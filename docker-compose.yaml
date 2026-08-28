@@ -12,8 +12,8 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    ports:
-      - "80:80"
+    expose:
+      - "80"
 
 volumes:
   backend_data:
