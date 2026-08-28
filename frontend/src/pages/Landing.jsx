@@ -37,7 +37,16 @@ const TESTIMONIALS = [
   },
 ];
 
-const PRICE_DISPLAY = "$4.99";
+function formatPrice(amountInSmallestUnit, currency) {
+  const value = (amountInSmallestUnit || 0) / 100;
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: currency || "USD" }).format(value);
+  } catch {
+    return `${currency || ""} ${value.toFixed(2)}`;
+  }
+}
+
+// Marketing "was" price shown struck-through — cosmetic only, not tied to the real checkout amount.
 const ORIGINAL_PRICE_DISPLAY = "$27.00";
 
 function useCountdown(initialSeconds) {
@@ -66,7 +75,13 @@ export default function Landing() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [product, setProduct] = useState({ priceKobo: 499, currency: "USD" });
   const sessionId = useMemo(() => getOrCreateSessionId(), []);
+  const priceDisplay = formatPrice(product.priceKobo, product.currency);
+
+  useEffect(() => {
+    api.getProduct().then(setProduct).catch(() => {}); // falls back to default if it fails
+  }, []);
 
   useEffect(() => {
     api.trackVisit(sessionId, "/", document.referrer);
@@ -139,7 +154,7 @@ export default function Landing() {
 
         <p className="mt-4 rounded-2xl bg-[#0f3d1f]/[0.06] p-4 text-[15px] leading-[1.5]">
           Discover the simple 8-step natural system to clear your skin and boost your confidence —{" "}
-          <strong>just {PRICE_DISPLAY}</strong>
+          <strong>just {priceDisplay}</strong>
         </p>
 
         {/* Before/after placeholder — drop your real image at /public/before-after.jpg */}
@@ -157,7 +172,7 @@ export default function Landing() {
           disabled={loading}
           className="mt-6 w-full rounded-full bg-[#dc2626] text-white font-bold text-[17px] py-4 flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 disabled:opacity-60"
         >
-          {loading ? "Opening secure checkout…" : `Get The 8 Steps PDF – ${PRICE_DISPLAY} →`}
+          {loading ? "Opening secure checkout…" : `Get The 8 Steps PDF – ${priceDisplay} →`}
         </button>
 
         {/* Email + inline checkout entry */}
@@ -180,7 +195,7 @@ export default function Landing() {
           <div className="text-[13px] uppercase tracking-widest text-[#a3d65c] mb-1">Today Only</div>
           <div className="flex items-baseline gap-3">
             <span className="line-through opacity-50 text-[20px]">{ORIGINAL_PRICE_DISPLAY}</span>
-            <span className="text-[42px] font-black">{PRICE_DISPLAY}</span>
+            <span className="text-[42px] font-black">{priceDisplay}</span>
             <span className="rounded-full bg-[#a3d65c] text-[#0f3d1f] text-[11px] font-bold px-2.5 py-1">
               SAVE $22
             </span>
@@ -244,7 +259,7 @@ export default function Landing() {
           disabled={loading}
           className="mt-8 w-full rounded-full bg-[#dc2626] text-white font-bold text-[17px] py-4 disabled:opacity-60"
         >
-          {loading ? "Opening secure checkout…" : `📘 Download Now – ${PRICE_DISPLAY}`}
+          {loading ? "Opening secure checkout…" : `📘 Download Now – ${priceDisplay}`}
         </button>
         <p className="mt-2 text-center text-[12px] text-[#0f3d1f]/60">
           Instant Download · Any Device · Price goes back to $27 soon

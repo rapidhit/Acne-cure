@@ -33,6 +33,14 @@ CREATE TABLE IF NOT EXISTS visits (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS settings (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  price_kobo INTEGER NOT NULL,
+  currency TEXT NOT NULL,
+  product_name TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
 CREATE INDEX IF NOT EXISTS idx_transactions_created ON transactions(created_at);
 CREATE INDEX IF NOT EXISTS idx_visits_created ON visits(created_at);
@@ -40,3 +48,22 @@ CREATE INDEX IF NOT EXISTS idx_visits_session ON visits(session_id);
 `);
 
 export default db;
+
+// Seed the settings row once, from env vars, so the DB becomes the
+// source of truth from then on — env vars only matter on first boot.
+const existing = db.prepare(`SELECT id FROM settings WHERE id = 1`).get();
+if (!existing) {
+  db.prepare(
+    `INSERT INTO settings (id, price_kobo, currency, product_name, updated_at)
+     VALUES (1, ?, ?, ?, ?)`
+  ).run(
+    Number(process.env.PRODUCT_PRICE_KOBO) || 499,
+    process.env.PRODUCT_CURRENCY || "USD",
+    process.env.PRODUCT_NAME || "Flawless Natural Remedies - 8 Steps PDF",
+    Date.now()
+  );
+}
+
+export function getSettings() {
+  return db.prepare(`SELECT price_kobo, currency, product_name, updated_at FROM settings WHERE id = 1`).get();
+}

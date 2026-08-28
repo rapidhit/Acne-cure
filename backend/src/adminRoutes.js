@@ -1,8 +1,10 @@
 import express from "express";
 import crypto from "node:crypto";
-import db from "./db.js";
+import db, { getSettings } from "./db.js";
 
 const router = express.Router();
+
+const VALID_CURRENCY = /^[A-Z]{3}$/;
 
 function timingSafeEqual(a, b) {
   const bufA = Buffer.from(String(a));
@@ -110,6 +112,43 @@ router.get("/stats", requireAdmin, (req, res) => {
     series,
     recentTransactions,
   });
+});
+
+/**
+ * GET /api/admin/settings
+ * Returns the current editable product price/currency/name.
+ */
+router.get("/settings", requireAdmin, (req, res) => {
+  res.json(getSettings());
+});
+
+/**
+ * PUT /api/admin/settings
+ * Body: { priceKobo, currency, productName }
+ * Updates the live checkout price. Takes effect immediately —
+ * no redeploy or env var change needed.
+ */
+router.put("/settings", requireAdmin, (req, res) => {
+  const { priceKobo, currency, productName } = req.body || {};
+
+  const price = Number(priceKobo);
+  if (!Number.isInteger(price) || price <= 0) {
+    return res.status(400).json({ error: "priceKobo must be a positive whole number (smallest currency unit)" });
+  }
+  const cur = String(currency || "").toUpperCase();
+  if (!VALID_CURRENCY.test(cur)) {
+    return res.status(400).json({ error: "currency must be a 3-letter code, e.g. USD, GHS, NGN" });
+  }
+  const name = String(productName || "").trim();
+  if (!name) {
+    return res.status(400).json({ error: "productName is required" });
+  }
+
+  db.prepare(
+    `UPDATE settings SET price_kobo = ?, currency = ?, product_name = ?, updated_at = ? WHERE id = 1`
+  ).run(price, cur, name, Date.now());
+
+  res.json(getSettings());
 });
 
 export default router;

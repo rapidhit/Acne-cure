@@ -15,6 +15,7 @@ async function request(path, options = {}) {
 }
 
 export const api = {
+  getProduct: () => request("/paystack/product"),
   initPayment: (email) =>
     request("/paystack/init", { method: "POST", body: JSON.stringify({ email }) }),
   verifyPayment: (reference) =>
@@ -29,6 +30,9 @@ export const api = {
   adminLogout: () => request("/admin/logout", { method: "POST" }),
   adminSession: () => request("/admin/session"),
   adminStats: () => request("/admin/stats"),
+  adminGetSettings: () => request("/admin/settings"),
+  adminUpdateSettings: (payload) =>
+    request("/admin/settings", { method: "PUT", body: JSON.stringify(payload) }),
 };
 
 export function getOrCreateSessionId() {

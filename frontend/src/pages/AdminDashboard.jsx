@@ -36,16 +36,54 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
   const [error, setError] = useState("");
+  const [settings, setSettings] = useState(null);
+  const [settingsForm, setSettingsForm] = useState({ priceDollars: "", currency: "", productName: "" });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState("");
 
   useEffect(() => {
     api
       .adminSession()
       .then((s) => {
         if (!s.isAdmin) navigate("/admin/login");
-        else loadStats();
+        else {
+          loadStats();
+          loadSettings();
+        }
       })
       .catch(() => navigate("/admin/login"));
   }, []);
+
+  function loadSettings() {
+    api.adminGetSettings().then((s) => {
+      setSettings(s);
+      setSettingsForm({
+        priceDollars: (s.price_kobo / 100).toFixed(2),
+        currency: s.currency,
+        productName: s.product_name,
+      });
+    });
+  }
+
+  async function handleSaveSettings(e) {
+    e.preventDefault();
+    setSavingSettings(true);
+    setSettingsMessage("");
+    try {
+      const priceKobo = Math.round(parseFloat(settingsForm.priceDollars) * 100);
+      const updated = await api.adminUpdateSettings({
+        priceKobo,
+        currency: settingsForm.currency,
+        productName: settingsForm.productName,
+      });
+      setSettings(updated);
+      setSettingsMessage("Saved — new price is live on the checkout immediately.");
+    } catch (e) {
+      setSettingsMessage(e.message || "Could not save settings.");
+    } finally {
+      setSavingSettings(false);
+    }
+  }
 
   function loadStats() {
     api
@@ -80,6 +118,57 @@ export default function AdminDashboard() {
           >
             Log out
           </button>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
+          <h2 className="text-[15px] font-bold text-[#0f3d1f] mb-1">Product Settings</h2>
+          <p className="text-[12px] text-[#0f3d1f]/60 mb-4">
+            Changes apply immediately to the live checkout — no redeploy needed.
+          </p>
+          {settings && (
+            <form onSubmit={handleSaveSettings} className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+              <div>
+                <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Price</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.5"
+                  value={settingsForm.priceDollars}
+                  onChange={(e) => setSettingsForm((f) => ({ ...f, priceDollars: e.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px]"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Currency (3-letter code)</label>
+                <input
+                  type="text"
+                  maxLength={3}
+                  value={settingsForm.currency}
+                  onChange={(e) => setSettingsForm((f) => ({ ...f, currency: e.target.value.toUpperCase() }))}
+                  className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px] uppercase"
+                />
+              </div>
+              <div>
+                <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Product name</label>
+                <input
+                  type="text"
+                  value={settingsForm.productName}
+                  onChange={(e) => setSettingsForm((f) => ({ ...f, productName: e.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px]"
+                />
+              </div>
+              <div className="md:col-span-3 flex items-center gap-3">
+                <button
+                  type="submit"
+                  disabled={savingSettings}
+                  className="rounded-full bg-[#0f3d1f] text-white font-semibold text-[13px] px-5 py-2 disabled:opacity-60"
+                >
+                  {savingSettings ? "Saving…" : "Save changes"}
+                </button>
+                {settingsMessage && <span className="text-[12px] text-[#0f3d1f]/70">{settingsMessage}</span>}
+              </div>
+            </form>
+          )}
         </div>
 
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -4,9 +4,19 @@ import crypto from "node:crypto";
 import { nanoid } from "nanoid";
 import path from "node:path";
 import fs from "node:fs";
-import db from "./db.js";
+import db, { getSettings } from "./db.js";
 
 const router = express.Router();
+
+/**
+ * GET /api/paystack/product
+ * Public — lets the landing page always display the live price/currency
+ * without hardcoding it in the frontend build.
+ */
+router.get("/product", (req, res) => {
+  const { price_kobo, currency, product_name } = getSettings();
+  res.json({ priceKobo: price_kobo, currency, productName: product_name });
+});
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE = "https://api.paystack.co";
@@ -34,8 +44,7 @@ router.post("/init", (req, res) => {
   }
 
   const reference = `flw_${nanoid(20)}`;
-  const amount = Number(process.env.PRODUCT_PRICE_KOBO);
-  const currency = process.env.PRODUCT_CURRENCY || "USD";
+  const { price_kobo: amount, currency } = getSettings();
 
   db.prepare(
     `INSERT INTO transactions (reference, email, amount, currency, status, created_at)
