@@ -33,6 +33,19 @@ export const api = {
   adminGetSettings: () => request("/admin/settings"),
   adminUpdateSettings: (payload) =>
     request("/admin/settings", { method: "PUT", body: JSON.stringify(payload) }),
+  adminGetPdfStatus: () => request("/admin/pdf-status"),
+  adminUploadPdf: async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/admin/upload-pdf", {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || "Upload failed");
+    return data;
+  },
 };
 
 export function getOrCreateSessionId() {

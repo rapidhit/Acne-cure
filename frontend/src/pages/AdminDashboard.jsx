@@ -22,6 +22,13 @@ function formatMoney(amountInSmallestUnit, currency) {
   }
 }
 
+function formatBytes(bytes) {
+  if (!bytes) return "0 KB";
+  const mb = bytes / (1024 * 1024);
+  if (mb >= 1) return `${mb.toFixed(2)} MB`;
+  return `${(bytes / 1024).toFixed(0)} KB`;
+}
+
 function StatCard({ label, value, sub }) {
   return (
     <div className="rounded-2xl border border-black/10 p-5 bg-white">
@@ -40,6 +47,9 @@ export default function AdminDashboard() {
   const [settingsForm, setSettingsForm] = useState({ priceDollars: "", currency: "", productName: "" });
   const [savingSettings, setSavingSettings] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState("");
+  const [pdfStatus, setPdfStatus] = useState(null);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [pdfMessage, setPdfMessage] = useState("");
 
   useEffect(() => {
     api
@@ -49,6 +59,7 @@ export default function AdminDashboard() {
         else {
           loadStats();
           loadSettings();
+          loadPdfStatus();
         }
       })
       .catch(() => navigate("/admin/login"));
@@ -82,6 +93,27 @@ export default function AdminDashboard() {
       setSettingsMessage(e.message || "Could not save settings.");
     } finally {
       setSavingSettings(false);
+    }
+  }
+
+  function loadPdfStatus() {
+    api.adminGetPdfStatus().then(setPdfStatus).catch(() => {});
+  }
+
+  async function handleUploadPdf(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingPdf(true);
+    setPdfMessage("");
+    try {
+      const result = await api.adminUploadPdf(file);
+      setPdfStatus({ exists: true, sizeBytes: result.sizeBytes, updatedAt: result.updatedAt, fileName: result.fileName });
+      setPdfMessage("Uploaded — this is now the file buyers receive after payment.");
+    } catch (err) {
+      setPdfMessage(err.message || "Upload failed.");
+    } finally {
+      setUploadingPdf(false);
+      e.target.value = ""; // allow re-selecting the same file name later
     }
   }
 
@@ -168,6 +200,48 @@ export default function AdminDashboard() {
                 {settingsMessage && <span className="text-[12px] text-[#0f3d1f]/70">{settingsMessage}</span>}
               </div>
             </form>
+          )}
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
+          <h2 className="text-[15px] font-bold text-[#0f3d1f] mb-1">Delivery File</h2>
+          <p className="text-[12px] text-[#0f3d1f]/60 mb-4">
+            The PDF customers receive on the download page after a verified payment. Uploading a
+            new file replaces it immediately — already-issued download links keep working.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex-1 min-w-[220px]">
+              {pdfStatus?.exists ? (
+                <div className="flex items-center gap-2 text-[13px]">
+                  <span className="text-[#15803d] font-semibold">✓ File in place</span>
+                  <span className="text-[#0f3d1f]/50">
+                    {pdfStatus.fileName} · {formatBytes(pdfStatus.sizeBytes)} · updated{" "}
+                    {new Date(pdfStatus.updatedAt).toLocaleString()}
+                  </span>
+                </div>
+              ) : pdfStatus ? (
+                <div className="text-[13px] text-[#dc2626] font-semibold">
+                  ⚠ No file uploaded yet — buyers can't download anything until you add one.
+                </div>
+              ) : (
+                <div className="text-[13px] text-[#0f3d1f]/50">Checking…</div>
+              )}
+            </div>
+
+            <label className="shrink-0 cursor-pointer rounded-full bg-[#0f3d1f] text-white font-semibold text-[13px] px-5 py-2.5">
+              {uploadingPdf ? "Uploading…" : pdfStatus?.exists ? "Replace file" : "Upload PDF"}
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleUploadPdf}
+                disabled={uploadingPdf}
+                className="hidden"
+              />
+            </label>
+          </div>
+          {pdfMessage && (
+            <p className="mt-3 text-[12px] text-[#0f3d1f]/70">{pdfMessage}</p>
           )}
         </div>
 

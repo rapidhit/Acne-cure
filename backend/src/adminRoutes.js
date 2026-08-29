@@ -1,10 +1,24 @@
 import express from "express";
 import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import multer from "multer";
 import db, { getSettings } from "./db.js";
 
 const router = express.Router();
 
 const VALID_CURRENCY = /^[A-Z]{3}$/;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB ceiling — plenty for a PDF guide
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype !== "application/pdf") {
+      return cb(new Error("Only PDF files are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
 function timingSafeEqual(a, b) {
   const bufA = Buffer.from(String(a));
@@ -149,6 +163,57 @@ router.put("/settings", requireAdmin, (req, res) => {
   ).run(price, cur, name, Date.now());
 
   res.json(getSettings());
+});
+
+/**
+ * GET /api/admin/pdf-status
+ * Reports whether the deliverable file is currently in place, and its size/date.
+ */
+router.get("/pdf-status", requireAdmin, (req, res) => {
+  const filePath = path.resolve(process.env.PDF_FILE_PATH || "./data/flawless-natural-remedies.pdf");
+  if (!fs.existsSync(filePath)) {
+    return res.json({ exists: false });
+  }
+  const stat = fs.statSync(filePath);
+  res.json({
+    exists: true,
+    sizeBytes: stat.size,
+    updatedAt: stat.mtimeMs,
+    fileName: path.basename(filePath),
+  });
+});
+
+/**
+ * POST /api/admin/upload-pdf
+ * multipart/form-data, field name "file". Replaces the file customers receive
+ * after a verified payment — takes effect immediately, no redeploy needed.
+ */
+router.post("/upload-pdf", requireAdmin, upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file received (or it wasn't a PDF)" });
+  }
+
+  const filePath = path.resolve(process.env.PDF_FILE_PATH || "./data/flawless-natural-remedies.pdf");
+  const dir = path.dirname(filePath);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+  fs.writeFileSync(filePath, req.file.buffer);
+
+  const stat = fs.statSync(filePath);
+  res.json({
+    ok: true,
+    sizeBytes: stat.size,
+    updatedAt: stat.mtimeMs,
+    fileName: path.basename(filePath),
+  });
+});
+
+// Handle multer errors (wrong file type, too large) with a clean JSON response
+router.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError || err) {
+    return res.status(400).json({ error: err.message || "Upload failed" });
+  }
+  next();
 });
 
 export default router;
