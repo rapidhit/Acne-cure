@@ -203,7 +203,7 @@ export default function Landing() {
           disabled={loading}
           className="mt-6 w-full rounded-full bg-[#dc2626] text-white font-bold text-[17px] py-4 flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 disabled:opacity-60"
         >
-          {loading ? "Opening secure checkout…" : `Get The 8 Steps PDF – ${priceDisplay} →`}
+          {loading ? "Opening secure checkout…" : `Get Access – ${priceDisplay} →`}
         </button>
 
         {error && !showEmailModal && (
@@ -313,7 +313,7 @@ export default function Landing() {
               disabled={loading}
               className="mt-7 rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[17px] px-10 py-[18px] shadow-[0_14px_32px_rgba(220,38,38,0.5)] disabled:opacity-60"
             >
-              {loading ? "Opening secure checkout…" : `Get The 8 Steps PDF – ${priceDisplay}`}
+              {loading ? "Opening secure checkout…" : `Get Access – ${priceDisplay}`}
             </button>
           </div>
         </div>
@@ -336,7 +336,7 @@ export default function Landing() {
           disabled={loading}
           className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[15px] py-4 rounded-full shadow-[0_8px_20px_rgba(220,38,38,0.5)] flex items-center justify-center gap-2 active:scale-[0.98] transition disabled:opacity-60"
         >
-          📘 {loading ? "Opening secure checkout…" : `Get The 8 Steps PDF – ${priceDisplay}`}
+          📘 {loading ? "Opening secure checkout…" : `Get Access – ${priceDisplay}`}
         </button>
         <p className="mt-1.5 text-center text-[10px] font-semibold opacity-60">
           Instant Download · Any Device
