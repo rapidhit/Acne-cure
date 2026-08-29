@@ -10,7 +10,6 @@ import adminRoutes from "./adminRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const isProd = process.env.NODE_ENV === "production";
 
 app.set("trust proxy", 1); // needed behind Coolify's reverse proxy for secure cookies
 
@@ -37,9 +36,10 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    proxy: true, // trust X-Forwarded-Proto from Coolify's Traefik proxy
     cookie: {
       httpOnly: true,
-      secure: isProd,
+      secure: "auto", // sets Secure only when the actual request is HTTPS
       sameSite: "lax",
       maxAge: 1000 * 60 * 60 * 8, // 8 hours
     },
