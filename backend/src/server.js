@@ -7,6 +7,7 @@ import rateLimit from "express-rate-limit";
 import paystackRoutes from "./paystackRoutes.js";
 import trackRoutes from "./trackRoutes.js";
 import adminRoutes from "./adminRoutes.js";
+import telegramRoutes from "./telegramRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -57,6 +58,7 @@ app.use("/api/admin/login", loginLimiter);
 app.use("/api/paystack", paystackRoutes);
 app.use("/api/track", trackRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/telegram", telegramRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
