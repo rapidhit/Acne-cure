@@ -99,6 +99,7 @@ export default function Landing() {
   const [error, setError] = useState("");
   const [product, setProduct] = useState({ priceKobo: 499, currency: "USD" });
   const [openFaq, setOpenFaq] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
   const sessionId = useMemo(() => getOrCreateSessionId(), []);
   const priceDisplay = formatPrice(product.priceKobo, product.currency);
 
@@ -119,7 +120,12 @@ export default function Landing() {
     document.body.appendChild(script);
   }, []);
 
-  async function handleBuy() {
+  function openEmailModal() {
+    setError("");
+    setShowEmailModal(true);
+  }
+
+  async function handleCheckout() {
     setError("");
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       setError("Enter a valid email so we can send your receipt.");
@@ -193,27 +199,16 @@ export default function Landing() {
         </p>
 
         <button
-          onClick={handleBuy}
+          onClick={openEmailModal}
           disabled={loading}
           className="mt-6 w-full rounded-full bg-[#dc2626] text-white font-bold text-[17px] py-4 flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 disabled:opacity-60"
         >
           {loading ? "Opening secure checkout…" : `Get The 8 Steps PDF – ${priceDisplay} →`}
         </button>
 
-        {/* Email + inline checkout entry */}
-        <div className="mt-4 rounded-2xl border border-[#0f3d1f]/10 p-4">
-          <label className="text-[12px] font-semibold uppercase tracking-wide text-[#0f3d1f]/70">
-            Email for your receipt & download link
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            className="mt-2 w-full rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[#0f3d1f]"
-          />
-          {error && <p className="mt-2 text-[13px] text-[#dc2626]">{error}</p>}
-        </div>
+        {error && !showEmailModal && (
+          <p className="mt-3 text-center text-[13px] text-[#dc2626]">{error}</p>
+        )}
 
         {/* Pricing block */}
         <div className="mt-8 rounded-[24px] bg-[#0f3d1f] text-[#e8f0d8] p-6">
@@ -314,7 +309,7 @@ export default function Landing() {
               read on any device.
             </p>
             <button
-              onClick={handleBuy}
+              onClick={openEmailModal}
               disabled={loading}
               className="mt-7 rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[17px] px-10 py-[18px] shadow-[0_14px_32px_rgba(220,38,38,0.5)] disabled:opacity-60"
             >
@@ -322,8 +317,6 @@ export default function Landing() {
             </button>
           </div>
         </div>
-
-        {error && <p className="mt-3 text-center text-[13px] text-[#dc2626]">{error}</p>}
 
         {/* Footer */}
         <div className="mt-10 border-t border-[#0f3d1f]/10 pt-6 pb-4 text-center">
@@ -339,7 +332,7 @@ export default function Landing() {
       {/* Sticky mobile buy bar */}
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/10 p-3">
         <button
-          onClick={handleBuy}
+          onClick={openEmailModal}
           disabled={loading}
           className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[15px] py-4 rounded-full shadow-[0_8px_20px_rgba(220,38,38,0.5)] flex items-center justify-center gap-2 active:scale-[0.98] transition disabled:opacity-60"
         >
@@ -349,6 +342,50 @@ export default function Landing() {
           Instant Download · Any Device
         </p>
       </div>
+      {/* Email capture modal — shown when any "Get the PDF" button is clicked */}
+      {showEmailModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-[#0f3d1f]/70 backdrop-blur-sm"
+            onClick={() => !loading && setShowEmailModal(false)}
+          />
+          <div className="relative bg-white rounded-[28px] p-7 sm:p-8 max-w-[440px] w-full shadow-[0_24px_64px_rgba(0,0,0,0.3)] animate-[in_0.25s_ease]">
+            <button
+              onClick={() => !loading && setShowEmailModal(false)}
+              className="absolute top-4 right-4 text-[#0f3d1f]/40 hover:text-[#0f3d1f] text-[20px] leading-none"
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <div className="w-14 h-14 rounded-full bg-[#a3d65c] grid place-items-center text-[24px]">📘</div>
+            <h3 className="mt-4 font-black text-[22px] tracking-[-0.02em]">Almost there!</h3>
+            <p className="mt-2 text-[13.5px] leading-[1.5] text-[#0f3d1f]/70">
+              Enter your email — your receipt and download link go straight there right after
+              payment.
+            </p>
+            <input
+              type="email"
+              autoFocus
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleCheckout()}
+              placeholder="you@example.com"
+              className="mt-5 w-full rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[#0f3d1f]"
+            />
+            {error && <p className="mt-2 text-[13px] text-[#dc2626]">{error}</p>}
+            <button
+              onClick={handleCheckout}
+              disabled={loading}
+              className="mt-5 w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black py-3.5 rounded-full text-[14px] disabled:opacity-60"
+            >
+              {loading ? "Opening secure checkout…" : `Continue to Payment – ${priceDisplay}`}
+            </button>
+            <p className="mt-3 text-[11px] text-center text-[#0f3d1f]/50">
+              🔒 Secured by Paystack
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
