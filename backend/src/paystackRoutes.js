@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import path from "node:path";
 import fs from "node:fs";
 import db, { getSettings } from "./db.js";
+import { notifySale } from "./notify.js";
 
 const router = express.Router();
 
@@ -95,6 +96,8 @@ router.post("/verify", async (req, res) => {
         `UPDATE transactions SET status = 'success', paystack_response = ?, verified_at = ? WHERE id = ?`
       ).run(JSON.stringify(data.data), Date.now(), tx.id);
 
+      notifySale({ email: tx.email, amount: tx.amount, currency: tx.currency, reference: tx.reference });
+
       return res.json({ status: "success", downloadUrl: `/api/paystack/download/${token}` });
     }
 
@@ -160,6 +163,8 @@ router.post("/webhook", (req, res) => {
       db.prepare(
         `UPDATE transactions SET status = 'success', paystack_response = ?, verified_at = ?, download_token = ? WHERE id = ?`
       ).run(JSON.stringify(event.data), Date.now(), token, tx.id);
+
+      notifySale({ email: tx.email, amount: tx.amount, currency: tx.currency, reference: tx.reference });
     }
   }
 
