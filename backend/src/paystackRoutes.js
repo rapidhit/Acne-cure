@@ -4,20 +4,10 @@ import crypto from "node:crypto";
 import { nanoid } from "nanoid";
 import path from "node:path";
 import fs from "node:fs";
-import db, { getSettings } from "./db.js";
+import db, { getProductBySlug, getProductById } from "./db.js";
 import { notifySale } from "./notify.js";
 
 const router = express.Router();
-
-/**
- * GET /api/paystack/product
- * Public — lets the landing page always display the live price/currency
- * without hardcoding it in the frontend build.
- */
-router.get("/product", (req, res) => {
-  const { price_kobo, currency, product_name } = getSettings();
-  res.json({ priceKobo: price_kobo, currency, productName: product_name });
-});
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE = "https://api.paystack.co";
@@ -34,28 +24,34 @@ function issueDownloadToken(txId) {
 
 /**
  * POST /api/paystack/init
- * Body: { email }
- * Creates a pending transaction row with a server-generated reference.
- * The frontend uses this reference + the PUBLIC key to open Paystack Inline JS.
+ * Body: { email, productSlug }
+ * Creates a pending transaction row tied to a specific product, with a
+ * server-generated reference. The frontend uses this reference + the
+ * PUBLIC key to open Paystack Inline JS.
  */
 router.post("/init", (req, res) => {
-  const { email } = req.body || {};
+  const { email, productSlug } = req.body || {};
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
     return res.status(400).json({ error: "Valid email is required" });
   }
+  if (!productSlug) {
+    return res.status(400).json({ error: "productSlug is required" });
+  }
+
+  const product = getProductBySlug(productSlug);
+  if (!product) return res.status(404).json({ error: "Product not found" });
 
   const reference = `flw_${nanoid(20)}`;
-  const { price_kobo: amount, currency } = getSettings();
 
   db.prepare(
-    `INSERT INTO transactions (reference, email, amount, currency, status, created_at)
-     VALUES (?, ?, ?, ?, 'pending', ?)`
-  ).run(reference, email, amount, currency, Date.now());
+    `INSERT INTO transactions (product_id, reference, email, amount, currency, status, created_at)
+     VALUES (?, ?, ?, ?, ?, 'pending', ?)`
+  ).run(product.id, reference, email, product.price_kobo, product.currency, Date.now());
 
   res.json({
     reference,
-    amount,
-    currency,
+    amount: product.price_kobo,
+    currency: product.currency,
     publicKey: process.env.PAYSTACK_PUBLIC_KEY,
   });
 });
@@ -96,7 +92,14 @@ router.post("/verify", async (req, res) => {
         `UPDATE transactions SET status = 'success', paystack_response = ?, verified_at = ? WHERE id = ?`
       ).run(JSON.stringify(data.data), Date.now(), tx.id);
 
-      notifySale({ email: tx.email, amount: tx.amount, currency: tx.currency, reference: tx.reference });
+      const product = tx.product_id ? getProductById(tx.product_id) : null;
+      notifySale({
+        email: tx.email,
+        amount: tx.amount,
+        currency: tx.currency,
+        reference: tx.reference,
+        productName: product?.name,
+      });
 
       return res.json({ status: "success", downloadUrl: `/api/paystack/download/${token}` });
     }
@@ -113,7 +116,8 @@ router.post("/verify", async (req, res) => {
 
 /**
  * GET /api/paystack/download/:token
- * Serves the PDF only if the token is valid, unexpired, and tied to a successful transaction.
+ * Serves the correct product's PDF only if the token is valid, unexpired,
+ * and tied to a successful transaction.
  */
 router.get("/download/:token", (req, res) => {
   const { token } = req.params;
@@ -126,14 +130,19 @@ router.get("/download/:token", (req, res) => {
     return res.status(410).send("This download link has expired. Contact support with your payment reference.");
   }
 
-  const filePath = path.resolve(process.env.PDF_FILE_PATH || "./data/flawless-natural-remedies.pdf");
+  const product = tx.product_id ? getProductById(tx.product_id) : null;
+  if (!product) {
+    return res.status(500).send("Product record missing for this order. Contact support.");
+  }
+
+  const filePath = path.resolve(product.pdf_file_path || `./data/products/${product.slug}.pdf`);
   if (!fs.existsSync(filePath)) {
-    console.error("PDF file missing at", filePath);
+    console.error("PDF file missing at", filePath, "for product", product.slug);
     return res.status(500).send("File temporarily unavailable. Contact support.");
   }
 
   db.prepare(`UPDATE transactions SET download_count = download_count + 1 WHERE id = ?`).run(tx.id);
-  res.download(filePath, "Flawless-Natural-Remedies-8-Steps.pdf");
+  res.download(filePath, `${product.slug}.pdf`);
 });
 
 /**
@@ -164,7 +173,14 @@ router.post("/webhook", (req, res) => {
         `UPDATE transactions SET status = 'success', paystack_response = ?, verified_at = ?, download_token = ? WHERE id = ?`
       ).run(JSON.stringify(event.data), Date.now(), token, tx.id);
 
-      notifySale({ email: tx.email, amount: tx.amount, currency: tx.currency, reference: tx.reference });
+      const product = tx.product_id ? getProductById(tx.product_id) : null;
+      notifySale({
+        email: tx.email,
+        amount: tx.amount,
+        currency: tx.currency,
+        reference: tx.reference,
+        productName: product?.name,
+      });
     }
   }
 

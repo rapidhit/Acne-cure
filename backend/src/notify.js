@@ -22,7 +22,7 @@ export async function sendTelegramMessage(chatId, text) {
  * Sends a Telegram message when a sale is confirmed. Silently no-ops if
  * TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID aren't set.
  */
-export async function notifySale({ email, amount, currency, reference }) {
+export async function notifySale({ email, amount, currency, reference, productName }) {
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!chatId) return;
 
@@ -39,6 +39,7 @@ export async function notifySale({ email, amount, currency, reference }) {
 
   const text =
     `🎉 New sale!\n\n` +
+    (productName ? `📦 ${productName}\n` : "") +
     `💰 ${value} ${currency}\n` +
     `📧 ${email}\n` +
     `🔖 ${reference}\n` +

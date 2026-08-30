@@ -1,0 +1,50 @@
+import express from "express";
+import { getProductBySlug, getDefaultProduct } from "./db.js";
+
+const router = express.Router();
+
+function toPublicShape(product) {
+  if (!product) return null;
+  return {
+    slug: product.slug,
+    name: product.name,
+    priceKobo: product.price_kobo,
+    currency: product.currency,
+    mode: product.mode,
+    headline: product.headline,
+    subheadline: product.subheadline,
+    testimonials: product.testimonials_json ? JSON.parse(product.testimonials_json) : [],
+    faqs: product.faqs_json ? JSON.parse(product.faqs_json) : [],
+    customHtml: product.mode === "custom_code" ? product.custom_html : undefined,
+    floating: {
+      enabled: !!product.floating_enabled,
+      label: product.floating_label,
+      position: product.floating_position,
+      scrollPercent: product.floating_scroll_percent,
+      stickTo: product.floating_stick_to,
+    },
+    inlineButtons: product.inline_buttons_json ? JSON.parse(product.inline_buttons_json) : [],
+  };
+}
+
+/**
+ * GET /api/public/products/default
+ * Powers the bare domain root "/" — whichever product is currently flagged default.
+ */
+router.get("/default", (req, res) => {
+  const product = getDefaultProduct();
+  if (!product) return res.status(404).json({ error: "No default product configured" });
+  res.json(toPublicShape(product));
+});
+
+/**
+ * GET /api/public/products/:slug
+ * Powers flawless.hryders.com/<slug>
+ */
+router.get("/:slug", (req, res) => {
+  const product = getProductBySlug(req.params.slug);
+  if (!product) return res.status(404).json({ error: "Product not found" });
+  res.json(toPublicShape(product));
+});
+
+export default router;

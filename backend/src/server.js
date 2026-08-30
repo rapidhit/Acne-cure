@@ -8,6 +8,8 @@ import paystackRoutes from "./paystackRoutes.js";
 import trackRoutes from "./trackRoutes.js";
 import adminRoutes from "./adminRoutes.js";
 import telegramRoutes from "./telegramRoutes.js";
+import productsRoutes from "./productsRoutes.js";
+import publicRoutes from "./publicRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -59,6 +61,8 @@ app.use("/api/paystack", paystackRoutes);
 app.use("/api/track", trackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/telegram", telegramRoutes);
+app.use("/api/admin/products", productsRoutes);
+app.use("/api/public/products", publicRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
