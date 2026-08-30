@@ -15,29 +15,45 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  getProduct: () => request("/paystack/product"),
-  initPayment: (email) =>
-    request("/paystack/init", { method: "POST", body: JSON.stringify({ email }) }),
+  // --- Public product pages ---
+  getDefaultProduct: () => request("/public/products/default"),
+  getProductBySlug: (slug) => request(`/public/products/${encodeURIComponent(slug)}`),
+
+  // --- Checkout ---
+  initPayment: (email, productSlug) =>
+    request("/paystack/init", { method: "POST", body: JSON.stringify({ email, productSlug }) }),
   verifyPayment: (reference) =>
     request("/paystack/verify", { method: "POST", body: JSON.stringify({ reference }) }),
-  trackVisit: (sessionId, path, referrer) =>
+
+  // --- Visitor tracking ---
+  trackVisit: (sessionId, path, referrer, productSlug) =>
     request("/track/visit", {
       method: "POST",
-      body: JSON.stringify({ sessionId, path, referrer }),
+      body: JSON.stringify({ sessionId, path, referrer, productSlug }),
     }).catch(() => {}), // tracking must never break the page
+
+  // --- Admin auth ---
   adminLogin: (password) =>
     request("/admin/login", { method: "POST", body: JSON.stringify({ password }) }),
   adminLogout: () => request("/admin/logout", { method: "POST" }),
   adminSession: () => request("/admin/session"),
-  adminStats: () => request("/admin/stats"),
-  adminGetSettings: () => request("/admin/settings"),
-  adminUpdateSettings: (payload) =>
-    request("/admin/settings", { method: "PUT", body: JSON.stringify(payload) }),
-  adminGetPdfStatus: () => request("/admin/pdf-status"),
-  adminUploadPdf: async (file) => {
+
+  // --- Admin: products ---
+  adminListProducts: () => request("/admin/products"),
+  adminGetProduct: (id) => request(`/admin/products/${id}`),
+  adminCreateProduct: (payload) =>
+    request("/admin/products", { method: "POST", body: JSON.stringify(payload) }),
+  adminUpdateProduct: (id, payload) =>
+    request(`/admin/products/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  adminSetDefaultProduct: (id) =>
+    request(`/admin/products/${id}/set-default`, { method: "POST" }),
+
+  // --- Admin: per-product PDF ---
+  adminGetPdfStatus: (id) => request(`/admin/products/${id}/pdf-status`),
+  adminUploadPdf: async (id, file) => {
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("/api/admin/upload-pdf", {
+    const res = await fetch(`/api/admin/products/${id}/upload-pdf`, {
       method: "POST",
       credentials: "include",
       body: formData,
@@ -46,7 +62,11 @@ export const api = {
     if (!res.ok) throw new Error(data?.error || "Upload failed");
     return data;
   },
-  adminClearPending: () => request("/admin/transactions/pending", { method: "DELETE" }),
+
+  // --- Admin: per-product stats ---
+  adminGetStats: (id) => request(`/admin/products/${id}/stats`),
+  adminClearPending: (id) =>
+    request(`/admin/products/${id}/transactions/pending`, { method: "DELETE" }),
 };
 
 export function getOrCreateSessionId() {
