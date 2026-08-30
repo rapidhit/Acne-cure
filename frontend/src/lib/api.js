@@ -46,6 +46,7 @@ export const api = {
     if (!res.ok) throw new Error(data?.error || "Upload failed");
     return data;
   },
+  adminClearPending: () => request("/admin/transactions/pending", { method: "DELETE" }),
 };
 
 export function getOrCreateSessionId() {

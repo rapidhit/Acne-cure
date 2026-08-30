@@ -216,4 +216,15 @@ router.use((err, req, res, next) => {
   next();
 });
 
+/**
+ * DELETE /api/admin/transactions/pending
+ * Removes all transactions still stuck in "pending" — abandoned checkouts
+ * where the buyer never completed payment. Successful and failed
+ * transactions are untouched since those are real records worth keeping.
+ */
+router.delete("/transactions/pending", requireAdmin, (req, res) => {
+  const result = db.prepare(`DELETE FROM transactions WHERE status = 'pending'`).run();
+  res.json({ ok: true, deletedCount: result.changes });
+});
+
 export default router;

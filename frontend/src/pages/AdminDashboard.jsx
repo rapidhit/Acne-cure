@@ -50,6 +50,7 @@ export default function AdminDashboard() {
   const [pdfStatus, setPdfStatus] = useState(null);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [pdfMessage, setPdfMessage] = useState("");
+  const [clearingPending, setClearingPending] = useState(false);
 
   useEffect(() => {
     api
@@ -114,6 +115,22 @@ export default function AdminDashboard() {
     } finally {
       setUploadingPdf(false);
       e.target.value = ""; // allow re-selecting the same file name later
+    }
+  }
+
+  async function handleClearPending() {
+    if (!window.confirm("Delete all pending (never-completed) orders? This can't be undone. Successful and failed orders are not affected.")) {
+      return;
+    }
+    setClearingPending(true);
+    try {
+      const result = await api.adminClearPending();
+      loadStats();
+      window.alert(`Cleared ${result.deletedCount} pending order${result.deletedCount === 1 ? "" : "s"}.`);
+    } catch (err) {
+      window.alert(err.message || "Could not clear pending orders.");
+    } finally {
+      setClearingPending(false);
     }
   }
 
@@ -279,7 +296,16 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-8 rounded-2xl border border-black/10 bg-white p-5 overflow-x-auto">
-          <h2 className="text-[15px] font-bold text-[#0f3d1f] mb-4">Recent Transactions</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[15px] font-bold text-[#0f3d1f]">Recent Transactions</h2>
+            <button
+              onClick={handleClearPending}
+              disabled={clearingPending}
+              className="text-[12px] font-semibold text-[#dc2626] border border-[#dc2626]/30 rounded-full px-3.5 py-1.5 hover:bg-[#dc2626]/5 disabled:opacity-50"
+            >
+              {clearingPending ? "Clearing…" : "Clear Pending Orders"}
+            </button>
+          </div>
           <table className="w-full text-[13px]">
             <thead>
               <tr className="text-left text-[#0f3d1f]/60 border-b border-black/10">
