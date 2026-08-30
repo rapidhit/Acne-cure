@@ -142,6 +142,7 @@ router.put("/:id", requireAdmin, (req, res) => {
     if (!Array.isArray(body.inlineButtons)) {
       return res.status(400).json({ error: "inlineButtons must be an array" });
     }
+    const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
     for (const btn of body.inlineButtons) {
       if (
         typeof btn.label !== "string" ||
@@ -152,6 +153,21 @@ router.put("/:id", requireAdmin, (req, res) => {
         btn.yPercent < 0 || btn.yPercent > 100
       ) {
         return res.status(400).json({ error: "Each inline button needs a label, xPercent (0-100), and yPercent (0-100)" });
+      }
+      if (btn.fontSize !== undefined && (typeof btn.fontSize !== "number" || btn.fontSize < 8 || btn.fontSize > 48)) {
+        return res.status(400).json({ error: "Button fontSize must be between 8 and 48" });
+      }
+      if (btn.paddingX !== undefined && (typeof btn.paddingX !== "number" || btn.paddingX < 0 || btn.paddingX > 100)) {
+        return res.status(400).json({ error: "Button paddingX must be between 0 and 100" });
+      }
+      if (btn.paddingY !== undefined && (typeof btn.paddingY !== "number" || btn.paddingY < 0 || btn.paddingY > 60)) {
+        return res.status(400).json({ error: "Button paddingY must be between 0 and 60" });
+      }
+      if (btn.textColor !== undefined && !HEX_COLOR.test(btn.textColor)) {
+        return res.status(400).json({ error: "Button textColor must be a hex color like #ffffff" });
+      }
+      if (btn.bgColor !== undefined && !HEX_COLOR.test(btn.bgColor)) {
+        return res.status(400).json({ error: "Button bgColor must be a hex color like #dc2626" });
       }
     }
     updates.inline_buttons_json = JSON.stringify(body.inlineButtons);

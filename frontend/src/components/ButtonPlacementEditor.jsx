@@ -29,7 +29,10 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
 
   function addButton(label) {
     const id = `btn_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    const next = [...buttons, { id, label, xPercent: 50, yPercent: 50 }];
+    const next = [
+      ...buttons,
+      { id, label, xPercent: 50, yPercent: 50, fontSize: 14, paddingX: 24, paddingY: 14, textColor: "#ffffff", bgColor: "#dc2626" },
+    ];
     onChange(next);
     setSelectedId(id);
   }
@@ -122,10 +125,20 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
                 }}
                 onKeyDown={(e) => handleKeyDown(e, btn.id)}
                 onFocus={() => setSelectedId(btn.id)}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move select-none bg-[#dc2626] text-white font-black text-[13px] px-4 py-2.5 rounded-full whitespace-nowrap outline-none ${
+                className={`absolute -translate-x-1/2 -translate-y-1/2 cursor-move select-none font-black rounded-full whitespace-nowrap outline-none ${
                   selectedId === btn.id ? "ring-4 ring-[#a3d65c]" : ""
                 }`}
-                style={{ left: `${btn.xPercent}%`, top: `${btn.yPercent}%` }}
+                style={{
+                  left: `${btn.xPercent}%`,
+                  top: `${btn.yPercent}%`,
+                  fontSize: `${btn.fontSize ?? 14}px`,
+                  paddingLeft: `${btn.paddingX ?? 24}px`,
+                  paddingRight: `${btn.paddingX ?? 24}px`,
+                  paddingTop: `${btn.paddingY ?? 14}px`,
+                  paddingBottom: `${btn.paddingY ?? 14}px`,
+                  color: btn.textColor || "#ffffff",
+                  backgroundColor: btn.bgColor || "#dc2626",
+                }}
               >
                 {btn.label}
               </div>
@@ -137,21 +150,94 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
       {buttons.length > 0 && (
         <div className="mt-3 space-y-2">
           {buttons.map((btn) => (
-            <div key={btn.id} className="flex items-center gap-2">
-              <input
-                value={btn.label}
-                onChange={(e) => updateButton(btn.id, { label: e.target.value })}
-                className="flex-1 text-[13px] rounded-lg border border-black/10 px-3 py-1.5"
-              />
-              <span className="text-[11px] text-[#0f3d1f]/40 w-20 shrink-0">
-                {btn.xPercent.toFixed(0)}%, {btn.yPercent.toFixed(0)}%
-              </span>
-              <button
-                onClick={() => removeButton(btn.id)}
-                className="text-[#dc2626] text-[12px] font-semibold shrink-0"
-              >
-                Remove
-              </button>
+            <div
+              key={btn.id}
+              className={`rounded-xl border p-3 ${selectedId === btn.id ? "border-[#a3d65c] bg-[#a3d65c]/5" : "border-black/10"}`}
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  value={btn.label}
+                  onChange={(e) => updateButton(btn.id, { label: e.target.value })}
+                  onFocus={() => setSelectedId(btn.id)}
+                  className="flex-1 text-[13px] rounded-lg border border-black/10 px-3 py-1.5"
+                />
+                <span className="text-[11px] text-[#0f3d1f]/40 w-20 shrink-0">
+                  {btn.xPercent.toFixed(0)}%, {btn.yPercent.toFixed(0)}%
+                </span>
+                <button
+                  onClick={() => setSelectedId(selectedId === btn.id ? null : btn.id)}
+                  className="text-[12px] font-semibold text-[#0f3d1f]/60 shrink-0"
+                >
+                  {selectedId === btn.id ? "Hide style" : "Style"}
+                </button>
+                <button onClick={() => removeButton(btn.id)} className="text-[#dc2626] text-[12px] font-semibold shrink-0">
+                  Remove
+                </button>
+              </div>
+
+              {selectedId === btn.id && (
+                <div className="mt-3 pt-3 border-t border-black/5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50">
+                      Text size: {btn.fontSize ?? 14}px
+                    </label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="28"
+                      value={btn.fontSize ?? 14}
+                      onChange={(e) => updateButton(btn.id, { fontSize: Number(e.target.value) })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50">
+                      Width (padding): {btn.paddingX ?? 24}px
+                    </label>
+                    <input
+                      type="range"
+                      min="8"
+                      max="60"
+                      value={btn.paddingX ?? 24}
+                      onChange={(e) => updateButton(btn.id, { paddingX: Number(e.target.value) })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50">
+                      Height (padding): {btn.paddingY ?? 14}px
+                    </label>
+                    <input
+                      type="range"
+                      min="4"
+                      max="28"
+                      value={btn.paddingY ?? 14}
+                      onChange={(e) => updateButton(btn.id, { paddingY: Number(e.target.value) })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50 block">Text color</label>
+                      <input
+                        type="color"
+                        value={btn.textColor || "#ffffff"}
+                        onChange={(e) => updateButton(btn.id, { textColor: e.target.value })}
+                        className="mt-1 w-10 h-8 rounded border border-black/10"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50 block">Background</label>
+                      <input
+                        type="color"
+                        value={btn.bgColor || "#dc2626"}
+                        onChange={(e) => updateButton(btn.id, { bgColor: e.target.value })}
+                        className="mt-1 w-10 h-8 rounded border border-black/10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

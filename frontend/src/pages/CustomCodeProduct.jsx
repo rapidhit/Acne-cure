@@ -35,8 +35,18 @@ export default function CustomCodeProduct({ product }) {
           <button
             key={btn.id ?? `${btn.xPercent}-${btn.yPercent}`}
             onClick={() => setShowModal(true)}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[14px] px-6 py-3.5 rounded-full shadow-[0_10px_24px_rgba(220,38,38,0.45)] whitespace-nowrap"
-            style={{ left: `${btn.xPercent}%`, top: `${btn.yPercent}%` }}
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-auto font-black rounded-full shadow-[0_10px_24px_rgba(220,38,38,0.35)] whitespace-nowrap"
+            style={{
+              left: `${btn.xPercent}%`,
+              top: `${btn.yPercent}%`,
+              fontSize: `${btn.fontSize ?? 14}px`,
+              paddingLeft: `${btn.paddingX ?? 24}px`,
+              paddingRight: `${btn.paddingX ?? 24}px`,
+              paddingTop: `${btn.paddingY ?? 14}px`,
+              paddingBottom: `${btn.paddingY ?? 14}px`,
+              color: btn.textColor || "#ffffff",
+              backgroundColor: btn.bgColor || "#dc2626",
+            }}
           >
             {btn.label}
           </button>
