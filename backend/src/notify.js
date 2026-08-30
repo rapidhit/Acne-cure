@@ -27,11 +27,22 @@ export async function notifySale({ email, amount, currency, reference }) {
   if (!chatId) return;
 
   const value = (amount / 100).toFixed(2);
+  const timestamp = new Date().toLocaleString("en-GB", {
+    timeZone: "Africa/Accra",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+
   const text =
     `🎉 New sale!\n\n` +
     `💰 ${value} ${currency}\n` +
     `📧 ${email}\n` +
-    `🔖 ${reference}`;
+    `🔖 ${reference}\n` +
+    `🕐 ${timestamp} (GMT)`;
 
   await sendTelegramMessage(chatId, text);
 }
