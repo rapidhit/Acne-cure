@@ -16,7 +16,6 @@ async function request(path, options = {}) {
 
 export const api = {
   // --- Public product pages ---
-  getDefaultProduct: () => request("/public/products/default"),
   getProductBySlug: (slug) => request(`/public/products/${encodeURIComponent(slug)}`),
 
   // --- Checkout ---

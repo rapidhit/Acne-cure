@@ -9,10 +9,17 @@ export default function NewProductModal({ onClose, onCreated }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
+
+    const cleanSlug = form.slug.trim().toLowerCase();
+    if (!cleanSlug) {
+      setError("A URL path (slug) is required.");
+      return;
+    }
+
     setSaving(true);
     try {
       const product = await api.adminCreateProduct({
-        slug: form.slug.trim().toLowerCase(),
+        slug: cleanSlug,
         name: form.name.trim(),
         priceKobo: Math.round(parseFloat(form.priceDollars) * 100),
         currency: form.currency.toUpperCase(),
@@ -37,7 +44,7 @@ export default function NewProductModal({ onClose, onCreated }) {
 
         <div className="mt-4 space-y-3">
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">URL path (slug)</label>
+            <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">URL path (slug) *</label>
             <div className="mt-1 flex items-center rounded-lg border border-black/10 overflow-hidden">
               <span className="px-3 py-2 text-[13px] text-[#0f3d1f]/50 bg-[#f9fafb] shrink-0">yourdomain.com/</span>
               <input

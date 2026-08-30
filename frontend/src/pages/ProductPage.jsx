@@ -11,15 +11,20 @@ export default function ProductPage() {
   const sessionId = useMemo(() => getOrCreateSessionId(), []);
 
   useEffect(() => {
+    // No slug means someone visited the bare domain root — nothing is
+    // served there anymore. Every product lives at its own /<slug>.
+    if (!slug) {
+      setError(true);
+      return;
+    }
     setProduct(null);
     setError(false);
-    const fetchProduct = slug ? api.getProductBySlug(slug) : api.getDefaultProduct();
-    fetchProduct.then(setProduct).catch(() => setError(true));
+    api.getProductBySlug(slug).then(setProduct).catch(() => setError(true));
   }, [slug]);
 
   useEffect(() => {
-    if (!product) return;
-    api.trackVisit(sessionId, slug ? `/${slug}` : "/", document.referrer, product.slug);
+    if (!product || !slug) return;
+    api.trackVisit(sessionId, `/${slug}`, document.referrer, product.slug);
   }, [product, sessionId, slug]);
 
   if (error) {

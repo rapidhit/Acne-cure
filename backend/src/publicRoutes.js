@@ -1,5 +1,5 @@
 import express from "express";
-import { getProductBySlug, getDefaultProduct } from "./db.js";
+import { getProductBySlug } from "./db.js";
 
 const router = express.Router();
 
@@ -28,18 +28,9 @@ function toPublicShape(product) {
 }
 
 /**
- * GET /api/public/products/default
- * Powers the bare domain root "/" — whichever product is currently flagged default.
- */
-router.get("/default", (req, res) => {
-  const product = getDefaultProduct();
-  if (!product) return res.status(404).json({ error: "No default product configured" });
-  res.json(toPublicShape(product));
-});
-
-/**
  * GET /api/public/products/:slug
  * Powers flawless.hryders.com/<slug>
+ * Nothing is exposed at the bare domain root — every product lives at its own slug.
  */
 router.get("/:slug", (req, res) => {
   const product = getProductBySlug(req.params.slug);
