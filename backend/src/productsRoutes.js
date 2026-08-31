@@ -10,6 +10,7 @@ const router = express.Router();
 const SLUG_RE = /^[a-z0-9-]{2,50}$/;
 const VALID_CURRENCY = /^[A-Z]{3}$/;
 const VALID_MODE = new Set(["template", "custom_code"]);
+const VALID_DELIVERY_TYPE = new Set(["pdf", "telegram"]);
 const VALID_FLOATING_POSITION = new Set(["top", "bottom", "scroll_trigger"]);
 const VALID_STICK_TO = new Set(["top", "bottom"]);
 
@@ -106,6 +107,19 @@ router.put("/:id", requireAdmin, (req, res) => {
   if (body.mode !== undefined) {
     if (!VALID_MODE.has(body.mode)) return res.status(400).json({ error: "Invalid mode" });
     updates.mode = body.mode;
+  }
+  if (body.deliveryType !== undefined) {
+    if (!VALID_DELIVERY_TYPE.has(body.deliveryType)) {
+      return res.status(400).json({ error: "deliveryType must be 'pdf' or 'telegram'" });
+    }
+    updates.delivery_type = body.deliveryType;
+  }
+  if (body.telegramLink !== undefined) {
+    const link = String(body.telegramLink).trim();
+    if (link && !/^https?:\/\//i.test(link)) {
+      return res.status(400).json({ error: "telegramLink must be a full URL starting with https://" });
+    }
+    updates.telegram_link = link || null;
   }
   if (body.headline !== undefined) updates.headline = String(body.headline);
   if (body.subheadline !== undefined) updates.subheadline = String(body.subheadline);

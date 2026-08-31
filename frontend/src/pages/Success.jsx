@@ -9,6 +9,7 @@ export default function Success() {
   const reference = params.get("reference");
   const [status, setStatus] = useState("verifying"); // verifying | celebrating | success | error
   const [downloadUrl, setDownloadUrl] = useState(null);
+  const [deliveryType, setDeliveryType] = useState("pdf");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -21,6 +22,7 @@ export default function Success() {
       .verifyPayment(reference)
       .then((data) => {
         setDownloadUrl(data.downloadUrl);
+        setDeliveryType(data.deliveryType || "pdf");
         setStatus("celebrating");
       })
       .catch((e) => {
@@ -70,13 +72,28 @@ export default function Success() {
               </div>
               <h1 className="mt-3 text-[22px] font-black">You're all set!</h1>
               <p className="mt-2 text-[14px] text-[#0f3d1f]/70">
-                Your download link is ready below and expires after a while for security — grab it now.
+                {deliveryType === "telegram"
+                  ? "Tap below to join the Telegram group — your access link expires after a while for security."
+                  : "Your download link is ready below and expires after a while for security — grab it now."}
               </p>
               <a
                 href={downloadUrl}
-                className="mt-6 inline-block w-full rounded-full bg-[#dc2626] text-white font-bold text-[16px] py-4"
+                target={deliveryType === "telegram" ? "_blank" : undefined}
+                rel={deliveryType === "telegram" ? "noopener noreferrer" : undefined}
+                className={`mt-6 inline-flex items-center justify-center gap-2 w-full rounded-full text-white font-bold text-[16px] py-4 ${
+                  deliveryType === "telegram" ? "bg-[#229ED9]" : "bg-[#dc2626]"
+                }`}
               >
-                Download Now
+                {deliveryType === "telegram" ? (
+                  <>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M21.95 5.5l-3.15 14.85c-.24 1.05-.87 1.31-1.76.82l-4.86-3.58-2.35 2.26c-.26.26-.48.48-.98.48l.35-4.94 9-8.13c.39-.35-.09-.54-.6-.2L6.6 13.44l-4.83-1.51c-1.05-.33-1.07-1.05.22-1.55L20.7 4.14c.87-.33 1.63.2 1.25 1.36z" />
+                    </svg>
+                    Join Telegram Group
+                  </>
+                ) : (
+                  "Download Now"
+                )}
               </a>
               <p className="mt-3 text-[11px] text-[#0f3d1f]/50">Reference: {reference}</p>
             </>

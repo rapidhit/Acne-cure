@@ -114,6 +114,8 @@ export default function AdminDashboard() {
         headline: p.headline || "",
         subheadline: p.subheadline || "",
         customHtml: p.custom_html || "",
+        deliveryType: p.delivery_type || "pdf",
+        telegramLink: p.telegram_link || "",
         floating: {
           enabled: !!p.floating_enabled,
           label: p.floating_label,
@@ -183,6 +185,8 @@ export default function AdminDashboard() {
         headline: settingsForm.headline,
         subheadline: settingsForm.subheadline,
         customHtml: settingsForm.customHtml,
+        deliveryType: settingsForm.deliveryType,
+        telegramLink: settingsForm.telegramLink,
         floatingEnabled: settingsForm.floating.enabled,
         floatingLabel: settingsForm.floating.label,
         floatingPosition: settingsForm.floating.position,
@@ -364,6 +368,44 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
+                      <div className="mt-5">
+                        <FieldLabel>What buyers get after payment</FieldLabel>
+                        <div className="mt-2 flex gap-5">
+                          <label className="flex items-center gap-2 text-[13.5px] text-[#12131A]">
+                            <input
+                              type="radio"
+                              checked={settingsForm.deliveryType === "pdf"}
+                              onChange={() => setSettingsForm((f) => ({ ...f, deliveryType: "pdf" }))}
+                              className="accent-accent"
+                            />
+                            A PDF file
+                          </label>
+                          <label className="flex items-center gap-2 text-[13.5px] text-[#12131A]">
+                            <input
+                              type="radio"
+                              checked={settingsForm.deliveryType === "telegram"}
+                              onChange={() => setSettingsForm((f) => ({ ...f, deliveryType: "telegram" }))}
+                              className="accent-accent"
+                            />
+                            A Telegram group invite link
+                          </label>
+                        </div>
+                        {settingsForm.deliveryType === "telegram" && (
+                          <div className="mt-3">
+                            <FieldLabel>Telegram invite link</FieldLabel>
+                            <input
+                              value={settingsForm.telegramLink}
+                              onChange={(e) => setSettingsForm((f) => ({ ...f, telegramLink: e.target.value }))}
+                              placeholder="https://t.me/+xxxxxxxxxxxx"
+                              className={inputClass}
+                            />
+                            <p className="mt-1.5 text-[12px] text-[#5B6472]">
+                              Buyers are redirected here after a verified payment.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+
                       {settingsForm.mode === "template" && (
                         <div className="mt-5 grid grid-cols-1 gap-4">
                           <div>
@@ -436,36 +478,38 @@ export default function AdminDashboard() {
                     </form>
                   </section>
 
-                  <section className="rounded-lg border border-hairline bg-white p-5">
-                    <h2 className="font-display font-semibold text-[15px] text-[#12131A] mb-1">Delivery file</h2>
-                    <p className="text-[13px] text-[#5B6472] mb-4">
-                      The PDF customers receive after a verified payment for this product.
-                    </p>
-                    <div className="flex flex-wrap items-center gap-4">
-                      <div className="flex-1 min-w-[220px]">
-                        {pdfStatus?.exists ? (
-                          <div className="flex flex-wrap items-center gap-2 text-[13px]">
-                            <span className="text-positive font-semibold">● File in place</span>
-                            <span className="text-[#5B6472]">
-                              {pdfStatus.fileName} · {formatBytes(pdfStatus.sizeBytes)} · updated{" "}
-                              {new Date(pdfStatus.updatedAt).toLocaleString()}
-                            </span>
-                          </div>
-                        ) : pdfStatus ? (
-                          <div className="text-[13px] text-[#DC2626] font-semibold">
-                            ● No file uploaded — buyers can't download anything until you add one.
-                          </div>
-                        ) : (
-                          <div className="text-[13px] text-[#5B6472]">Checking…</div>
-                        )}
+                  {settingsForm.deliveryType === "pdf" && (
+                    <section className="rounded-lg border border-hairline bg-white p-5">
+                      <h2 className="font-display font-semibold text-[15px] text-[#12131A] mb-1">Delivery file</h2>
+                      <p className="text-[13px] text-[#5B6472] mb-4">
+                        The PDF customers receive after a verified payment for this product.
+                      </p>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <div className="flex-1 min-w-[220px]">
+                          {pdfStatus?.exists ? (
+                            <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                              <span className="text-positive font-semibold">● File in place</span>
+                              <span className="text-[#5B6472]">
+                                {pdfStatus.fileName} · {formatBytes(pdfStatus.sizeBytes)} · updated{" "}
+                                {new Date(pdfStatus.updatedAt).toLocaleString()}
+                              </span>
+                            </div>
+                          ) : pdfStatus ? (
+                            <div className="text-[13px] text-[#DC2626] font-semibold">
+                              ● No file uploaded — buyers can't download anything until you add one.
+                            </div>
+                          ) : (
+                            <div className="text-[13px] text-[#5B6472]">Checking…</div>
+                          )}
+                        </div>
+                        <label className="shrink-0 cursor-pointer rounded-md bg-[#12131A] text-white font-semibold text-[13px] px-4 py-2 hover:bg-black transition-colors">
+                          {uploadingPdf ? "Uploading…" : pdfStatus?.exists ? "Replace file" : "Upload PDF"}
+                          <input type="file" accept="application/pdf" onChange={handleUploadPdf} disabled={uploadingPdf} className="hidden" />
+                        </label>
                       </div>
-                      <label className="shrink-0 cursor-pointer rounded-md bg-[#12131A] text-white font-semibold text-[13px] px-4 py-2 hover:bg-black transition-colors">
-                        {uploadingPdf ? "Uploading…" : pdfStatus?.exists ? "Replace file" : "Upload PDF"}
-                        <input type="file" accept="application/pdf" onChange={handleUploadPdf} disabled={uploadingPdf} className="hidden" />
-                      </label>
-                    </div>
-                    {pdfMessage && <p className="mt-3 text-[13px] text-[#5B6472]">{pdfMessage}</p>}
-                  </section>
+                      {pdfMessage && <p className="mt-3 text-[13px] text-[#5B6472]">{pdfMessage}</p>}
+                    </section>
+                  )}
                 </div>
               ) : activeView === "reviews" ? (
                 <div className="rounded-lg border border-hairline bg-white p-5">

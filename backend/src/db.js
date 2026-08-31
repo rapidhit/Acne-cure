@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS products (
   mode TEXT NOT NULL DEFAULT 'template', -- 'template' | 'custom_code'
   is_default INTEGER NOT NULL DEFAULT 0, -- served at the bare domain root "/"
   pdf_file_path TEXT,
+  delivery_type TEXT NOT NULL DEFAULT 'pdf', -- 'pdf' | 'telegram'
+  telegram_link TEXT,
 
   -- template mode fields
   headline TEXT,
@@ -90,6 +92,12 @@ if (!columnExists("transactions", "product_id")) {
 }
 if (!columnExists("visits", "product_id")) {
   db.exec(`ALTER TABLE visits ADD COLUMN product_id INTEGER`);
+}
+if (!columnExists("products", "delivery_type")) {
+  db.exec(`ALTER TABLE products ADD COLUMN delivery_type TEXT NOT NULL DEFAULT 'pdf'`);
+}
+if (!columnExists("products", "telegram_link")) {
+  db.exec(`ALTER TABLE products ADD COLUMN telegram_link TEXT`);
 }
 
 db.exec(`

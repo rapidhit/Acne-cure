@@ -71,9 +71,11 @@ router.post("/verify", async (req, res) => {
 
   // Already verified — just return the existing token (idempotent)
   if (tx.status === "success") {
+    const product = tx.product_id ? getProductById(tx.product_id) : null;
     return res.json({
       status: "success",
       downloadUrl: `/api/paystack/download/${tx.download_token}`,
+      deliveryType: product?.delivery_type || "pdf",
     });
   }
 
@@ -101,7 +103,11 @@ router.post("/verify", async (req, res) => {
         productName: product?.name,
       });
 
-      return res.json({ status: "success", downloadUrl: `/api/paystack/download/${token}` });
+      return res.json({
+        status: "success",
+        downloadUrl: `/api/paystack/download/${token}`,
+        deliveryType: product?.delivery_type || "pdf",
+      });
     }
 
     db.prepare(
@@ -133,6 +139,15 @@ router.get("/download/:token", (req, res) => {
   const product = tx.product_id ? getProductById(tx.product_id) : null;
   if (!product) {
     return res.status(500).send("Product record missing for this order. Contact support.");
+  }
+
+  if (product.delivery_type === "telegram") {
+    if (!product.telegram_link) {
+      console.error("Telegram link missing for product", product.slug);
+      return res.status(500).send("Access link not configured yet. Contact support with your payment reference.");
+    }
+    db.prepare(`UPDATE transactions SET download_count = download_count + 1 WHERE id = ?`).run(tx.id);
+    return res.redirect(302, product.telegram_link);
   }
 
   const filePath = path.resolve(product.pdf_file_path || `./data/products/${product.slug}.pdf`);
