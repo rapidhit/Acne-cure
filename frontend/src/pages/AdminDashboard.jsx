@@ -8,12 +8,12 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from "recharts";
 import { api } from "../lib/api.js";
 import NewProductModal from "../components/NewProductModal.jsx";
 import ButtonPlacementEditor from "../components/ButtonPlacementEditor.jsx";
 import FloatingButtonConfig from "../components/FloatingButtonConfig.jsx";
+import ProductSwitcher from "../components/ProductSwitcher.jsx";
 
 function formatMoney(amountInSmallestUnit, currency) {
   const value = amountInSmallestUnit / 100;
@@ -33,20 +33,29 @@ function formatBytes(bytes) {
 
 function StatCard({ label, value, sub }) {
   return (
-    <div className="rounded-2xl border border-black/10 p-5 bg-white">
-      <div className="text-[12px] uppercase tracking-wide text-[#0f3d1f]/60">{label}</div>
-      <div className="mt-1 text-[26px] font-black text-[#0f3d1f]">{value}</div>
-      {sub && <div className="mt-1 text-[12px] text-[#0f3d1f]/50">{sub}</div>}
+    <div className="rounded-lg border border-hairline bg-white p-5">
+      <div className="text-[13px] text-[#5B6472] font-console">{label}</div>
+      <div className="mt-1.5 text-[30px] font-display font-semibold text-[#12131A] tabular-nums leading-none">
+        {value}
+      </div>
+      {sub && <div className="mt-2 text-[12px] text-[#5B6472] font-console">{sub}</div>}
     </div>
   );
 }
+
+function FieldLabel({ children }) {
+  return <label className="block text-[12.5px] font-medium text-[#5B6472] font-console">{children}</label>;
+}
+
+const inputClass =
+  "mt-1.5 w-full rounded-md border border-hairline px-3 py-2 text-[14px] font-console text-[#12131A] outline-none focus:border-accent focus:ring-1 focus:ring-accent/30";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
 
   const [productList, setProductList] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
-  const [product, setProduct] = useState(null); // full record for selected product
+  const [product, setProduct] = useState(null);
   const [showNewProduct, setShowNewProduct] = useState(false);
   const [activeView, setActiveView] = useState("stats"); // 'stats' | 'settings'
 
@@ -62,7 +71,6 @@ export default function AdminDashboard() {
   const [statsError, setStatsError] = useState("");
   const [clearingPending, setClearingPending] = useState(false);
 
-  // --- Auth + initial product list ---
   useEffect(() => {
     api
       .adminSession()
@@ -83,7 +91,6 @@ export default function AdminDashboard() {
     });
   }
 
-  // --- Load everything for whichever product is selected ---
   useEffect(() => {
     if (!selectedId) return;
     localStorage.setItem("flw_admin_last_product_id", String(selectedId));
@@ -145,8 +152,8 @@ export default function AdminDashboard() {
         inlineButtons: settingsForm.inlineButtons,
       });
       setProduct(updated);
-      setSettingsMessage("Saved — changes are live immediately.");
-      loadProductList(); // in case name changed, refresh the switcher labels
+      setSettingsMessage("Saved. Changes are live now.");
+      loadProductList();
     } catch (err) {
       setSettingsMessage(err.message || "Could not save settings.");
     } finally {
@@ -162,7 +169,7 @@ export default function AdminDashboard() {
     try {
       const result = await api.adminUploadPdf(selectedId, file);
       setPdfStatus({ exists: true, sizeBytes: result.sizeBytes, updatedAt: result.updatedAt, fileName: result.fileName });
-      setPdfMessage("Uploaded — this is now the file buyers receive after payment.");
+      setPdfMessage("Uploaded. This is now the file buyers receive after payment.");
     } catch (err) {
       setPdfMessage(err.message || "Upload failed.");
     } finally {
@@ -172,7 +179,7 @@ export default function AdminDashboard() {
   }
 
   async function handleClearPending() {
-    if (!window.confirm("Delete all pending (never-completed) orders for this product? This can't be undone.")) return;
+    if (!window.confirm("Delete all pending orders for this product? This can't be undone.")) return;
     setClearingPending(true);
     try {
       const result = await api.adminClearPending(selectedId);
@@ -191,311 +198,321 @@ export default function AdminDashboard() {
   }
 
   if (!productList) {
-    return <div className="p-8">Loading dashboard…</div>;
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center font-console text-[#5B6472]">
+        Loading dashboard…
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] flex">
+    <div className="min-h-screen bg-surface flex font-console">
       {/* Sidebar */}
-      <aside className="w-64 shrink-0 bg-white border-r border-black/10 flex flex-col p-5">
-        <h1 className="text-[18px] font-black text-[#0f3d1f]">Dashboard</h1>
+      <aside className="w-64 shrink-0 bg-ink flex flex-col p-4">
+        <div className="px-1 py-2">
+          <span className="font-display font-semibold text-[15px] text-white">Console</span>
+        </div>
 
-        <select
-          value={selectedId || ""}
-          onChange={(e) => setSelectedId(Number(e.target.value))}
-          className="mt-5 w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-[13px] font-semibold text-[#0f3d1f]"
-        >
-          {productList.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name} (/{p.slug})
-            </option>
-          ))}
-        </select>
+        <div className="mt-3">
+          <ProductSwitcher products={productList} selectedId={selectedId} onSelect={setSelectedId} />
+        </div>
 
         <button
           onClick={() => setShowNewProduct(true)}
-          className="mt-2 text-[12px] font-semibold text-[#0f3d1f] border border-[#0f3d1f]/20 rounded-lg px-3 py-2 hover:bg-[#0f3d1f]/5"
+          className="mt-2 w-full text-left rounded-lg px-3 py-2 text-[13px] text-white/50 hover:text-white hover:bg-white/5 transition-colors"
         >
-          + New Product
+          + New product
         </button>
 
-        <nav className="mt-6 space-y-1">
-          <button
-            onClick={() => setActiveView("stats")}
-            className={`w-full text-left rounded-lg px-3 py-2.5 text-[14px] font-semibold ${
-              activeView === "stats" ? "bg-[#0f3d1f] text-white" : "text-[#0f3d1f] hover:bg-[#0f3d1f]/5"
-            }`}
-          >
-            📊 Insights
-          </button>
-          <button
-            onClick={() => setActiveView("settings")}
-            className={`w-full text-left rounded-lg px-3 py-2.5 text-[14px] font-semibold ${
-              activeView === "settings" ? "bg-[#0f3d1f] text-white" : "text-[#0f3d1f] hover:bg-[#0f3d1f]/5"
-            }`}
-          >
-            ⚙️ Settings
-          </button>
+        <nav className="mt-6 space-y-0.5">
+          {[
+            { id: "stats", label: "Insights" },
+            { id: "settings", label: "Settings" },
+          ].map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveView(item.id)}
+              className={`relative w-full text-left rounded-md pl-4 pr-3 py-2.5 text-[13.5px] font-medium transition-colors ${
+                activeView === item.id ? "bg-white/[0.06] text-white" : "text-white/50 hover:text-white/80"
+              }`}
+            >
+              {activeView === item.id && (
+                <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-accent" />
+              )}
+              {item.label}
+            </button>
+          ))}
         </nav>
 
-        <button onClick={handleLogout} className="mt-auto text-[13px] font-semibold text-[#0f3d1f]/60 hover:text-[#0f3d1f] text-left">
+        <button
+          onClick={handleLogout}
+          className="mt-auto text-left text-[13px] text-white/40 hover:text-white/70 transition-colors"
+        >
           Log out
         </button>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-8 overflow-y-auto">
-        <div className="max-w-[900px] mx-auto">
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-[860px] mx-auto px-8 py-8">
           {!product || !settingsForm ? (
-            <div>Loading product…</div>
-          ) : activeView === "settings" ? (
-            <>
-              <h2 className="text-[22px] font-black text-[#0f3d1f]">{product.name}</h2>
-              <p className="text-[13px] text-[#0f3d1f]/50 mb-6">Live at yourdomain.com/{product.slug}</p>
-
-              {/* Basic settings */}
-              <div className="rounded-2xl border border-black/10 bg-white p-5">
-                <h3 className="text-[15px] font-bold text-[#0f3d1f] mb-1">Product Settings</h3>
-                <p className="text-[12px] text-[#0f3d1f]/60 mb-4">Changes apply immediately.</p>
-                <form onSubmit={handleSaveSettings}>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                      <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Product name</label>
-                      <input
-                        value={settingsForm.name}
-                        onChange={(e) => setSettingsForm((f) => ({ ...f, name: e.target.value }))}
-                        className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px]"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Price</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0.5"
-                        value={settingsForm.priceDollars}
-                        onChange={(e) => setSettingsForm((f) => ({ ...f, priceDollars: e.target.value }))}
-                        className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px]"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Currency</label>
-                      <input
-                        maxLength={3}
-                        value={settingsForm.currency}
-                        onChange={(e) => setSettingsForm((f) => ({ ...f, currency: e.target.value.toUpperCase() }))}
-                        className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px] uppercase"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Page type</label>
-                    <div className="mt-1 flex gap-4">
-                      <label className="flex items-center gap-2 text-[13px]">
-                        <input
-                          type="radio"
-                          checked={settingsForm.mode === "custom_code"}
-                          onChange={() => setSettingsForm((f) => ({ ...f, mode: "custom_code" }))}
-                        />
-                        Custom page
-                      </label>
-                      <label className="flex items-center gap-2 text-[13px]">
-                        <input
-                          type="radio"
-                          checked={settingsForm.mode === "template"}
-                          onChange={() => setSettingsForm((f) => ({ ...f, mode: "template" }))}
-                        />
-                        Built-in template
-                      </label>
-                    </div>
-                  </div>
-
-                  {settingsForm.mode === "template" && (
-                    <div className="mt-4 grid grid-cols-1 gap-3">
-                      <div>
-                        <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Headline (optional override)</label>
-                        <input
-                          value={settingsForm.headline}
-                          onChange={(e) => setSettingsForm((f) => ({ ...f, headline: e.target.value }))}
-                          placeholder="Are you battling with...?"
-                          className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px]"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Subheadline (optional override)</label>
-                        <input
-                          value={settingsForm.subheadline}
-                          onChange={(e) => setSettingsForm((f) => ({ ...f, subheadline: e.target.value }))}
-                          placeholder="Discover the simple system to..."
-                          className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[14px]"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {settingsForm.mode === "custom_code" && (
-                    <div className="mt-5 space-y-5">
-                      <div>
-                        <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">
-                          Custom page HTML/CSS/JS
-                        </label>
-                        <textarea
-                          value={settingsForm.customHtml}
-                          onChange={(e) => setSettingsForm((f) => ({ ...f, customHtml: e.target.value }))}
-                          rows={10}
-                          placeholder="<html>...</html>"
-                          className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2 text-[12px] font-mono"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60 block mb-2">
-                          Buttons on the page (drag to place)
-                        </label>
-                        <ButtonPlacementEditor
-                          customHtml={settingsForm.customHtml}
-                          buttons={settingsForm.inlineButtons}
-                          onChange={(inlineButtons) => setSettingsForm((f) => ({ ...f, inlineButtons }))}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60 block mb-2">
-                          Floating action button
-                        </label>
-                        <FloatingButtonConfig
-                          config={settingsForm.floating}
-                          onChange={(floating) => setSettingsForm((f) => ({ ...f, floating }))}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-5 flex items-center gap-3">
-                    <button
-                      type="submit"
-                      disabled={savingSettings}
-                      className="rounded-full bg-[#0f3d1f] text-white font-semibold text-[13px] px-5 py-2 disabled:opacity-60"
-                    >
-                      {savingSettings ? "Saving…" : "Save changes"}
-                    </button>
-                    {settingsMessage && <span className="text-[12px] text-[#0f3d1f]/70">{settingsMessage}</span>}
-                  </div>
-                </form>
-              </div>
-
-              {/* Delivery file */}
-              <div className="mt-6 rounded-2xl border border-black/10 bg-white p-5">
-                <h3 className="text-[15px] font-bold text-[#0f3d1f] mb-1">Delivery File</h3>
-                <p className="text-[12px] text-[#0f3d1f]/60 mb-4">
-                  The PDF customers receive after a verified payment for this product.
-                </p>
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex-1 min-w-[220px]">
-                    {pdfStatus?.exists ? (
-                      <div className="flex items-center gap-2 text-[13px]">
-                        <span className="text-[#15803d] font-semibold">✓ File in place</span>
-                        <span className="text-[#0f3d1f]/50">
-                          {pdfStatus.fileName} · {formatBytes(pdfStatus.sizeBytes)} · updated{" "}
-                          {new Date(pdfStatus.updatedAt).toLocaleString()}
-                        </span>
-                      </div>
-                    ) : pdfStatus ? (
-                      <div className="text-[13px] text-[#dc2626] font-semibold">
-                        ⚠ No file uploaded yet — buyers can't download anything until you add one.
-                      </div>
-                    ) : (
-                      <div className="text-[13px] text-[#0f3d1f]/50">Checking…</div>
-                    )}
-                  </div>
-                  <label className="shrink-0 cursor-pointer rounded-full bg-[#0f3d1f] text-white font-semibold text-[13px] px-5 py-2.5">
-                    {uploadingPdf ? "Uploading…" : pdfStatus?.exists ? "Replace file" : "Upload PDF"}
-                    <input type="file" accept="application/pdf" onChange={handleUploadPdf} disabled={uploadingPdf} className="hidden" />
-                  </label>
-                </div>
-                {pdfMessage && <p className="mt-3 text-[12px] text-[#0f3d1f]/70">{pdfMessage}</p>}
-              </div>
-            </>
+            <div className="text-[#5B6472]">Loading product…</div>
           ) : (
             <>
-              <h2 className="text-[22px] font-black text-[#0f3d1f] mb-6">{product.name} — Insights</h2>
+              <div className="flex items-baseline gap-2 mb-7">
+                <h1 className="font-display font-semibold text-[22px] text-[#12131A]">{product.name}</h1>
+                <span className="text-[13px] text-accent">/{product.slug}</span>
+              </div>
 
-              {statsError && <p className="text-[#dc2626]">{statsError}</p>}
-              {stats && (
-                <>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <StatCard label="Total Sales" value={stats.totals.salesCount} />
-                    <StatCard label="Total Revenue" value={formatMoney(stats.totals.revenue, product.currency)} />
-                    <StatCard label="Today" value={stats.totals.todaySalesCount} sub={formatMoney(stats.totals.todayRevenue, product.currency)} />
-                    <StatCard label="Conversion Rate" value={`${stats.totals.conversionRate}%`} sub={`${stats.totals.totalVisits} unique visits`} />
-                  </div>
+              {activeView === "settings" ? (
+                <div className="space-y-5">
+                  <section className="rounded-lg border border-hairline bg-white p-5">
+                    <h2 className="font-display font-semibold text-[15px] text-[#12131A] mb-4">Product details</h2>
+                    <form onSubmit={handleSaveSettings}>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <FieldLabel>Product name</FieldLabel>
+                          <input
+                            value={settingsForm.name}
+                            onChange={(e) => setSettingsForm((f) => ({ ...f, name: e.target.value }))}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <FieldLabel>Price</FieldLabel>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0.5"
+                            value={settingsForm.priceDollars}
+                            onChange={(e) => setSettingsForm((f) => ({ ...f, priceDollars: e.target.value }))}
+                            className={inputClass}
+                          />
+                        </div>
+                        <div>
+                          <FieldLabel>Currency</FieldLabel>
+                          <input
+                            maxLength={3}
+                            value={settingsForm.currency}
+                            onChange={(e) => setSettingsForm((f) => ({ ...f, currency: e.target.value.toUpperCase() }))}
+                            className={`${inputClass} uppercase`}
+                          />
+                        </div>
+                      </div>
 
-                  <div className="mt-8 rounded-2xl border border-black/10 bg-white p-5">
-                    <h3 className="text-[15px] font-bold text-[#0f3d1f] mb-4">Last 14 Days</h3>
-                    <div style={{ width: "100%", height: 300 }}>
-                      <ResponsiveContainer>
-                        <LineChart data={stats.series}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-                          <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                          <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                          <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11 }} />
-                          <Tooltip />
-                          <Legend />
-                          <Line yAxisId="left" type="monotone" dataKey="sales" stroke="#0f3d1f" name="Sales" strokeWidth={2} />
-                          <Line yAxisId="right" type="monotone" dataKey="visits" stroke="#a3d65c" name="Visits" strokeWidth={2} />
-                        </LineChart>
-                      </ResponsiveContainer>
+                      <div className="mt-5">
+                        <FieldLabel>Page type</FieldLabel>
+                        <div className="mt-2 flex gap-5">
+                          <label className="flex items-center gap-2 text-[13.5px] text-[#12131A]">
+                            <input
+                              type="radio"
+                              checked={settingsForm.mode === "custom_code"}
+                              onChange={() => setSettingsForm((f) => ({ ...f, mode: "custom_code" }))}
+                              className="accent-accent"
+                            />
+                            Custom page
+                          </label>
+                          <label className="flex items-center gap-2 text-[13.5px] text-[#12131A]">
+                            <input
+                              type="radio"
+                              checked={settingsForm.mode === "template"}
+                              onChange={() => setSettingsForm((f) => ({ ...f, mode: "template" }))}
+                              className="accent-accent"
+                            />
+                            Built-in template
+                          </label>
+                        </div>
+                      </div>
+
+                      {settingsForm.mode === "template" && (
+                        <div className="mt-5 grid grid-cols-1 gap-4">
+                          <div>
+                            <FieldLabel>Headline (optional override)</FieldLabel>
+                            <input
+                              value={settingsForm.headline}
+                              onChange={(e) => setSettingsForm((f) => ({ ...f, headline: e.target.value }))}
+                              placeholder="Are you battling with...?"
+                              className={inputClass}
+                            />
+                          </div>
+                          <div>
+                            <FieldLabel>Subheadline (optional override)</FieldLabel>
+                            <input
+                              value={settingsForm.subheadline}
+                              onChange={(e) => setSettingsForm((f) => ({ ...f, subheadline: e.target.value }))}
+                              placeholder="Discover the simple system to..."
+                              className={inputClass}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {settingsForm.mode === "custom_code" && (
+                        <div className="mt-6 space-y-6">
+                          <div>
+                            <FieldLabel>Custom page HTML / CSS / JS</FieldLabel>
+                            <textarea
+                              value={settingsForm.customHtml}
+                              onChange={(e) => setSettingsForm((f) => ({ ...f, customHtml: e.target.value }))}
+                              rows={10}
+                              placeholder="<html>...</html>"
+                              className={`${inputClass} font-mono text-[12px]`}
+                            />
+                          </div>
+
+                          <div>
+                            <FieldLabel>Buttons on the page</FieldLabel>
+                            <div className="mt-2">
+                              <ButtonPlacementEditor
+                                customHtml={settingsForm.customHtml}
+                                buttons={settingsForm.inlineButtons}
+                                onChange={(inlineButtons) => setSettingsForm((f) => ({ ...f, inlineButtons }))}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <FieldLabel>Floating action button</FieldLabel>
+                            <div className="mt-2">
+                              <FloatingButtonConfig
+                                config={settingsForm.floating}
+                                onChange={(floating) => setSettingsForm((f) => ({ ...f, floating }))}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="mt-6 flex items-center gap-3 pt-5 border-t border-hairline">
+                        <button
+                          type="submit"
+                          disabled={savingSettings}
+                          className="rounded-md bg-accent text-white font-semibold text-[13.5px] px-4 py-2 hover:bg-accent/90 disabled:opacity-60 transition-colors"
+                        >
+                          {savingSettings ? "Saving…" : "Save changes"}
+                        </button>
+                        {settingsMessage && <span className="text-[13px] text-[#5B6472]">{settingsMessage}</span>}
+                      </div>
+                    </form>
+                  </section>
+
+                  <section className="rounded-lg border border-hairline bg-white p-5">
+                    <h2 className="font-display font-semibold text-[15px] text-[#12131A] mb-1">Delivery file</h2>
+                    <p className="text-[13px] text-[#5B6472] mb-4">
+                      The PDF customers receive after a verified payment for this product.
+                    </p>
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className="flex-1 min-w-[220px]">
+                        {pdfStatus?.exists ? (
+                          <div className="flex flex-wrap items-center gap-2 text-[13px]">
+                            <span className="text-positive font-semibold">● File in place</span>
+                            <span className="text-[#5B6472]">
+                              {pdfStatus.fileName} · {formatBytes(pdfStatus.sizeBytes)} · updated{" "}
+                              {new Date(pdfStatus.updatedAt).toLocaleString()}
+                            </span>
+                          </div>
+                        ) : pdfStatus ? (
+                          <div className="text-[13px] text-[#DC2626] font-semibold">
+                            ● No file uploaded — buyers can't download anything until you add one.
+                          </div>
+                        ) : (
+                          <div className="text-[13px] text-[#5B6472]">Checking…</div>
+                        )}
+                      </div>
+                      <label className="shrink-0 cursor-pointer rounded-md bg-[#12131A] text-white font-semibold text-[13px] px-4 py-2 hover:bg-black transition-colors">
+                        {uploadingPdf ? "Uploading…" : pdfStatus?.exists ? "Replace file" : "Upload PDF"}
+                        <input type="file" accept="application/pdf" onChange={handleUploadPdf} disabled={uploadingPdf} className="hidden" />
+                      </label>
                     </div>
-                  </div>
+                    {pdfMessage && <p className="mt-3 text-[13px] text-[#5B6472]">{pdfMessage}</p>}
+                  </section>
+                </div>
+              ) : (
+                <div>
+                  {statsError && <p className="text-[#DC2626]">{statsError}</p>}
+                  {stats && (
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <StatCard label="Total sales" value={stats.totals.salesCount} />
+                        <StatCard label="Total revenue" value={formatMoney(stats.totals.revenue, product.currency)} />
+                        <StatCard
+                          label="Today"
+                          value={stats.totals.todaySalesCount}
+                          sub={formatMoney(stats.totals.todayRevenue, product.currency)}
+                        />
+                        <StatCard
+                          label="Conversion rate"
+                          value={`${stats.totals.conversionRate}%`}
+                          sub={`${stats.totals.totalVisits} unique visits`}
+                        />
+                      </div>
 
-                  <div className="mt-8 rounded-2xl border border-black/10 bg-white p-5 overflow-x-auto">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-[15px] font-bold text-[#0f3d1f]">Recent Transactions</h3>
-                      <button
-                        onClick={handleClearPending}
-                        disabled={clearingPending}
-                        className="text-[12px] font-semibold text-[#dc2626] border border-[#dc2626]/30 rounded-full px-3.5 py-1.5 hover:bg-[#dc2626]/5 disabled:opacity-50"
-                      >
-                        {clearingPending ? "Clearing…" : "Clear Pending Orders"}
-                      </button>
-                    </div>
-                    <table className="w-full text-[13px]">
-                      <thead>
-                        <tr className="text-left text-[#0f3d1f]/60 border-b border-black/10">
-                          <th className="py-2 pr-4">Email</th>
-                          <th className="py-2 pr-4">Amount</th>
-                          <th className="py-2 pr-4">Status</th>
-                          <th className="py-2 pr-4">Downloads</th>
-                          <th className="py-2 pr-4">Date</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {stats.recentTransactions.map((t) => (
-                          <tr key={t.reference} className="border-b border-black/5">
-                            <td className="py-2 pr-4">{t.email}</td>
-                            <td className="py-2 pr-4">{formatMoney(t.amount, t.currency)}</td>
-                            <td className="py-2 pr-4">
-                              <span
-                                className={
-                                  t.status === "success"
-                                    ? "text-[#15803d] font-semibold"
-                                    : t.status === "failed"
-                                    ? "text-[#dc2626] font-semibold"
-                                    : "text-[#b45309] font-semibold"
-                                }
-                              >
-                                {t.status}
-                              </span>
-                            </td>
-                            <td className="py-2 pr-4">{t.download_count}</td>
-                            <td className="py-2 pr-4">{new Date(t.created_at).toLocaleString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
+                      <div className="mt-5 rounded-lg border border-hairline bg-white p-5">
+                        <h2 className="font-display font-semibold text-[15px] text-[#12131A] mb-4">Last 14 days</h2>
+                        <div style={{ width: "100%", height: 280 }}>
+                          <ResponsiveContainer>
+                            <LineChart data={stats.series}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#EEF0F3" vertical={false} />
+                              <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#5B6472" }} axisLine={{ stroke: "#E3E6EC" }} tickLine={false} />
+                              <YAxis yAxisId="left" tick={{ fontSize: 11, fill: "#5B6472" }} axisLine={false} tickLine={false} />
+                              <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 11, fill: "#5B6472" }} axisLine={false} tickLine={false} />
+                              <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid #E3E6EC" }} />
+                              <Line yAxisId="left" type="monotone" dataKey="sales" stroke="#3654FF" name="Sales" strokeWidth={2} dot={false} />
+                              <Line yAxisId="right" type="monotone" dataKey="visits" stroke="#0EA5A4" name="Visits" strokeWidth={2} dot={false} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 rounded-lg border border-hairline bg-white p-5 overflow-x-auto">
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="font-display font-semibold text-[15px] text-[#12131A]">Recent transactions</h2>
+                          <button
+                            onClick={handleClearPending}
+                            disabled={clearingPending}
+                            className="text-[12.5px] font-medium text-[#5B6472] border border-hairline rounded-md px-3 py-1.5 hover:border-[#DC2626]/40 hover:text-[#DC2626] disabled:opacity-50 transition-colors"
+                          >
+                            {clearingPending ? "Clearing…" : "Clear pending orders"}
+                          </button>
+                        </div>
+                        <table className="w-full text-[13px]">
+                          <thead>
+                            <tr className="text-left text-[#5B6472] border-b border-hairline">
+                              <th className="py-2 pr-4 font-medium">Email</th>
+                              <th className="py-2 pr-4 font-medium text-right">Amount</th>
+                              <th className="py-2 pr-4 font-medium">Status</th>
+                              <th className="py-2 pr-4 font-medium text-right">Downloads</th>
+                              <th className="py-2 pr-4 font-medium">Date</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {stats.recentTransactions.map((t) => (
+                              <tr key={t.reference} className="border-b border-hairline/60 text-[#12131A]">
+                                <td className="py-2.5 pr-4">{t.email}</td>
+                                <td className="py-2.5 pr-4 text-right tabular-nums">{formatMoney(t.amount, t.currency)}</td>
+                                <td className="py-2.5 pr-4">
+                                  <span
+                                    className={
+                                      t.status === "success"
+                                        ? "text-positive font-medium"
+                                        : t.status === "failed"
+                                        ? "text-[#DC2626] font-medium"
+                                        : "text-warn font-medium"
+                                    }
+                                  >
+                                    {t.status}
+                                  </span>
+                                </td>
+                                <td className="py-2.5 pr-4 text-right tabular-nums">{t.download_count}</td>
+                                <td className="py-2.5 pr-4 text-[#5B6472]">{new Date(t.created_at).toLocaleString()}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  )}
+                </div>
               )}
             </>
           )}

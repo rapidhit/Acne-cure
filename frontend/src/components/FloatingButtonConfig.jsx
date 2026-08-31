@@ -7,9 +7,10 @@ export default function FloatingButtonConfig({ config, onChange }) {
 
   return (
     <div className="space-y-4">
-      <label className="flex items-center gap-2 text-[13px] font-semibold">
+      <label className="flex items-center gap-2 text-[13.5px] font-medium text-[#12131A]">
         <input
           type="checkbox"
+          className="accent-accent"
           checked={config.enabled}
           onChange={(e) => set({ enabled: e.target.checked })}
         />
@@ -19,7 +20,7 @@ export default function FloatingButtonConfig({ config, onChange }) {
       {config.enabled && (
         <div className="pl-6 space-y-4">
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Label</label>
+            <label className="block text-[12.5px] font-medium text-[#5B6472]">Label</label>
             <div className="mt-1 flex flex-wrap gap-2">
               {PRESET_LABELS.map((preset) => (
                 <button
@@ -27,7 +28,7 @@ export default function FloatingButtonConfig({ config, onChange }) {
                   type="button"
                   onClick={() => set({ label: preset })}
                   className={`text-[12px] rounded-full border px-3 py-1 ${
-                    config.label === preset ? "bg-[#0f3d1f] text-white border-[#0f3d1f]" : "border-[#0f3d1f]/20"
+                    config.label === preset ? "bg-accent text-white border-accent" : "border-hairline"
                   }`}
                 >
                   {preset}
@@ -38,32 +39,35 @@ export default function FloatingButtonConfig({ config, onChange }) {
               value={config.label}
               onChange={(e) => set({ label: e.target.value })}
               placeholder="Or type a custom label…"
-              className="mt-2 w-full text-[13px] rounded-lg border border-black/10 px-3 py-2"
+              className="mt-2 w-full text-[13px] rounded-md border border-hairline px-3 py-2 outline-none focus:border-accent focus:ring-1 focus:ring-accent/30"
             />
           </div>
 
           <div>
-            <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Position</label>
+            <label className="block text-[12.5px] font-medium text-[#5B6472]">Position</label>
             <div className="mt-1 space-y-2">
-              <label className="flex items-center gap-2 text-[13px]">
+              <label className="flex items-center gap-2 text-[13px] text-[#12131A]">
                 <input
                   type="radio"
+                  className="accent-accent"
                   checked={config.position === "top"}
                   onChange={() => set({ position: "top" })}
                 />
                 Always at the top
               </label>
-              <label className="flex items-center gap-2 text-[13px]">
+              <label className="flex items-center gap-2 text-[13px] text-[#12131A]">
                 <input
                   type="radio"
+                  className="accent-accent"
                   checked={config.position === "bottom"}
                   onChange={() => set({ position: "bottom" })}
                 />
                 Always at the bottom
               </label>
-              <label className="flex items-center gap-2 text-[13px]">
+              <label className="flex items-center gap-2 text-[13px] text-[#12131A]">
                 <input
                   type="radio"
+                  className="accent-accent"
                   checked={config.position === "scroll_trigger"}
                   onChange={() => set({ position: "scroll_trigger" })}
                 />
@@ -75,7 +79,7 @@ export default function FloatingButtonConfig({ config, onChange }) {
           {config.position === "scroll_trigger" && (
             <div className="pl-6 space-y-3">
               <div>
-                <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">
+                <label className="block text-[12.5px] font-medium text-[#5B6472]">
                   Appears after scrolling {config.scrollPercent}% of the page
                 </label>
                 <input
@@ -88,19 +92,21 @@ export default function FloatingButtonConfig({ config, onChange }) {
                 />
               </div>
               <div>
-                <label className="text-[11px] uppercase tracking-wide text-[#0f3d1f]/60">Then sticks to</label>
+                <label className="block text-[12.5px] font-medium text-[#5B6472]">Then sticks to</label>
                 <div className="mt-1 flex gap-4">
-                  <label className="flex items-center gap-2 text-[13px]">
+                  <label className="flex items-center gap-2 text-[13px] text-[#12131A]">
                     <input
                       type="radio"
+                  className="accent-accent"
                       checked={config.stickTo === "top"}
                       onChange={() => set({ stickTo: "top" })}
                     />
                     Top
                   </label>
-                  <label className="flex items-center gap-2 text-[13px]">
+                  <label className="flex items-center gap-2 text-[13px] text-[#12131A]">
                     <input
                       type="radio"
+                  className="accent-accent"
                       checked={config.stickTo === "bottom"}
                       onChange={() => set({ stickTo: "bottom" })}
                     />

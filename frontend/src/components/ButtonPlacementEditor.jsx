@@ -87,12 +87,12 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
   return (
     <div>
       <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className="text-[12px] font-semibold text-[#0f3d1f]/70">Quick add:</span>
+        <span className="text-[12px] font-semibold text-[#5B6472]">Quick add:</span>
         {["Get Offer", "Buy Now", "Get Access", "Claim Discount"].map((preset) => (
           <button
             key={preset}
             onClick={() => addButton(preset)}
-            className="text-[12px] rounded-full border border-[#0f3d1f]/20 px-3 py-1 hover:bg-[#0f3d1f]/5"
+            className="text-[12px] rounded-full border border-hairline px-3 py-1 hover:bg-surface"
           >
             + {preset}
           </button>
@@ -100,11 +100,11 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
         <CustomAddButton onAdd={addButton} />
       </div>
 
-      <p className="text-[11px] text-[#0f3d1f]/50 mb-2">
+      <p className="text-[11px] text-[#5B6472] mb-2">
         Drag a button to position it. Click to select, then use arrow keys to nudge precisely.
       </p>
 
-      <div className="relative w-full border border-black/10 rounded-xl overflow-hidden bg-white" style={{ height: Math.min(contentHeight, 600), overflowY: "auto" }}>
+      <div className="relative w-full border border-hairline rounded-lg overflow-hidden bg-white" style={{ height: Math.min(contentHeight, 600), overflowY: "auto" }}>
         <div className="relative" style={{ height: contentHeight }}>
           <iframe
             ref={iframeRef}
@@ -152,33 +152,33 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
           {buttons.map((btn) => (
             <div
               key={btn.id}
-              className={`rounded-xl border p-3 ${selectedId === btn.id ? "border-[#a3d65c] bg-[#a3d65c]/5" : "border-black/10"}`}
+              className={`rounded-lg border p-3 ${selectedId === btn.id ? "border-accent bg-accent/5" : "border-hairline"}`}
             >
               <div className="flex items-center gap-2">
                 <input
                   value={btn.label}
                   onChange={(e) => updateButton(btn.id, { label: e.target.value })}
                   onFocus={() => setSelectedId(btn.id)}
-                  className="flex-1 text-[13px] rounded-lg border border-black/10 px-3 py-1.5"
+                  className="flex-1 text-[13px] rounded-md border border-hairline px-3 py-1.5 outline-none focus:border-accent focus:ring-1 focus:ring-accent/30"
                 />
-                <span className="text-[11px] text-[#0f3d1f]/40 w-20 shrink-0">
+                <span className="text-[11px] text-[#5B6472] w-20 shrink-0">
                   {btn.xPercent.toFixed(0)}%, {btn.yPercent.toFixed(0)}%
                 </span>
                 <button
                   onClick={() => setSelectedId(selectedId === btn.id ? null : btn.id)}
-                  className="text-[12px] font-semibold text-[#0f3d1f]/60 shrink-0"
+                  className="text-[12px] font-semibold text-[#5B6472] shrink-0"
                 >
                   {selectedId === btn.id ? "Hide style" : "Style"}
                 </button>
-                <button onClick={() => removeButton(btn.id)} className="text-[#dc2626] text-[12px] font-semibold shrink-0">
+                <button onClick={() => removeButton(btn.id)} className="text-[#DC2626] text-[12px] font-semibold shrink-0">
                   Remove
                 </button>
               </div>
 
               {selectedId === btn.id && (
-                <div className="mt-3 pt-3 border-t border-black/5 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="mt-3 pt-3 border-t border-hairline grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50">
+                    <label className="text-[11px] font-medium text-[#5B6472]">
                       Text size: {btn.fontSize ?? 14}px
                     </label>
                     <input
@@ -191,7 +191,7 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50">
+                    <label className="text-[11px] font-medium text-[#5B6472]">
                       Width (padding): {btn.paddingX ?? 24}px
                     </label>
                     <input
@@ -204,7 +204,7 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50">
+                    <label className="text-[11px] font-medium text-[#5B6472]">
                       Height (padding): {btn.paddingY ?? 14}px
                     </label>
                     <input
@@ -218,21 +218,21 @@ export default function ButtonPlacementEditor({ customHtml, buttons, onChange })
                   </div>
                   <div className="flex items-center gap-4">
                     <div>
-                      <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50 block">Text color</label>
+                      <label className="text-[11px] font-medium text-[#5B6472] block">Text color</label>
                       <input
                         type="color"
                         value={btn.textColor || "#ffffff"}
                         onChange={(e) => updateButton(btn.id, { textColor: e.target.value })}
-                        className="mt-1 w-10 h-8 rounded border border-black/10"
+                        className="mt-1 w-10 h-8 rounded border border-hairline"
                       />
                     </div>
                     <div>
-                      <label className="text-[10px] uppercase tracking-wide text-[#0f3d1f]/50 block">Background</label>
+                      <label className="text-[11px] font-medium text-[#5B6472] block">Background</label>
                       <input
                         type="color"
                         value={btn.bgColor || "#dc2626"}
                         onChange={(e) => updateButton(btn.id, { bgColor: e.target.value })}
-                        className="mt-1 w-10 h-8 rounded border border-black/10"
+                        className="mt-1 w-10 h-8 rounded border border-hairline"
                       />
                     </div>
                   </div>
@@ -262,9 +262,9 @@ function CustomAddButton({ onAdd }) {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder="Custom label…"
-        className="text-[12px] rounded-full border border-[#0f3d1f]/20 px-3 py-1 w-32"
+        className="text-[12px] rounded-full border border-hairline px-3 py-1 w-32"
       />
-      <button type="submit" className="text-[12px] font-semibold text-[#0f3d1f]">+ Add</button>
+      <button type="submit" className="text-[12px] font-semibold text-[#12131A]">+ Add</button>
     </form>
   );
 }
