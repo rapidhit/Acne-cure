@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CheckoutModal, { formatPrice } from "../components/CheckoutModal.jsx";
+import { api, getOrCreateSessionId } from "../lib/api.js";
 
 // Kept as sensible defaults for the legacy "8 Steps" design — a product using
 // template mode can override headline/subheadline/testimonials/faqs from the
@@ -7,7 +8,7 @@ import CheckoutModal, { formatPrice } from "../components/CheckoutModal.jsx";
 const DEFAULT_STEPS = [
   { n: "01", title: "Understanding Your Acne Type", sub: "Identify what's really causing your breakouts", tag: "Know your trigger" },
   { n: "02", title: "The Natural Cleanse Protocol", sub: "Gentle cleanse that clears pores without harsh chemicals", tag: "Clear pores gently" },
-  { n: "03", title: "The Neem Remedy (Main Recipe)", sub: "The main recipe - exact mix, dosage & how to apply", tag: "Core formula" },
+  { n: "03", title: "The Main Recipe", sub: "The exact mix, dosage & how to apply", tag: "Core formula" },
   { n: "04", title: "Reducing Redness & Inflammation", sub: "Calm redness and swelling in days, naturally", tag: "Calm skin fast" },
   { n: "05", title: "Detox & Diet Tweaks", sub: "Foods that trigger acne and simple swaps that help", tag: "Food swaps" },
   { n: "06", title: "Daily Skincare Routine", sub: "Morning & night routine for lasting clear skin", tag: "" },
@@ -20,7 +21,7 @@ const DEFAULT_TESTIMONIALS = [
     name: "Maya J.",
     meta: "24 · Texas",
     stars: 5,
-    text: "ok so i was skeptical cause its only $5 lol but wow. I've been doing the neem thing for about a week and a half now and my cheeks are actually clearing. not 100% gone but way less red and painful. definitely worth it",
+    text: "ok so i was skeptical cause its only $5 lol but wow. I've been following the routine for about a week and a half now and my cheeks are actually clearing. not 100% gone but way less red and painful. definitely worth it",
   },
   {
     name: "Jenna",
@@ -82,14 +83,41 @@ function Stars({ count }) {
 export default function TemplateProduct({ product }) {
   const [openFaq, setOpenFaq] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [realReviews, setRealReviews] = useState(null);
+  const [likedIds, setLikedIds] = useState(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("flw_liked_reviews") || "[]");
+    } catch {
+      return [];
+    }
+  });
   const timer = useCountdown(15 * 60);
+  const sessionId = useMemo(() => getOrCreateSessionId(), []);
+
+  useEffect(() => {
+    api.getProductReviews(product.slug).then(setRealReviews).catch(() => setRealReviews([]));
+  }, [product.slug]);
+
+  async function handleLike(reviewId) {
+    if (likedIds.includes(reviewId)) return;
+    try {
+      const { likes } = await api.likeReview(reviewId, sessionId);
+      setRealReviews((prev) => prev.map((r) => (r.id === reviewId ? { ...r, likes } : r)));
+      const next = [...likedIds, reviewId];
+      setLikedIds(next);
+      sessionStorage.setItem("flw_liked_reviews", JSON.stringify(next));
+    } catch {
+      // silently ignore — liking is a nice-to-have, not critical
+    }
+  }
 
   const priceDisplay = formatPrice(product.priceKobo, product.currency);
   const headline = product.headline || "Are you Battling with Acne or Pimples?";
   const subheadline =
     product.subheadline ||
     `Discover the simple 8-step natural system to clear your skin and boost your confidence — just ${priceDisplay}`;
-  const testimonials = product.testimonials?.length ? product.testimonials : DEFAULT_TESTIMONIALS;
+  const usingRealReviews = realReviews && realReviews.length > 0;
+  const testimonials = usingRealReviews ? realReviews : product.testimonials?.length ? product.testimonials : DEFAULT_TESTIMONIALS;
   const faqs = product.faqs?.length ? product.faqs : DEFAULT_FAQS;
 
   function openModal() {
@@ -100,7 +128,7 @@ export default function TemplateProduct({ product }) {
     <div className="min-h-screen bg-[#fffef9] text-[#0f3d1f] pb-28">
       {/* Top strip */}
       <div className="bg-gradient-to-br from-[#0f3d1f] via-[#164a26] to-[#0f3d1f] text-[#e8f0d8] text-[11px] py-2 px-4 text-center flex flex-wrap items-center justify-center gap-2">
-        <span>📘 Instant Digital Download</span>
+        <span>Instant Digital Download</span>
         <span className="opacity-60">|</span>
         <span>Simple, Actionable System</span>
         <span className="opacity-60">|</span>
@@ -183,21 +211,41 @@ export default function TemplateProduct({ product }) {
         <p className="mt-1 text-[13px] text-[#0f3d1f]/60">No filters — real reader reviews</p>
 
         <div className="mt-5 space-y-3">
-          {testimonials.map((t) => (
-            <div key={t.name} className="rounded-2xl bg-[#f9fafb] border border-black/[0.06] p-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#e0e7ff] flex items-center justify-center text-[12px] font-bold text-[#4338ca]">
-                  {t.name?.[0]}
+          {testimonials.map((t) => {
+            const isReal = usingRealReviews;
+            const key = isReal ? t.id : t.name;
+            const displayName = isReal ? t.name : t.name;
+            const stars = isReal ? t.rating : t.stars || 5;
+            const bodyText = isReal ? t.body : t.text;
+            const alreadyLiked = isReal && likedIds.includes(t.id);
+            return (
+              <div key={key} className="rounded-2xl bg-[#f9fafb] border border-black/[0.06] p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#e0e7ff] flex items-center justify-center text-[12px] font-bold text-[#4338ca]">
+                    {displayName?.[0]}
+                  </div>
+                  <div>
+                    <div className="font-semibold text-[14px]">{displayName}</div>
+                    {!isReal && <div className="text-[11px] text-[#0f3d1f]/60">{t.meta}</div>}
+                  </div>
+                  <div className="ml-auto"><Stars count={stars} /></div>
                 </div>
-                <div>
-                  <div className="font-semibold text-[14px]">{t.name}</div>
-                  <div className="text-[11px] text-[#0f3d1f]/60">{t.meta}</div>
-                </div>
-                <div className="ml-auto"><Stars count={t.stars || 5} /></div>
+                <p className="mt-3 text-[14px] leading-[1.55]">{bodyText}</p>
+                {isReal && (
+                  <button
+                    onClick={() => handleLike(t.id)}
+                    disabled={alreadyLiked}
+                    className={`mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold ${
+                      alreadyLiked ? "text-[#dc2626]" : "text-[#0f3d1f]/60 hover:text-[#dc2626]"
+                    }`}
+                  >
+                    <span>{alreadyLiked ? "♥" : "♡"}</span>
+                    {t.likes || 0}
+                  </button>
+                )}
               </div>
-              <p className="mt-3 text-[14px] leading-[1.55]">{t.text}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* FAQ */}
@@ -253,7 +301,7 @@ export default function TemplateProduct({ product }) {
           onClick={openModal}
           className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[15px] py-4 rounded-full shadow-[0_8px_20px_rgba(220,38,38,0.5)] flex items-center justify-center gap-2 active:scale-[0.98] transition"
         >
-          📘 Get Access – {priceDisplay}
+          Get Access – {priceDisplay}
         </button>
         <p className="mt-1.5 text-center text-[10px] font-semibold opacity-60">
           Instant Download · Any Device

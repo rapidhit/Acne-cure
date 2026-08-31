@@ -1,5 +1,6 @@
 import express from "express";
 import { getProductBySlug } from "./db.js";
+import db from "./db.js";
 
 const router = express.Router();
 
@@ -26,6 +27,25 @@ function toPublicShape(product) {
     inlineButtons: product.inline_buttons_json ? JSON.parse(product.inline_buttons_json) : [],
   };
 }
+
+/**
+ * GET /api/public/products/:slug/reviews
+ * Approved reviews only, most-liked first.
+ */
+router.get("/:slug/reviews", (req, res) => {
+  const product = getProductBySlug(req.params.slug);
+  if (!product) return res.status(404).json({ error: "Product not found" });
+
+  const reviews = db
+    .prepare(
+      `SELECT id, name, rating, body, likes, created_at FROM reviews
+       WHERE product_id = ? AND status = 'approved'
+       ORDER BY likes DESC, created_at DESC`
+    )
+    .all(product.id);
+
+  res.json(reviews);
+});
 
 /**
  * GET /api/public/products/:slug

@@ -17,6 +17,10 @@ async function request(path, options = {}) {
 export const api = {
   // --- Public product pages ---
   getProductBySlug: (slug) => request(`/public/products/${encodeURIComponent(slug)}`),
+  getProductReviews: (slug) => request(`/public/products/${encodeURIComponent(slug)}/reviews`),
+  submitReview: (payload) => request("/reviews", { method: "POST", body: JSON.stringify(payload) }),
+  likeReview: (reviewId, sessionId) =>
+    request(`/reviews/${reviewId}/like`, { method: "POST", body: JSON.stringify({ sessionId }) }),
 
   // --- Checkout ---
   initPayment: (email, productSlug) =>
@@ -66,6 +70,12 @@ export const api = {
   adminGetStats: (id) => request(`/admin/products/${id}/stats`),
   adminClearPending: (id) =>
     request(`/admin/products/${id}/transactions/pending`, { method: "DELETE" }),
+
+  // --- Admin: reviews ---
+  adminGetReviews: (productId) => request(`/admin/reviews?productId=${productId}`),
+  adminApproveReview: (id) => request(`/admin/reviews/${id}/approve`, { method: "POST" }),
+  adminRejectReview: (id) => request(`/admin/reviews/${id}/reject`, { method: "POST" }),
+  adminDeleteReview: (id) => request(`/admin/reviews/${id}`, { method: "DELETE" }),
 };
 
 export function getOrCreateSessionId() {

@@ -10,6 +10,7 @@ import adminRoutes from "./adminRoutes.js";
 import telegramRoutes from "./telegramRoutes.js";
 import productsRoutes from "./productsRoutes.js";
 import publicRoutes from "./publicRoutes.js";
+import { publicReviewsRouter, adminReviewsRouter } from "./reviewsRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -63,6 +64,8 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/telegram", telegramRoutes);
 app.use("/api/admin/products", productsRoutes);
 app.use("/api/public/products", publicRoutes);
+app.use("/api/reviews", publicReviewsRouter);
+app.use("/api/admin/reviews", adminReviewsRouter);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 

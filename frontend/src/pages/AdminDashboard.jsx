@@ -71,6 +71,9 @@ export default function AdminDashboard() {
   const [statsError, setStatsError] = useState("");
   const [clearingPending, setClearingPending] = useState(false);
 
+  const [reviews, setReviews] = useState(null);
+  const [reviewActionId, setReviewActionId] = useState(null);
+
   useEffect(() => {
     api
       .adminSession()
@@ -97,6 +100,7 @@ export default function AdminDashboard() {
     loadProduct();
     loadStats();
     loadPdfStatus();
+    loadReviews();
   }, [selectedId]);
 
   function loadProduct() {
@@ -129,6 +133,41 @@ export default function AdminDashboard() {
 
   function loadPdfStatus() {
     api.adminGetPdfStatus(selectedId).then(setPdfStatus).catch(() => {});
+  }
+
+  function loadReviews() {
+    api.adminGetReviews(selectedId).then(setReviews).catch(() => setReviews([]));
+  }
+
+  async function handleApproveReview(id) {
+    setReviewActionId(id);
+    try {
+      await api.adminApproveReview(id);
+      loadReviews();
+    } finally {
+      setReviewActionId(null);
+    }
+  }
+
+  async function handleRejectReview(id) {
+    setReviewActionId(id);
+    try {
+      await api.adminRejectReview(id);
+      loadReviews();
+    } finally {
+      setReviewActionId(null);
+    }
+  }
+
+  async function handleDeleteReview(id) {
+    if (!window.confirm("Delete this review permanently?")) return;
+    setReviewActionId(id);
+    try {
+      await api.adminDeleteReview(id);
+      loadReviews();
+    } finally {
+      setReviewActionId(null);
+    }
   }
 
   async function handleSaveSettings(e) {
@@ -227,6 +266,7 @@ export default function AdminDashboard() {
         <nav className="mt-6 space-y-0.5">
           {[
             { id: "stats", label: "Insights" },
+            { id: "reviews", label: "Reviews" },
             { id: "settings", label: "Settings" },
           ].map((item) => (
             <button
@@ -426,6 +466,79 @@ export default function AdminDashboard() {
                     </div>
                     {pdfMessage && <p className="mt-3 text-[13px] text-[#5B6472]">{pdfMessage}</p>}
                   </section>
+                </div>
+              ) : activeView === "reviews" ? (
+                <div className="rounded-lg border border-hairline bg-white p-5">
+                  <h2 className="font-display font-semibold text-[15px] text-[#12131A] mb-1">Reviews</h2>
+                  <p className="text-[13px] text-[#5B6472] mb-4">
+                    Approve a review to make it visible on this product's page.
+                  </p>
+
+                  {!reviews ? (
+                    <p className="text-[13px] text-[#5B6472]">Loading…</p>
+                  ) : reviews.length === 0 ? (
+                    <p className="text-[13px] text-[#5B6472]">No reviews submitted yet for this product.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {reviews.map((r) => (
+                        <div key={r.id} className="rounded-md border border-hairline p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-[13.5px] text-[#12131A]">{r.name}</span>
+                                <span className="text-[#a3d65c] text-[13px]">
+                                  {"★".repeat(r.rating)}
+                                  {"☆".repeat(5 - r.rating)}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-[13px] text-[#12131A]">{r.body}</p>
+                              <p className="mt-1.5 text-[11px] text-[#5B6472]">
+                                {new Date(r.created_at).toLocaleString()} · {r.likes} like{r.likes === 1 ? "" : "s"}
+                              </p>
+                            </div>
+                            <span
+                              className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                                r.status === "approved"
+                                  ? "bg-positive/10 text-positive"
+                                  : r.status === "rejected"
+                                  ? "bg-[#DC2626]/10 text-[#DC2626]"
+                                  : "bg-warn/10 text-warn"
+                              }`}
+                            >
+                              {r.status}
+                            </span>
+                          </div>
+                          <div className="mt-3 flex items-center gap-3">
+                            {r.status !== "approved" && (
+                              <button
+                                onClick={() => handleApproveReview(r.id)}
+                                disabled={reviewActionId === r.id}
+                                className="text-[12.5px] font-semibold text-positive disabled:opacity-50"
+                              >
+                                Approve
+                              </button>
+                            )}
+                            {r.status !== "rejected" && (
+                              <button
+                                onClick={() => handleRejectReview(r.id)}
+                                disabled={reviewActionId === r.id}
+                                className="text-[12.5px] font-semibold text-warn disabled:opacity-50"
+                              >
+                                Reject
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDeleteReview(r.id)}
+                              disabled={reviewActionId === r.id}
+                              className="text-[12.5px] font-semibold text-[#DC2626] disabled:opacity-50"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div>

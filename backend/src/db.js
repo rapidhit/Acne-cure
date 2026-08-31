@@ -93,6 +93,19 @@ if (!columnExists("visits", "product_id")) {
 }
 
 db.exec(`
+CREATE TABLE IF NOT EXISTS reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  reference TEXT,
+  name TEXT NOT NULL,
+  rating INTEGER NOT NULL,
+  body TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending', -- pending | approved | rejected
+  likes INTEGER NOT NULL DEFAULT 0,
+  liked_sessions_json TEXT NOT NULL DEFAULT '[]',
+  created_at INTEGER NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
 CREATE INDEX IF NOT EXISTS idx_transactions_created ON transactions(created_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_product ON transactions(product_id);
@@ -100,6 +113,8 @@ CREATE INDEX IF NOT EXISTS idx_visits_created ON visits(created_at);
 CREATE INDEX IF NOT EXISTS idx_visits_session ON visits(session_id);
 CREATE INDEX IF NOT EXISTS idx_visits_product ON visits(product_id);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
+CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
 `);
 
 export default db;

@@ -81,7 +81,11 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
         >
           ×
         </button>
-        <div className="w-14 h-14 rounded-full bg-[#a3d65c] grid place-items-center text-[24px]">📘</div>
+        <div className="w-14 h-14 rounded-full bg-[#a3d65c] grid place-items-center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M9 12l2 2 4-4" stroke="#0f3d1f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
         <h3 className="mt-4 font-black text-[22px] tracking-[-0.02em] text-[#0f3d1f]">Almost there!</h3>
         <p className="mt-2 text-[13.5px] leading-[1.5] text-[#0f3d1f]/70">
           Enter your email — your receipt and download link go straight there right after payment.
