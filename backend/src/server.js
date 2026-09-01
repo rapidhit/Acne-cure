@@ -11,6 +11,7 @@ import telegramRoutes from "./telegramRoutes.js";
 import productsRoutes from "./productsRoutes.js";
 import publicRoutes from "./publicRoutes.js";
 import { publicReviewsRouter, adminReviewsRouter } from "./reviewsRoutes.js";
+import fxRoutes from "./fxRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -66,6 +67,7 @@ app.use("/api/admin/products", productsRoutes);
 app.use("/api/public/products", publicRoutes);
 app.use("/api/reviews", publicReviewsRouter);
 app.use("/api/admin/reviews", adminReviewsRouter);
+app.use("/api/admin/fx-rate", fxRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 

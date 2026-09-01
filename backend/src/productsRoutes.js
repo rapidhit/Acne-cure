@@ -121,6 +121,13 @@ router.put("/:id", requireAdmin, (req, res) => {
     }
     updates.telegram_link = link || null;
   }
+  if (body.usdAnchorKobo !== undefined) {
+    const anchor = Number(body.usdAnchorKobo);
+    if (anchor !== null && (!Number.isInteger(anchor) || anchor <= 0)) {
+      return res.status(400).json({ error: "usdAnchorKobo must be a positive whole number" });
+    }
+    updates.usd_anchor_kobo = anchor || null;
+  }
   if (body.headline !== undefined) updates.headline = String(body.headline);
   if (body.subheadline !== undefined) updates.subheadline = String(body.subheadline);
   if (body.testimonials !== undefined) updates.testimonials_json = JSON.stringify(body.testimonials);

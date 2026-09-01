@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS products (
   pdf_file_path TEXT,
   delivery_type TEXT NOT NULL DEFAULT 'pdf', -- 'pdf' | 'telegram'
   telegram_link TEXT,
+  usd_anchor_kobo INTEGER, -- fixed USD reference price (in cents); price auto-converts from this when currency changes
 
   -- template mode fields
   headline TEXT,
@@ -98,6 +99,9 @@ if (!columnExists("products", "delivery_type")) {
 }
 if (!columnExists("products", "telegram_link")) {
   db.exec(`ALTER TABLE products ADD COLUMN telegram_link TEXT`);
+}
+if (!columnExists("products", "usd_anchor_kobo")) {
+  db.exec(`ALTER TABLE products ADD COLUMN usd_anchor_kobo INTEGER`);
 }
 
 db.exec(`

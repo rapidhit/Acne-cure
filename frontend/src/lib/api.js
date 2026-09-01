@@ -70,6 +70,7 @@ export const api = {
   adminGetStats: (id) => request(`/admin/products/${id}/stats`),
   adminClearPending: (id) =>
     request(`/admin/products/${id}/transactions/pending`, { method: "DELETE" }),
+  adminGetFxRate: (to) => request(`/admin/fx-rate?to=${encodeURIComponent(to)}`),
 
   // --- Admin: reviews ---
   adminGetReviews: (productId) => request(`/admin/reviews?productId=${productId}`),

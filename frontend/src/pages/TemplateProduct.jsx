@@ -58,7 +58,7 @@ const DEFAULT_FAQS = [
   },
 ];
 
-const ORIGINAL_PRICE_DISPLAY = "$27.00";
+// Marketing "was" price is computed proportionally below, matching whatever currency is set.
 
 function useCountdown(initialSeconds) {
   const [seconds, setSeconds] = useState(initialSeconds);
@@ -112,6 +112,11 @@ export default function TemplateProduct({ product }) {
   }
 
   const priceDisplay = formatPrice(product.priceKobo, product.currency);
+  // "Was" price keeps the same ~5.4x markup illusion as the original design,
+  // but scales with whatever the real price/currency actually is.
+  const originalPriceKobo = Math.round(product.priceKobo * 5.41);
+  const originalPriceDisplay = formatPrice(originalPriceKobo, product.currency);
+  const savingsDisplay = formatPrice(originalPriceKobo - product.priceKobo, product.currency);
   const headline = product.headline || "Are you Battling with Acne or Pimples?";
   const subheadline =
     product.subheadline ||
@@ -171,10 +176,10 @@ export default function TemplateProduct({ product }) {
         <div className="mt-8 rounded-[24px] bg-[#0f3d1f] text-[#e8f0d8] p-6">
           <div className="text-[13px] uppercase tracking-widest text-[#a3d65c] mb-1">Today Only</div>
           <div className="flex items-baseline gap-3">
-            <span className="line-through opacity-50 text-[20px]">{ORIGINAL_PRICE_DISPLAY}</span>
+            <span className="line-through opacity-50 text-[20px]">{originalPriceDisplay}</span>
             <span className="text-[42px] font-black">{priceDisplay}</span>
             <span className="rounded-full bg-[#a3d65c] text-[#0f3d1f] text-[11px] font-bold px-2.5 py-1">
-              SAVE $22
+              SAVE {savingsDisplay}
             </span>
           </div>
           <div className="mt-4 flex items-center justify-between rounded-2xl bg-black/20 px-4 py-3">

@@ -74,6 +74,10 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState(null);
   const [reviewActionId, setReviewActionId] = useState(null);
 
+  const [converting, setConverting] = useState(false);
+  const [fxInfo, setFxInfo] = useState(null); // { rate, to, fetchedAt }
+  const [fxError, setFxError] = useState("");
+
   useEffect(() => {
     api
       .adminSession()
@@ -109,6 +113,11 @@ export default function AdminDashboard() {
       setSettingsForm({
         name: p.name,
         priceDollars: (p.price_kobo / 100).toFixed(2),
+        usdAnchorDollars: p.usd_anchor_kobo
+          ? (p.usd_anchor_kobo / 100).toFixed(2)
+          : p.currency === "USD"
+          ? (p.price_kobo / 100).toFixed(2)
+          : "",
         currency: p.currency,
         mode: p.mode,
         headline: p.headline || "",
@@ -181,6 +190,9 @@ export default function AdminDashboard() {
         name: settingsForm.name,
         priceKobo: Math.round(parseFloat(settingsForm.priceDollars) * 100),
         currency: settingsForm.currency,
+        usdAnchorKobo: settingsForm.usdAnchorDollars
+          ? Math.round(parseFloat(settingsForm.usdAnchorDollars) * 100)
+          : null,
         mode: settingsForm.mode,
         headline: settingsForm.headline,
         subheadline: settingsForm.subheadline,
@@ -232,6 +244,32 @@ export default function AdminDashboard() {
       window.alert(err.message || "Could not clear pending orders.");
     } finally {
       setClearingPending(false);
+    }
+  }
+
+  async function handleCurrencyChange(newCurrency) {
+    setSettingsForm((f) => ({ ...f, currency: newCurrency }));
+    setFxError("");
+
+    const anchor = parseFloat(settingsForm.usdAnchorDollars);
+    if (!anchor || anchor <= 0) return; // nothing to convert from yet
+
+    if (newCurrency === "USD") {
+      setSettingsForm((f) => ({ ...f, currency: newCurrency, priceDollars: anchor.toFixed(2) }));
+      setFxInfo(null);
+      return;
+    }
+
+    setConverting(true);
+    try {
+      const { rate, fetchedAt } = await api.adminGetFxRate(newCurrency);
+      const converted = (anchor * rate).toFixed(2);
+      setSettingsForm((f) => ({ ...f, currency: newCurrency, priceDollars: converted }));
+      setFxInfo({ rate, to: newCurrency, fetchedAt });
+    } catch (err) {
+      setFxError(err.message || "Could not fetch a live exchange rate.");
+    } finally {
+      setConverting(false);
     }
   }
 
@@ -335,13 +373,39 @@ export default function AdminDashboard() {
                         </div>
                         <div>
                           <FieldLabel>Currency</FieldLabel>
-                          <input
-                            maxLength={3}
+                          <select
                             value={settingsForm.currency}
-                            onChange={(e) => setSettingsForm((f) => ({ ...f, currency: e.target.value.toUpperCase() }))}
-                            className={`${inputClass} uppercase`}
-                          />
+                            onChange={(e) => handleCurrencyChange(e.target.value)}
+                            className={inputClass}
+                          >
+                            {["USD", "GHS", "NGN", "KES", "ZAR", "GBP", "EUR", "CAD", "AUD"].map((c) => (
+                              <option key={c} value={c}>{c}</option>
+                            ))}
+                          </select>
                         </div>
+                      </div>
+
+                      <div className="mt-4 rounded-md border border-hairline bg-surface/50 p-4">
+                        <FieldLabel>Reference price (USD)</FieldLabel>
+                        <p className="text-[12px] text-[#5B6472] mt-0.5 mb-2">
+                          Set this once. Switching currency above auto-converts the price from this amount using a live exchange rate.
+                        </p>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.5"
+                          value={settingsForm.usdAnchorDollars}
+                          onChange={(e) => setSettingsForm((f) => ({ ...f, usdAnchorDollars: e.target.value }))}
+                          placeholder="4.99"
+                          className={`${inputClass} max-w-[160px]`}
+                        />
+                        {converting && <p className="mt-2 text-[12px] text-accent">Converting…</p>}
+                        {fxError && <p className="mt-2 text-[12px] text-[#DC2626]">{fxError}</p>}
+                        {fxInfo && !converting && (
+                          <p className="mt-2 text-[12px] text-[#5B6472]">
+                            1 USD = {fxInfo.rate.toFixed(2)} {fxInfo.to} · converted just now
+                          </p>
+                        )}
                       </div>
 
                       <div className="mt-5">
