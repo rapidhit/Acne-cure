@@ -184,18 +184,22 @@ export default function TemplateProduct({ product }) {
 
         <button
           onClick={openModal}
-          className="mt-6 w-full rounded-full bg-[#dc2626] text-white font-bold text-[17px] py-4 flex items-center justify-center gap-2 shadow-lg shadow-red-900/20"
+          className="mt-6 w-full rounded-full bg-[#dc2626] text-white font-bold text-[clamp(13px,3.8vw,17px)] py-4 px-3 flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 text-center leading-tight"
         >
-          Get Access – {priceDisplay} →
+          <span>Get Access – {priceDisplay} →</span>
         </button>
 
         {/* Pricing block */}
         <div className="mt-8 rounded-[24px] bg-[#0f3d1f] text-[#e8f0d8] p-6">
           <div className="text-[13px] uppercase tracking-widest text-[#a3d65c] mb-1">Today Only</div>
-          <div className="flex items-baseline gap-3">
-            <span className="line-through opacity-50 text-[20px]">{originalPriceDisplay}</span>
-            <span className="text-[42px] font-black">{priceDisplay}</span>
-            <span className="rounded-full bg-[#a3d65c] text-[#0f3d1f] text-[11px] font-bold px-2.5 py-1">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+            <span className="line-through opacity-50 text-[clamp(13px,3.5vw,20px)] whitespace-nowrap">
+              {originalPriceDisplay}
+            </span>
+            <span className="font-black text-[clamp(22px,7vw,42px)] leading-tight break-words">
+              {priceDisplay}
+            </span>
+            <span className="rounded-full bg-[#a3d65c] text-[#0f3d1f] text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
               SAVE {savingsDisplay}
             </span>
           </div>
@@ -305,7 +309,7 @@ export default function TemplateProduct({ product }) {
             </p>
             <button
               onClick={openModal}
-              className="mt-7 rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[17px] px-10 py-[18px] shadow-[0_14px_32px_rgba(220,38,38,0.5)]"
+              className="mt-7 max-w-full rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[clamp(13px,4vw,17px)] px-6 sm:px-10 py-[18px] shadow-[0_14px_32px_rgba(220,38,38,0.5)] leading-tight"
             >
               Get Access – {priceDisplay}
             </button>
@@ -326,9 +330,9 @@ export default function TemplateProduct({ product }) {
       <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/10 p-3">
         <button
           onClick={openModal}
-          className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[15px] py-4 rounded-full shadow-[0_8px_20px_rgba(220,38,38,0.5)] flex items-center justify-center gap-2 active:scale-[0.98] transition"
+          className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[clamp(12px,3.8vw,15px)] py-4 px-2 rounded-full shadow-[0_8px_20px_rgba(220,38,38,0.5)] flex items-center justify-center gap-2 active:scale-[0.98] transition leading-tight"
         >
-          Get Access – {priceDisplay}
+          <span>Get Access – {priceDisplay}</span>
         </button>
         <p className="mt-1.5 text-center text-[10px] font-semibold opacity-60">
           Instant Download · Any Device
