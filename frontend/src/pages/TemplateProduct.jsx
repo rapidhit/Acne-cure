@@ -93,6 +93,21 @@ export default function TemplateProduct({ product }) {
   });
   const timer = useCountdown(15 * 60);
   const sessionId = useMemo(() => getOrCreateSessionId(), []);
+  const [localizedPriceKobo, setLocalizedPriceKobo] = useState(null);
+  const [localizedCurrency, setLocalizedCurrency] = useState(null);
+
+  useEffect(() => {
+    if (!product.usdAnchorKobo) return; // nothing to localize from
+    api
+      .getGeoCurrency()
+      .then(async ({ currency }) => {
+        if (!currency || currency === product.currency) return; // already showing the right one
+        const { rate } = await api.getPublicFxRate(currency);
+        setLocalizedPriceKobo(Math.round(product.usdAnchorKobo * rate));
+        setLocalizedCurrency(currency);
+      })
+      .catch(() => {}); // any failure just leaves the real price showing — never breaks the page
+  }, [product.slug, product.usdAnchorKobo, product.currency]);
 
   useEffect(() => {
     api.getProductReviews(product.slug).then(setRealReviews).catch(() => setRealReviews([]));
@@ -111,12 +126,14 @@ export default function TemplateProduct({ product }) {
     }
   }
 
-  const priceDisplay = formatPrice(product.priceKobo, product.currency);
+  const displayPriceKobo = localizedPriceKobo ?? product.priceKobo;
+  const displayCurrency = localizedCurrency ?? product.currency;
+  const priceDisplay = formatPrice(displayPriceKobo, displayCurrency);
   // "Was" price keeps the same ~5.4x markup illusion as the original design,
-  // but scales with whatever the real price/currency actually is.
-  const originalPriceKobo = Math.round(product.priceKobo * 5.41);
-  const originalPriceDisplay = formatPrice(originalPriceKobo, product.currency);
-  const savingsDisplay = formatPrice(originalPriceKobo - product.priceKobo, product.currency);
+  // but scales with whatever the real (or localized) price/currency actually is.
+  const originalPriceKobo = Math.round(displayPriceKobo * 5.41);
+  const originalPriceDisplay = formatPrice(originalPriceKobo, displayCurrency);
+  const savingsDisplay = formatPrice(originalPriceKobo - displayPriceKobo, displayCurrency);
   const headline = product.headline || "Are you Battling with Acne or Pimples?";
   const subheadline =
     product.subheadline ||
@@ -183,9 +200,14 @@ export default function TemplateProduct({ product }) {
             </span>
           </div>
           <div className="mt-4 flex items-center justify-between rounded-2xl bg-black/20 px-4 py-3">
-            <span className="text-[12px] uppercase tracking-wide">Price goes back to $27 soon</span>
+            <span className="text-[12px] uppercase tracking-wide">Price goes back up soon</span>
             <span className="font-mono font-bold text-[18px]">{timer}</span>
           </div>
+          {localizedCurrency && (
+            <p className="mt-3 text-[11px] text-[#e8f0d8]/50">
+              Price shown in {localizedCurrency} for your convenience — charged in {product.currency}.
+            </p>
+          )}
         </div>
 
         {/* Steps */}

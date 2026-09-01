@@ -1,26 +1,8 @@
 import express from "express";
-import axios from "axios";
 import { requireAdmin } from "./adminRoutes.js";
+import { getRateTo } from "./fxCache.js";
 
 const router = express.Router();
-
-// Free, no-API-key exchange rate service, base USD, refreshed daily upstream.
-const FX_SOURCE = "https://open.er-api.com/v6/latest/USD";
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour — rates don't need per-request freshness
-
-let cache = { rates: null, fetchedAt: 0 };
-
-async function getRates() {
-  const isFresh = cache.rates && Date.now() - cache.fetchedAt < CACHE_TTL_MS;
-  if (isFresh) return cache;
-
-  const { data } = await axios.get(FX_SOURCE, { timeout: 8000 });
-  if (data?.result !== "success" || !data.rates) {
-    throw new Error("Exchange rate provider returned an unexpected response");
-  }
-  cache = { rates: data.rates, fetchedAt: Date.now() };
-  return cache;
-}
 
 /**
  * GET /api/admin/fx-rate?to=GHS
@@ -33,15 +15,9 @@ router.get("/", requireAdmin, async (req, res) => {
   }
 
   try {
-    const { rates, fetchedAt } = await getRates();
-    if (to === "USD") {
-      return res.json({ rate: 1, base: "USD", to, fetchedAt });
-    }
-    const rate = rates[to];
-    if (!rate) {
-      return res.status(404).json({ error: `No exchange rate available for ${to}` });
-    }
-    res.json({ rate, base: "USD", to, fetchedAt });
+    const result = await getRateTo(to);
+    if (!result) return res.status(404).json({ error: `No exchange rate available for ${to}` });
+    res.json({ rate: result.rate, base: "USD", to, fetchedAt: result.fetchedAt });
   } catch (err) {
     console.error("FX rate fetch failed:", err.message);
     res.status(502).json({ error: "Could not fetch a live exchange rate right now. Try again shortly." });

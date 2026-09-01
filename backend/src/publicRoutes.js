@@ -10,6 +10,7 @@ function toPublicShape(product) {
     slug: product.slug,
     name: product.name,
     priceKobo: product.price_kobo,
+    usdAnchorKobo: product.usd_anchor_kobo || null,
     currency: product.currency,
     mode: product.mode,
     headline: product.headline,

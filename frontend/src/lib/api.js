@@ -17,6 +17,8 @@ async function request(path, options = {}) {
 export const api = {
   // --- Public product pages ---
   getProductBySlug: (slug) => request(`/public/products/${encodeURIComponent(slug)}`),
+  getGeoCurrency: () => request("/public/geo-currency"),
+  getPublicFxRate: (to) => request(`/public/fx-rate?to=${encodeURIComponent(to)}`),
   getProductReviews: (slug) => request(`/public/products/${encodeURIComponent(slug)}/reviews`),
   submitReview: (payload) => request("/reviews", { method: "POST", body: JSON.stringify(payload) }),
   likeReview: (reviewId, sessionId) =>
