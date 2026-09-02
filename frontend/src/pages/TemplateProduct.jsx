@@ -207,11 +207,6 @@ export default function TemplateProduct({ product }) {
             <span className="text-[12px] uppercase tracking-wide">Price goes back up soon</span>
             <span className="font-mono font-bold text-[18px]">{timer}</span>
           </div>
-          {localizedCurrency && (
-            <p className="mt-3 text-[11px] text-[#e8f0d8]/50">
-              Price shown in {localizedCurrency} for your convenience — charged in {product.currency}.
-            </p>
-          )}
         </div>
 
         {/* Steps */}
@@ -343,8 +338,8 @@ export default function TemplateProduct({ product }) {
         open={showModal}
         onClose={() => setShowModal(false)}
         productSlug={product.slug}
-        priceKobo={product.priceKobo}
-        currency={product.currency}
+        priceKobo={displayPriceKobo}
+        currency={displayCurrency}
       />
     </div>
   );
