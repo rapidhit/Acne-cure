@@ -118,6 +118,14 @@ CREATE TABLE IF NOT EXISTS reviews (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS support_messages (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  admin_message_id INTEGER UNIQUE NOT NULL,
+  customer_chat_id TEXT NOT NULL,
+  customer_name TEXT,
+  created_at INTEGER NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
 CREATE INDEX IF NOT EXISTS idx_transactions_created ON transactions(created_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_product ON transactions(product_id);

@@ -11,6 +11,11 @@ export default function Success() {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [deliveryType, setDeliveryType] = useState("pdf");
   const [message, setMessage] = useState("");
+  const [supportUrl, setSupportUrl] = useState(null);
+
+  useEffect(() => {
+    api.getSupportLink().then(({ url }) => setSupportUrl(url)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!reference) {
@@ -96,6 +101,16 @@ export default function Success() {
                 )}
               </a>
               <p className="mt-3 text-[11px] text-[#0f3d1f]/50">Reference: {reference}</p>
+              {supportUrl && (
+                <a
+                  href={supportUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center justify-center gap-1.5 text-[13px] font-semibold text-[#0f3d1f]/70 hover:text-[#0f3d1f]"
+                >
+                  Need help? Contact support
+                </a>
+              )}
             </>
           )}
 
@@ -107,6 +122,18 @@ export default function Success() {
               <Link to="/" className="mt-6 inline-block text-[14px] font-semibold underline">
                 Back
               </Link>
+              {supportUrl && (
+                <div>
+                  <a
+                    href={supportUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center justify-center gap-1.5 text-[13px] font-semibold text-[#0f3d1f]/70 hover:text-[#0f3d1f]"
+                  >
+                    Need help? Contact support
+                  </a>
+                </div>
+              )}
             </>
           )}
         </div>

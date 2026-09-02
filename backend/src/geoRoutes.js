@@ -76,4 +76,13 @@ router.get("/fx-rate", async (req, res) => {
   }
 });
 
+/**
+ * GET /api/public/support-link
+ * Exposes the configured support bot's t.me link. Returns null if not set up.
+ */
+router.get("/support-link", (req, res) => {
+  const username = process.env.SUPPORT_BOT_USERNAME;
+  res.json({ url: username ? `https://t.me/${username}` : null });
+});
+
 export default router;
