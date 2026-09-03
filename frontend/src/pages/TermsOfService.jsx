@@ -87,7 +87,7 @@ export default function Terms() {
         </p>
 
         <div className="mt-10 pt-6 border-t border-black/10">
-          <Link to="/privacy" className="text-[13px] font-semibold underline">Privacy Policy →</Link>
+          <Link to="/privacy-policy" className="text-[13px] font-semibold underline">Privacy Policy →</Link>
         </div>
       </div>
     </div>

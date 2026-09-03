@@ -47,9 +47,22 @@ export default function ProductPage() {
     );
   }
 
-  return product.mode === "custom_code" ? (
-    <CustomCodeProduct product={product} />
-  ) : (
-    <TemplateProduct product={product} />
+  return (
+    <>
+      {product.mode === "custom_code" ? (
+        <CustomCodeProduct product={product} />
+      ) : (
+        <TemplateProduct product={product} />
+      )}
+      <div className="bg-[#fffef9] text-center py-5 pb-24 sm:pb-5 border-t border-black/5">
+        <a href="/terms-of-service" className="text-[11px] font-semibold text-[#0f3d1f]/50 underline">
+          Terms of Service
+        </a>
+        <span className="mx-3 text-[#0f3d1f]/30">·</span>
+        <a href="/privacy-policy" className="text-[11px] font-semibold text-[#0f3d1f]/50 underline">
+          Privacy Policy
+        </a>
+      </div>
+    </>
   );
 }

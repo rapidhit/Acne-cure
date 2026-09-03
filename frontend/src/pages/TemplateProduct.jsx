@@ -318,10 +318,6 @@ export default function TemplateProduct({ product }) {
             Disclaimer: This is a digital PDF guide. Individual results may vary. For informational
             purposes only.
           </p>
-          <div className="mt-4 flex items-center justify-center gap-4">
-            <a href="/terms" className="text-[11px] font-semibold text-[#0f3d1f]/60 underline">Terms of Service</a>
-            <a href="/privacy" className="text-[11px] font-semibold text-[#0f3d1f]/60 underline">Privacy Policy</a>
-          </div>
         </div>
       </div>
 

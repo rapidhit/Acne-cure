@@ -80,7 +80,7 @@ export default function Privacy() {
         </p>
 
         <div className="mt-10 pt-6 border-t border-black/10">
-          <Link to="/terms" className="text-[13px] font-semibold underline">Terms of Service →</Link>
+          <Link to="/terms-of-service" className="text-[13px] font-semibold underline">Terms of Service →</Link>
         </div>
       </div>
     </div>
