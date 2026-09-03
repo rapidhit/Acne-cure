@@ -118,6 +118,16 @@ CREATE TABLE IF NOT EXISTS reviews (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS support_customers (
+  chat_id TEXT PRIMARY KEY,
+  email TEXT,
+  country TEXT,
+  details_provided INTEGER NOT NULL DEFAULT 0,
+  last_message_date TEXT NOT NULL, -- 'YYYY-MM-DD'
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS support_messages (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   admin_message_id INTEGER UNIQUE NOT NULL,
