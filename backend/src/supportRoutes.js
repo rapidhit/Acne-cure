@@ -7,8 +7,7 @@ const router = express.Router();
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 const INSTRUCTIONS_TEXT =
   "Thanks for reaching out! To help you faster, please reply with these three things in ONE message:\n\n" +
-  "Country: \nEmail (used for your purchase): \nProblem: \n\n" +
-  "Sending it all together means we won't have to ask one by one.";
+  "Country: \nEmail (used for your purchase): \nProblem: ";
 const DETAILS_RECEIVED_TEXT =
   "Thank you for providing the details! One of our support team will attend to it in a jiffy. 🙂";
 const PLAIN_ACK_TEXT = "Thanks for reaching out! We'll get back to you shortly.";
