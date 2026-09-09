@@ -3,6 +3,7 @@ import { useSearchParams, Link } from "react-router-dom";
 import { api } from "../lib/api.js";
 import ConfettiBurst from "../components/ConfettiBurst.jsx";
 import ReviewForm from "../components/ReviewForm.jsx";
+import SupportFloatingButton from "../components/SupportFloatingButton.jsx";
 
 export default function Success() {
   const [params] = useSearchParams();
@@ -11,11 +12,6 @@ export default function Success() {
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [deliveryType, setDeliveryType] = useState("pdf");
   const [message, setMessage] = useState("");
-  const [supportUrl, setSupportUrl] = useState(null);
-
-  useEffect(() => {
-    api.getSupportLink().then(({ url }) => setSupportUrl(url)).catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (!reference) {
@@ -44,6 +40,7 @@ export default function Success() {
 
   return (
     <div className="min-h-screen bg-[#fffef9] text-[#0f3d1f] flex items-center justify-center px-5 py-10">
+      <SupportFloatingButton />
       <div className="max-w-[440px] w-full">
         <div className="relative rounded-[24px] border border-black/10 p-8 text-center overflow-hidden">
           {status === "verifying" && (
@@ -101,16 +98,6 @@ export default function Success() {
                 )}
               </a>
               <p className="mt-3 text-[11px] text-[#0f3d1f]/50">Reference: {reference}</p>
-              {supportUrl && (
-                <a
-                  href={supportUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center justify-center gap-1.5 text-[13px] font-semibold text-[#0f3d1f]/70 hover:text-[#0f3d1f]"
-                >
-                  Need help? Contact support
-                </a>
-              )}
             </>
           )}
 
@@ -122,18 +109,6 @@ export default function Success() {
               <Link to="/" className="mt-6 inline-block text-[14px] font-semibold underline">
                 Back
               </Link>
-              {supportUrl && (
-                <div>
-                  <a
-                    href={supportUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center justify-center gap-1.5 text-[13px] font-semibold text-[#0f3d1f]/70 hover:text-[#0f3d1f]"
-                  >
-                    Need help? Contact support
-                  </a>
-                </div>
-              )}
             </>
           )}
         </div>
