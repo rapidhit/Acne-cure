@@ -74,6 +74,9 @@ export default function AdminDashboard() {
   const [reviews, setReviews] = useState(null);
   const [reviewActionId, setReviewActionId] = useState(null);
 
+  const [emailCaptures, setEmailCaptures] = useState(null);
+  const [clearingCaptures, setClearingCaptures] = useState(false);
+
   const [converting, setConverting] = useState(false);
   const [fxInfo, setFxInfo] = useState(null); // { rate, to, fetchedAt }
   const [fxError, setFxError] = useState("");
@@ -105,6 +108,7 @@ export default function AdminDashboard() {
     loadStats();
     loadPdfStatus();
     loadReviews();
+    loadEmailCaptures();
   }, [selectedId]);
 
   function loadProduct() {
@@ -144,6 +148,21 @@ export default function AdminDashboard() {
 
   function loadPdfStatus() {
     api.adminGetPdfStatus(selectedId).then(setPdfStatus).catch(() => {});
+  }
+
+  function loadEmailCaptures() {
+    api.adminGetEmailCaptures(selectedId).then(setEmailCaptures).catch(() => setEmailCaptures([]));
+  }
+
+  async function handleClearEmailCaptures() {
+    if (!window.confirm("Clear all captured abandoned-checkout emails for this product? This can't be undone.")) return;
+    setClearingCaptures(true);
+    try {
+      await api.adminClearEmailCaptures(selectedId);
+      loadEmailCaptures();
+    } finally {
+      setClearingCaptures(false);
+    }
   }
 
   function loadReviews() {
@@ -730,6 +749,48 @@ export default function AdminDashboard() {
                             ))}
                           </tbody>
                         </table>
+                      </div>
+
+                      <div className="mt-5 rounded-lg border border-hairline bg-white p-5">
+                        <div className="flex items-center justify-between mb-1">
+                          <h2 className="font-display font-semibold text-[15px] text-[#12131A]">
+                            Interested but didn't check out
+                          </h2>
+                          {emailCaptures && emailCaptures.length > 0 && (
+                            <button
+                              onClick={handleClearEmailCaptures}
+                              disabled={clearingCaptures}
+                              className="text-[12px] font-medium text-[#5B6472] border border-hairline rounded-md px-3 py-1.5 hover:border-[#DC2626]/40 hover:text-[#DC2626] disabled:opacity-50 transition-colors"
+                            >
+                              {clearingCaptures ? "Clearing…" : "Clear list"}
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-[#5B6472] mb-4">
+                          Emails typed into checkout but closed before attempting payment — worth a follow-up email.
+                        </p>
+                        {!emailCaptures ? (
+                          <p className="text-[13px] text-[#5B6472]">Loading…</p>
+                        ) : emailCaptures.length === 0 ? (
+                          <p className="text-[13px] text-[#5B6472]">None yet.</p>
+                        ) : (
+                          <table className="w-full text-[13px]">
+                            <thead>
+                              <tr className="text-left text-[#5B6472] border-b border-hairline">
+                                <th className="py-2 pr-4 font-medium">Email</th>
+                                <th className="py-2 pr-4 font-medium">Date</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {emailCaptures.map((c, i) => (
+                                <tr key={i} className="border-b border-hairline/60 text-[#12131A]">
+                                  <td className="py-2.5 pr-4">{c.email}</td>
+                                  <td className="py-2.5 pr-4 text-[#5B6472]">{new Date(c.created_at).toLocaleString()}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        )}
                       </div>
                     </>
                   )}

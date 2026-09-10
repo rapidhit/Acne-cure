@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { api } from "../lib/api.js";
+import { api, getOrCreateSessionId } from "../lib/api.js";
 
 function formatPrice(amountInSmallestUnit, currency) {
   const value = (amountInSmallestUnit || 0) / 100;
@@ -20,6 +20,11 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const attemptedPayment = useRef(false);
+
+  useEffect(() => {
+    if (open) attemptedPayment.current = false; // fresh open, no attempt yet
+  }, [open]);
 
   useEffect(() => {
     if (document.getElementById("paystack-inline-js")) return;
@@ -33,6 +38,16 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
   if (!open) return null;
 
   const priceDisplay = formatPrice(priceKobo, currency);
+
+  function handleClose() {
+    // If they typed a real-looking email but never actually attempted payment,
+    // that's a genuine "changed their mind" signal worth keeping — attempted
+    // payments are already captured as pending transactions, so skip those.
+    if (!attemptedPayment.current && /^\S+@\S+\.\S+$/.test(email)) {
+      api.trackEmailCapture(email, productSlug, getOrCreateSessionId());
+    }
+    onClose();
+  }
 
   async function handleCheckout() {
     setError("");
@@ -48,6 +63,7 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
     setLoading(true);
     try {
       const { reference, amount, currency: cur, publicKey } = await api.initPayment(email, productSlug);
+      attemptedPayment.current = true;
 
       const handler = window.PaystackPop.setup({
         key: publicKey,
@@ -71,11 +87,11 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div
         className="absolute inset-0 bg-[#0f3d1f]/70 backdrop-blur-sm"
-        onClick={() => !loading && onClose()}
+        onClick={() => !loading && handleClose()}
       />
       <div className="relative bg-white rounded-[28px] p-7 sm:p-8 max-w-[440px] w-full shadow-[0_24px_64px_rgba(0,0,0,0.3)] animate-[in_0.25s_ease]">
         <button
-          onClick={() => !loading && onClose()}
+          onClick={() => !loading && handleClose()}
           className="absolute top-4 right-4 text-[#0f3d1f]/40 hover:text-[#0f3d1f] text-[20px] leading-none"
           aria-label="Close"
         >

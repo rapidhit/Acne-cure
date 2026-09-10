@@ -136,6 +136,14 @@ CREATE TABLE IF NOT EXISTS support_messages (
   created_at INTEGER NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS email_captures (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  product_id INTEGER NOT NULL,
+  email TEXT NOT NULL,
+  session_id TEXT,
+  created_at INTEGER NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status);
 CREATE INDEX IF NOT EXISTS idx_transactions_created ON transactions(created_at);
 CREATE INDEX IF NOT EXISTS idx_transactions_product ON transactions(product_id);
@@ -145,6 +153,7 @@ CREATE INDEX IF NOT EXISTS idx_visits_product ON visits(product_id);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
+CREATE INDEX IF NOT EXISTS idx_email_captures_product ON email_captures(product_id);
 `);
 
 export default db;

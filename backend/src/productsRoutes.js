@@ -339,4 +339,26 @@ router.delete("/:id/transactions/pending", requireAdmin, (req, res) => {
   res.json({ ok: true, deletedCount: result.changes });
 });
 
+/**
+ * GET /api/admin/products/:id/email-captures
+ * People who typed an email but closed checkout before even attempting
+ * payment — never became a transaction row at all.
+ */
+router.get("/:id/email-captures", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!getProductById(id)) return res.status(404).json({ error: "Product not found" });
+
+  const rows = db
+    .prepare(`SELECT email, created_at FROM email_captures WHERE product_id = ? ORDER BY created_at DESC LIMIT 100`)
+    .all(id);
+  res.json(rows);
+});
+
+router.delete("/:id/email-captures", requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!getProductById(id)) return res.status(404).json({ error: "Product not found" });
+  const result = db.prepare(`DELETE FROM email_captures WHERE product_id = ?`).run(id);
+  res.json({ ok: true, deletedCount: result.changes });
+});
+
 export default router;

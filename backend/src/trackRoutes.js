@@ -31,4 +31,29 @@ router.post("/visit", (req, res) => {
   res.sendStatus(204);
 });
 
+/**
+ * POST /api/track/email-capture
+ * Body: { email, productSlug, sessionId }
+ * Fired only when someone typed an email and closed checkout WITHOUT ever
+ * clicking "Continue to Payment" — i.e. they changed their mind before even
+ * attempting a purchase. (If they did click through, that's already captured
+ * as a 'pending' transaction, so this stays specific to true drop-offs.)
+ */
+router.post("/email-capture", (req, res) => {
+  const { email, productSlug, sessionId } = req.body || {};
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) {
+    return res.status(400).json({ error: "Valid email is required" });
+  }
+
+  const product = productSlug ? getProductBySlug(productSlug) : null;
+  if (!product) return res.status(404).json({ error: "Product not found" });
+
+  db.prepare(
+    `INSERT INTO email_captures (product_id, email, session_id, created_at) VALUES (?, ?, ?, ?)`
+  ).run(product.id, cleanEmail.slice(0, 255), sessionId ? String(sessionId).slice(0, 64) : null, Date.now());
+
+  res.sendStatus(204);
+});
+
 export default router;

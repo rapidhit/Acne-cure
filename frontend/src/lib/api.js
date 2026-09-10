@@ -37,6 +37,11 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ sessionId, path, referrer, productSlug }),
     }).catch(() => {}), // tracking must never break the page
+  trackEmailCapture: (email, productSlug, sessionId) =>
+    request("/track/email-capture", {
+      method: "POST",
+      body: JSON.stringify({ email, productSlug, sessionId }),
+    }).catch(() => {}),
 
   // --- Admin auth ---
   adminLogin: (password) =>
@@ -73,6 +78,9 @@ export const api = {
   adminGetStats: (id) => request(`/admin/products/${id}/stats`),
   adminClearPending: (id) =>
     request(`/admin/products/${id}/transactions/pending`, { method: "DELETE" }),
+  adminGetEmailCaptures: (id) => request(`/admin/products/${id}/email-captures`),
+  adminClearEmailCaptures: (id) =>
+    request(`/admin/products/${id}/email-captures`, { method: "DELETE" }),
   adminGetFxRate: (to) => request(`/admin/fx-rate?to=${encodeURIComponent(to)}`),
 
   // --- Admin: reviews ---
