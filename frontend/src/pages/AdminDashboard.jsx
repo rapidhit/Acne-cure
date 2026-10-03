@@ -81,12 +81,17 @@ export default function AdminDashboard() {
   const [fxInfo, setFxInfo] = useState(null); // { rate, to, fetchedAt }
   const [fxError, setFxError] = useState("");
 
+  const [providerStatus, setProviderStatus] = useState(null); // which gateways have keys configured on the server
+
   useEffect(() => {
     api
       .adminSession()
       .then((s) => {
         if (!s.isAdmin) navigate("/admin/login");
-        else loadProductList();
+        else {
+          loadProductList();
+          api.adminGetPaymentProviderStatus().then(setProviderStatus).catch(() => {});
+        }
       })
       .catch(() => navigate("/admin/login"));
   }, []);
@@ -129,6 +134,7 @@ export default function AdminDashboard() {
         customHtml: p.custom_html || "",
         deliveryType: p.delivery_type || "pdf",
         telegramLink: p.telegram_link || "",
+        paymentProvider: p.payment_provider || "paystack",
         floating: {
           enabled: !!p.floating_enabled,
           label: p.floating_label,
@@ -218,6 +224,7 @@ export default function AdminDashboard() {
         customHtml: settingsForm.customHtml,
         deliveryType: settingsForm.deliveryType,
         telegramLink: settingsForm.telegramLink,
+        paymentProvider: settingsForm.paymentProvider,
         floatingEnabled: settingsForm.floating.enabled,
         floatingLabel: settingsForm.floating.label,
         floatingPosition: settingsForm.floating.position,
@@ -487,6 +494,42 @@ export default function AdminDashboard() {
                             </p>
                           </div>
                         )}
+                      </div>
+
+                      <div className="mt-5">
+                        <FieldLabel>Payment provider</FieldLabel>
+                        <p className="mt-1 text-[12px] text-[#5B6472]">
+                          Which gateway processes payments for this product. Switch instantly if one has an issue —
+                          other products keep using whatever they're set to.
+                        </p>
+                        <div className="mt-2 flex flex-col gap-2">
+                          {[
+                            { id: "paystack", label: "Paystack" },
+                            { id: "flutterwave", label: "Flutterwave" },
+                            { id: "korapay", label: "Korapay" },
+                          ].map((gw) => {
+                            const configured = providerStatus ? providerStatus[gw.id] : true;
+                            return (
+                              <label
+                                key={gw.id}
+                                className="flex items-center gap-2 text-[13.5px] text-[#12131A]"
+                              >
+                                <input
+                                  type="radio"
+                                  checked={settingsForm.paymentProvider === gw.id}
+                                  onChange={() => setSettingsForm((f) => ({ ...f, paymentProvider: gw.id }))}
+                                  className="accent-accent"
+                                />
+                                {gw.label}
+                                {providerStatus && !configured && (
+                                  <span className="text-[11px] text-[#B45309] bg-[#FEF3C7] px-1.5 py-0.5 rounded">
+                                    No keys set on server yet
+                                  </span>
+                                )}
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
 
                       {settingsForm.mode === "template" && (

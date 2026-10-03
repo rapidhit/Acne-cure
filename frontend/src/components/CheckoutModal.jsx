@@ -11,9 +11,30 @@ function formatPrice(amountInSmallestUnit, currency) {
   }
 }
 
+// One entry per gateway: where to load its checkout script from, and how to
+// tell once it's ready on `window`. Keeps the component below gateway-agnostic.
+const GATEWAY_SCRIPTS = {
+  paystack: { id: "paystack-inline-js", src: "https://js.paystack.co/v1/inline.js", isReady: () => !!window.PaystackPop },
+  flutterwave: { id: "flutterwave-inline-js", src: "https://checkout.flutterwave.com/v3.js", isReady: () => !!window.FlutterwaveCheckout },
+  korapay: { id: "korapay-checkout-js", src: "https://checkout.korapay.com/v1/korapay-collections.min.js", isReady: () => !!window.Korapay },
+};
+
+function loadGatewayScript(provider) {
+  const cfg = GATEWAY_SCRIPTS[provider];
+  if (!cfg) return;
+  if (document.getElementById(cfg.id)) return;
+  const script = document.createElement("script");
+  script.id = cfg.id;
+  script.src = cfg.src;
+  script.async = true;
+  document.body.appendChild(script);
+}
+
 /**
- * Renders nothing until `open` is true. Handles the email capture +
- * Paystack Inline JS flow for whichever product slug/price is passed in.
+ * Renders nothing until `open` is true. Handles the email capture + checkout
+ * flow for whichever product slug/price is passed in, loading and driving
+ * whichever payment gateway (Paystack, Flutterwave, or Korapay) that
+ * product is currently configured to use.
  */
 export default function CheckoutModal({ open, onClose, productSlug, priceKobo, currency }) {
   const navigate = useNavigate();
@@ -26,13 +47,11 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
     if (open) attemptedPayment.current = false; // fresh open, no attempt yet
   }, [open]);
 
+  // Preload all three gateway scripts up front — we don't know which one
+  // this product uses until /payments/init responds, and loading on demand
+  // would add a visible delay right when the buyer clicks "Pay".
   useEffect(() => {
-    if (document.getElementById("paystack-inline-js")) return;
-    const script = document.createElement("script");
-    script.id = "paystack-inline-js";
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.async = true;
-    document.body.appendChild(script);
+    Object.keys(GATEWAY_SCRIPTS).forEach(loadGatewayScript);
   }, []);
 
   if (!open) return null;
@@ -49,34 +68,80 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
     onClose();
   }
 
+  function openPaystack({ publicKey, email, amount, currency: cur, reference }) {
+    if (!window.PaystackPop) {
+      setError("Payment is still loading — try again in a moment.");
+      setLoading(false);
+      return;
+    }
+    const handler = window.PaystackPop.setup({
+      key: publicKey,
+      email,
+      amount,
+      currency: cur,
+      ref: reference,
+      callback: (response) => navigate(`/success?reference=${response.reference}`),
+      onClose: () => setLoading(false),
+    });
+    handler.openIframe();
+  }
+
+  function openFlutterwave({ publicKey, email, amount, currency: cur, reference }) {
+    if (!window.FlutterwaveCheckout) {
+      setError("Payment is still loading — try again in a moment.");
+      setLoading(false);
+      return;
+    }
+    window.FlutterwaveCheckout({
+      public_key: publicKey,
+      tx_ref: reference,
+      amount: amount / 100, // Flutterwave takes a decimal amount, not the smallest unit
+      currency: cur,
+      customer: { email },
+      callback: (response) => {
+        if (response.status === "successful" || response.status === "completed") {
+          navigate(`/success?reference=${reference}&providerRef=${response.transaction_id}`);
+        } else {
+          setLoading(false);
+        }
+      },
+      onclose: () => setLoading(false),
+    });
+  }
+
+  function openKorapay({ publicKey, email, amount, currency: cur, reference }) {
+    if (!window.Korapay) {
+      setError("Payment is still loading — try again in a moment.");
+      setLoading(false);
+      return;
+    }
+    window.Korapay.initialize({
+      key: publicKey,
+      reference,
+      amount: amount / 100, // Korapay also takes a decimal amount
+      currency: cur,
+      customer: { email },
+      onSuccess: () => navigate(`/success?reference=${reference}`),
+      onClose: () => setLoading(false),
+    });
+  }
+
   async function handleCheckout() {
     setError("");
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       setError("Enter a valid email so we can send your receipt.");
       return;
     }
-    if (!window.PaystackPop) {
-      setError("Payment is still loading — try again in a moment.");
-      return;
-    }
 
     setLoading(true);
     try {
-      const { reference, amount, currency: cur, publicKey } = await api.initPayment(email, productSlug);
+      const { reference, amount, currency: cur, publicKey, provider } = await api.initPayment(email, productSlug);
       attemptedPayment.current = true;
 
-      const handler = window.PaystackPop.setup({
-        key: publicKey,
-        email,
-        amount,
-        currency: cur,
-        ref: reference,
-        callback: (response) => {
-          navigate(`/success?reference=${response.reference}`);
-        },
-        onClose: () => setLoading(false),
-      });
-      handler.openIframe();
+      const args = { publicKey, email, amount, currency: cur, reference };
+      if (provider === "flutterwave") openFlutterwave(args);
+      else if (provider === "korapay") openKorapay(args);
+      else openPaystack(args);
     } catch (e) {
       setError(e.message || "Something went wrong starting checkout.");
       setLoading(false);
@@ -123,7 +188,7 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
         >
           {loading ? "Opening secure checkout…" : `Continue to Payment – ${priceDisplay}`}
         </button>
-        <p className="mt-3 text-[11px] text-center text-[#0f3d1f]/50">🔒 Secured by Paystack</p>
+        <p className="mt-3 text-[11px] text-center text-[#0f3d1f]/50">🔒 Secured checkout</p>
       </div>
     </div>
   );

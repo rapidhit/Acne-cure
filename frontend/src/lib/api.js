@@ -27,9 +27,9 @@ export const api = {
 
   // --- Checkout ---
   initPayment: (email, productSlug) =>
-    request("/paystack/init", { method: "POST", body: JSON.stringify({ email, productSlug }) }),
-  verifyPayment: (reference) =>
-    request("/paystack/verify", { method: "POST", body: JSON.stringify({ reference }) }),
+    request("/payments/init", { method: "POST", body: JSON.stringify({ email, productSlug }) }),
+  verifyPayment: (reference, providerRef) =>
+    request("/payments/verify", { method: "POST", body: JSON.stringify({ reference, providerRef }) }),
 
   // --- Visitor tracking ---
   trackVisit: (sessionId, path, referrer, productSlug) =>
@@ -82,6 +82,7 @@ export const api = {
   adminClearEmailCaptures: (id) =>
     request(`/admin/products/${id}/email-captures`, { method: "DELETE" }),
   adminGetFxRate: (to) => request(`/admin/fx-rate?to=${encodeURIComponent(to)}`),
+  adminGetPaymentProviderStatus: () => request("/admin/products/payment-providers/status"),
 
   // --- Admin: reviews ---
   adminGetReviews: (productId) => request(`/admin/reviews?productId=${productId}`),

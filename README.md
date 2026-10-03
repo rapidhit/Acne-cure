@@ -33,12 +33,26 @@ The Vite dev server proxies `/api/*` to `http://localhost:4000` automatically.
 | `SESSION_SECRET` | Long random string |
 | `FRONTEND_ORIGIN` | Your real domain in production, for CORS |
 
-## Paystack webhook
-In your Paystack dashboard, set the webhook URL to:
+## Payment gateways
+
+Each product picks its own payment provider (Paystack, Flutterwave, or Korapay) from its
+Settings tab in the admin dashboard — switch a product to a different gateway instantly if
+one has an issue, without touching any other product. Only fill in the `.env` keys for the
+gateways you actually plan to use.
+
+## Webhooks
+
+Each gateway has its own webhook URL, parameterized by provider:
 ```
-https://yourdomain.com/api/paystack/webhook
+https://yourdomain.com/api/payments/webhook/paystack
+https://yourdomain.com/api/payments/webhook/flutterwave
+https://yourdomain.com/api/payments/webhook/korapay
 ```
-This is a backup path — the primary flow verifies payment right after checkout via `/api/paystack/verify`, so the site works even if you skip the webhook, but the webhook catches edge cases (buyer closes tab before verify fires).
+These are a backup path — the primary flow verifies payment right after checkout via
+`/api/payments/verify`, so the site works even if you skip the webhooks, but they catch edge
+cases (buyer closes the tab before the verify call fires). For Flutterwave, also set
+`FLUTTERWAVE_WEBHOOK_SECRET` in `.env` to the same "secret hash" string you enter in its
+dashboard under Settings → Webhooks.
 
 ## Deploying on Coolify
 1. Push this repo to GitHub/GitLab.
@@ -55,4 +69,4 @@ This is a backup path — the primary flow verifies payment right after checkout
 - The Paystack **secret key never reaches the browser** — only used server-side to verify transactions and validate webhook signatures.
 - Download links are single-use-tracked, tied to a verified transaction, and expire after `DOWNLOAD_TOKEN_TTL_MINUTES`.
 - Admin session is a signed, httpOnly cookie — not accessible to JS, not stored in localStorage.
-- Rate limiting is applied to `/paystack/init`, `/paystack/verify`, and `/admin/login` to blunt brute-force / abuse.
+- Rate limiting is applied to `/payments/init`, `/payments/verify`, and `/admin/login` to blunt brute-force / abuse.

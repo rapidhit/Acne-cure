@@ -4,7 +4,7 @@ import cors from "cors";
 import session from "express-session";
 import rateLimit from "express-rate-limit";
 
-import paystackRoutes from "./paystackRoutes.js";
+import paymentsRoutes, { handleWebhook } from "./paymentsRoutes.js";
 import trackRoutes from "./trackRoutes.js";
 import adminRoutes from "./adminRoutes.js";
 import telegramRoutes from "./telegramRoutes.js";
@@ -28,13 +28,9 @@ app.use(
 );
 
 // Webhook needs the RAW body for signature verification, so mount it
-// before the global express.json() parser.
-app.post(
-  "/api/paystack/webhook",
-  express.raw({ type: "application/json" }),
-  (req, res, next) => next(),
-  paystackRoutes
-);
+// before the global express.json() parser. One route, parameterized by
+// gateway, handles Paystack, Flutterwave and Korapay alike.
+app.post("/api/payments/webhook/:provider", express.raw({ type: "application/json" }), handleWebhook);
 
 app.use(express.json());
 
@@ -57,11 +53,11 @@ app.use(
 const paymentLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 60 });
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 });
 
-app.use("/api/paystack/init", paymentLimiter);
-app.use("/api/paystack/verify", paymentLimiter);
+app.use("/api/payments/init", paymentLimiter);
+app.use("/api/payments/verify", paymentLimiter);
 app.use("/api/admin/login", loginLimiter);
 
-app.use("/api/paystack", paystackRoutes);
+app.use("/api/payments", paymentsRoutes);
 app.use("/api/track", trackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/telegram", telegramRoutes);

@@ -8,6 +8,7 @@ import SupportFloatingButton from "../components/SupportFloatingButton.jsx";
 export default function Success() {
   const [params] = useSearchParams();
   const reference = params.get("reference");
+  const providerRef = params.get("providerRef");
   const [status, setStatus] = useState("verifying"); // verifying | celebrating | success | error
   const [downloadUrl, setDownloadUrl] = useState(null);
   const [deliveryType, setDeliveryType] = useState("pdf");
@@ -20,7 +21,7 @@ export default function Success() {
       return;
     }
     api
-      .verifyPayment(reference)
+      .verifyPayment(reference, providerRef)
       .then((data) => {
         setDownloadUrl(data.downloadUrl);
         setDeliveryType(data.deliveryType || "pdf");
@@ -30,7 +31,7 @@ export default function Success() {
         setStatus("error");
         setMessage(e.message || "We could not confirm this payment.");
       });
-  }, [reference]);
+  }, [reference, providerRef]);
 
   useEffect(() => {
     if (status !== "celebrating") return;

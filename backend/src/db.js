@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS products (
   delivery_type TEXT NOT NULL DEFAULT 'pdf', -- 'pdf' | 'telegram'
   telegram_link TEXT,
   usd_anchor_kobo INTEGER, -- fixed USD reference price (in cents); price auto-converts from this when currency changes
+  payment_provider TEXT NOT NULL DEFAULT 'paystack', -- 'paystack' | 'flutterwave' | 'korapay'
 
   -- template mode fields
   headline TEXT,
@@ -55,6 +56,8 @@ CREATE TABLE IF NOT EXISTS transactions (
   currency TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending', -- pending | success | failed
   paystack_response TEXT,
+  provider TEXT NOT NULL DEFAULT 'paystack', -- 'paystack' | 'flutterwave' | 'korapay'
+  provider_ref TEXT, -- gateway-native id/ref (e.g. Flutterwave's numeric transaction id)
   download_token TEXT,
   download_token_expires_at INTEGER,
   download_count INTEGER NOT NULL DEFAULT 0,
@@ -102,6 +105,15 @@ if (!columnExists("products", "telegram_link")) {
 }
 if (!columnExists("products", "usd_anchor_kobo")) {
   db.exec(`ALTER TABLE products ADD COLUMN usd_anchor_kobo INTEGER`);
+}
+if (!columnExists("products", "payment_provider")) {
+  db.exec(`ALTER TABLE products ADD COLUMN payment_provider TEXT NOT NULL DEFAULT 'paystack'`);
+}
+if (!columnExists("transactions", "provider")) {
+  db.exec(`ALTER TABLE transactions ADD COLUMN provider TEXT NOT NULL DEFAULT 'paystack'`);
+}
+if (!columnExists("transactions", "provider_ref")) {
+  db.exec(`ALTER TABLE transactions ADD COLUMN provider_ref TEXT`);
 }
 
 db.exec(`
@@ -198,6 +210,6 @@ export function getProductById(id) {
 
 export function listProducts() {
   return db
-    .prepare(`SELECT id, slug, name, price_kobo, currency, mode, is_default, updated_at FROM products ORDER BY created_at ASC`)
+    .prepare(`SELECT id, slug, name, price_kobo, currency, mode, is_default, payment_provider, updated_at FROM products ORDER BY created_at ASC`)
     .all();
 }
