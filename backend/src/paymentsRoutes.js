@@ -210,7 +210,7 @@ export async function handleWebhook(req, res) {
   const event = provider.parseWebhookEvent(bodyJson);
   if (event?.success && event.reference) {
     const tx = db.prepare(`SELECT * FROM transactions WHERE reference = ?`).get(event.reference);
-    if (tx && tx.status !== "success") {
+    if (tx && tx.status !== "success" && event.amountPaid >= tx.amount) {
       markSuccess(tx, event);
     }
   }

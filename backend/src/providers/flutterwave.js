@@ -33,7 +33,10 @@ export async function verifyTransaction({ reference, providerRef }) {
   const success = data?.status === "success" && tx?.status === "successful" && tx?.tx_ref === reference;
   return {
     success,
-    amountPaid: tx?.amount,
+    // Flutterwave reports amount as a decimal currency value (e.g. 4.99),
+    // while we store/compare everything in the smallest unit (e.g. 499) —
+    // convert here so paymentsRoutes.js stays provider-agnostic.
+    amountPaid: tx?.amount != null ? Math.round(tx.amount * 100) : undefined,
     currency: tx?.currency,
     providerRef: tx?.id,
     raw: tx,
@@ -55,7 +58,7 @@ export function parseWebhookEvent(bodyJson) {
     reference: data?.tx_ref,
     providerRef: data?.id,
     success: true,
-    amountPaid: data?.amount,
+    amountPaid: data?.amount != null ? Math.round(data.amount * 100) : undefined,
     currency: data?.currency,
     raw: data,
   };

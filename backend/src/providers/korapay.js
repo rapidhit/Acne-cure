@@ -21,7 +21,10 @@ export async function verifyTransaction({ reference }) {
   const success = data?.status === true && tx?.status === "success";
   return {
     success,
-    amountPaid: tx?.amount,
+    // Korapay reports amount as a decimal currency value (e.g. 4.99), while
+    // we store/compare everything in the smallest unit (e.g. 499) — convert
+    // here so paymentsRoutes.js stays provider-agnostic.
+    amountPaid: tx?.amount != null ? Math.round(tx.amount * 100) : undefined,
     currency: tx?.currency,
     raw: tx,
   };
@@ -40,7 +43,7 @@ export function parseWebhookEvent(bodyJson) {
   return {
     reference: data?.reference,
     success: true,
-    amountPaid: data?.amount,
+    amountPaid: data?.amount != null ? Math.round(data.amount * 100) : undefined,
     currency: data?.currency,
     raw: data,
   };
