@@ -97,17 +97,19 @@ export default function TemplateProduct({ product }) {
   const [localizedCurrency, setLocalizedCurrency] = useState(null);
 
   useEffect(() => {
-    if (!product.usdAnchorKobo) return; // nothing to localize from
     api
       .getGeoCurrency()
       .then(async ({ currency }) => {
         if (!currency || currency === product.currency) return; // already showing the right one
-        const { rate } = await api.getPublicFxRate(currency);
-        setLocalizedPriceKobo(Math.round(product.usdAnchorKobo * rate));
+        // Always convert from the product's actual, current price/currency —
+        // never from a separately-maintained reference value, which can go
+        // stale the moment the price is edited without updating it too.
+        const { rate } = await api.getPublicFxRate(currency, product.currency);
+        setLocalizedPriceKobo(Math.round(product.priceKobo * rate));
         setLocalizedCurrency(currency);
       })
       .catch(() => {}); // any failure just leaves the real price showing — never breaks the page
-  }, [product.slug, product.usdAnchorKobo, product.currency]);
+  }, [product.slug, product.priceKobo, product.currency]);
 
   useEffect(() => {
     api.getProductReviews(product.slug).then(setRealReviews).catch(() => setRealReviews([]));

@@ -57,19 +57,26 @@ router.get("/geo-currency", async (req, res) => {
 });
 
 /**
- * GET /api/public/fx-rate?to=GHS
- * Public read of the same cached exchange rates, used to compute a
- * localized display price. No auth — it's just cached, read-only data.
+ * GET /api/public/fx-rate?to=GHS&from=NGN
+ * Public read of the cached exchange rates, used to compute a localized
+ * display price. `from` defaults to USD for backward compatibility, but
+ * geo-localization always passes the product's actual currency as `from`
+ * so the converted price reflects whatever price is really configured —
+ * never a separately-maintained reference value that can go stale.
+ * No auth — it's just cached, read-only data.
  */
 router.get("/fx-rate", async (req, res) => {
   const to = String(req.query.to || "").toUpperCase();
-  if (!/^[A-Z]{3}$/.test(to)) {
-    return res.status(400).json({ error: "Query param 'to' must be a 3-letter currency code" });
+  const from = String(req.query.from || "USD").toUpperCase();
+  if (!/^[A-Z]{3}$/.test(to) || !/^[A-Z]{3}$/.test(from)) {
+    return res.status(400).json({ error: "Query params 'to' and 'from' must be 3-letter currency codes" });
   }
   try {
-    const result = await getRateTo(to);
-    if (!result) return res.status(404).json({ error: `No exchange rate available for ${to}` });
-    res.json({ rate: result.rate, base: "USD", to, fetchedAt: result.fetchedAt });
+    const [toResult, fromResult] = await Promise.all([getRateTo(to), getRateTo(from)]);
+    if (!toResult) return res.status(404).json({ error: `No exchange rate available for ${to}` });
+    if (!fromResult) return res.status(404).json({ error: `No exchange rate available for ${from}` });
+    const rate = toResult.rate / fromResult.rate; // units of `to` per 1 `from`
+    res.json({ rate, from, to, fetchedAt: Math.min(toResult.fetchedAt, fromResult.fetchedAt) });
   } catch (err) {
     console.error("Public FX rate fetch failed:", err.message);
     res.status(502).json({ error: "Could not fetch a live exchange rate right now." });

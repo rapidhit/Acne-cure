@@ -18,7 +18,8 @@ export const api = {
   // --- Public product pages ---
   getProductBySlug: (slug) => request(`/public/products/${encodeURIComponent(slug)}`),
   getGeoCurrency: () => request("/public/geo-currency"),
-  getPublicFxRate: (to) => request(`/public/fx-rate?to=${encodeURIComponent(to)}`),
+  getPublicFxRate: (to, from) =>
+    request(`/public/fx-rate?to=${encodeURIComponent(to)}${from ? `&from=${encodeURIComponent(from)}` : ""}`),
   getSupportLink: () => request("/public/support-link"),
   getProductReviews: (slug) => request(`/public/products/${encodeURIComponent(slug)}/reviews`),
   submitReview: (payload) => request("/reviews", { method: "POST", body: JSON.stringify(payload) }),
