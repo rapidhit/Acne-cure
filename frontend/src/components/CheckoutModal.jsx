@@ -135,8 +135,14 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
 
     setLoading(true);
     try {
-      const { reference, amount, currency: cur, publicKey, provider } = await api.initPayment(email, productSlug);
+      const { reference, amount, currency: cur, publicKey, provider, checkoutUrl } = await api.initPayment(email, productSlug);
       attemptedPayment.current = true;
+
+      // Hosted-checkout gateways (Bachs) hand back a URL to send the buyer to.
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+        return;
+      }
 
       const args = { publicKey, email, amount, currency: cur, reference };
       if (provider === "flutterwave") openFlutterwave(args);

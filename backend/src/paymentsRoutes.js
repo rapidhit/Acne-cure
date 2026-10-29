@@ -51,7 +51,7 @@ function markSuccess(tx, verifyResult) {
  * Creates a pending transaction tied to a product, using whichever payment
  * provider that product is currently configured to use.
  */
-router.post("/init", (req, res) => {
+router.post("/init", async (req, res) => {
   const { email, productSlug } = req.body || {};
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
     return res.status(400).json({ error: "Valid email is required" });
@@ -63,8 +63,8 @@ router.post("/init", (req, res) => {
 
   const providerName = PROVIDER_NAMES.includes(product.payment_provider) ? product.payment_provider : "paystack";
   const provider = getProvider(providerName);
-  const publicKey = provider.getPublicKey();
-  if (!publicKey) {
+  const configured = provider.isConfigured ? provider.isConfigured() : Boolean(provider.getPublicKey());
+  if (!configured) {
     return res.status(500).json({ error: `${providerName} is not configured on this server yet.` });
   }
 
@@ -75,11 +75,34 @@ router.post("/init", (req, res) => {
      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
   ).run(product.id, reference, email, product.price_kobo, product.currency, providerName, Date.now());
 
+  // Redirect-style gateways (hosted checkout page): create the session
+  // server-side and hand the browser a URL instead of a public key.
+  if (provider.createCheckout) {
+    const origin = (process.env.FRONTEND_ORIGIN || "").replace(/\/$/, "");
+    try {
+      const { checkoutUrl, providerRef } = await provider.createCheckout({
+        reference,
+        email,
+        amount: product.price_kobo,
+        currency: product.currency,
+        successUrl: `${origin}/success?reference=${reference}`,
+        cancelUrl: `${origin}/${product.slug}`,
+        productName: product.name,
+      });
+      db.prepare(`UPDATE transactions SET provider_ref = ? WHERE reference = ?`).run(providerRef, reference);
+      return res.json({ reference, provider: providerName, checkoutUrl });
+    } catch (err) {
+      console.error(`${providerName} checkout creation failed:`, err?.response?.data || err.message);
+      db.prepare(`DELETE FROM transactions WHERE reference = ?`).run(reference);
+      return res.status(502).json({ error: "Could not start checkout right now. Please try again shortly." });
+    }
+  }
+
   res.json({
     reference,
     amount: product.price_kobo,
     currency: product.currency,
-    publicKey,
+    publicKey: provider.getPublicKey(),
     provider: providerName,
   });
 });
@@ -109,10 +132,13 @@ router.post("/verify", async (req, res) => {
 
   try {
     const provider = getProvider(tx.provider || "paystack");
-    const result = await provider.verifyTransaction({ reference, providerRef });
+    // A gateway-id we stored at init (e.g. Bachs checkout id) wins over anything
+    // the browser sends; Flutterwave's id only arrives from the browser.
+    const knownRef = tx.provider_ref || providerRef;
+    const result = await provider.verifyTransaction({ reference, providerRef: knownRef });
 
-    if (result.success && result.amountPaid >= tx.amount) {
-      const { token, product } = markSuccess(tx, { ...result, providerRef });
+    if (result.success && result.amountPaid >= tx.amount && (!result.currency || result.currency === tx.currency)) {
+      const { token, product } = markSuccess(tx, { ...result, providerRef: knownRef });
       return res.json({
         status: "success",
         downloadUrl: `/api/payments/download/${token}`,
@@ -198,20 +224,49 @@ export async function handleWebhook(req, res) {
   }
 
   const signatureHeader =
-    req.headers["x-paystack-signature"] || req.headers["verif-hash"] || req.headers["x-korapay-signature"];
+    req.headers["x-paystack-signature"] ||
+    req.headers["verif-hash"] ||
+    req.headers["x-korapay-signature"] ||
+    req.headers["x-bachs-signature"];
 
   const validSignature =
     providerName === "korapay"
       ? provider.verifyWebhookSignature(bodyJson, signatureHeader)
-      : provider.verifyWebhookSignature(req.body, signatureHeader);
+      : provider.verifyWebhookSignature(req.body, signatureHeader, req.headers);
 
   if (!validSignature) return res.status(401).send("Invalid signature");
 
   const event = provider.parseWebhookEvent(bodyJson);
-  if (event?.success && event.reference) {
-    const tx = db.prepare(`SELECT * FROM transactions WHERE reference = ?`).get(event.reference);
-    if (tx && tx.status !== "success" && event.amountPaid >= tx.amount) {
-      markSuccess(tx, event);
+  if (event?.success) {
+    // Some gateways (Bachs) only say "something succeeded": match it to one of
+    // our transactions by any identifier in the payload, then ask the gateway
+    // directly for the real status/amount instead of trusting the payload.
+    let tx = null;
+    if (event.reference) {
+      tx = db.prepare(`SELECT * FROM transactions WHERE reference = ?`).get(event.reference);
+    } else if (event.candidates?.length) {
+      const find = db.prepare(
+        `SELECT * FROM transactions WHERE provider = ? AND (reference = ? OR provider_ref = ?) LIMIT 1`
+      );
+      for (const c of event.candidates) {
+        tx = find.get(providerName, c, c);
+        if (tx) break;
+      }
+    }
+
+    if (tx && tx.status !== "success") {
+      let result = event;
+      if (event.verifyWithProvider) {
+        try {
+          result = await provider.verifyTransaction({ reference: tx.reference, providerRef: tx.provider_ref });
+        } catch (err) {
+          console.error(`${providerName} webhook verify error:`, err?.response?.data || err.message);
+          return res.sendStatus(500); // make the gateway retry later
+        }
+      }
+      if (result.success && result.amountPaid >= tx.amount && (!result.currency || result.currency === tx.currency)) {
+        markSuccess(tx, result);
+      }
     }
   }
 

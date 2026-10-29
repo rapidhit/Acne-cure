@@ -11,7 +11,7 @@ const SLUG_RE = /^[a-z0-9-]{2,50}$/;
 const VALID_CURRENCY = /^[A-Z]{3}$/;
 const VALID_MODE = new Set(["template", "custom_code"]);
 const VALID_DELIVERY_TYPE = new Set(["pdf", "telegram"]);
-const VALID_PAYMENT_PROVIDER = new Set(["paystack", "flutterwave", "korapay"]);
+const VALID_PAYMENT_PROVIDER = new Set(["paystack", "flutterwave", "korapay", "bachs"]);
 const VALID_FLOATING_POSITION = new Set(["top", "bottom", "scroll_trigger"]);
 const VALID_STICK_TO = new Set(["top", "bottom"]);
 
@@ -41,6 +41,7 @@ router.get("/payment-providers/status", requireAdmin, (req, res) => {
     paystack: Boolean(process.env.PAYSTACK_SECRET_KEY && process.env.PAYSTACK_PUBLIC_KEY),
     flutterwave: Boolean(process.env.FLUTTERWAVE_SECRET_KEY && process.env.FLUTTERWAVE_PUBLIC_KEY),
     korapay: Boolean(process.env.KORAPAY_SECRET_KEY && process.env.KORAPAY_PUBLIC_KEY),
+    bachs: Boolean(process.env.BACHS_API_KEY),
   });
 });
 
@@ -134,7 +135,7 @@ router.put("/:id", requireAdmin, (req, res) => {
   }
   if (body.paymentProvider !== undefined) {
     if (!VALID_PAYMENT_PROVIDER.has(body.paymentProvider)) {
-      return res.status(400).json({ error: "paymentProvider must be 'paystack', 'flutterwave', or 'korapay'" });
+      return res.status(400).json({ error: "paymentProvider must be 'paystack', 'flutterwave', 'korapay', or 'bachs'" });
     }
     updates.payment_provider = body.paymentProvider;
   }

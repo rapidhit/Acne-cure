@@ -507,6 +507,7 @@ export default function AdminDashboard() {
                             { id: "paystack", label: "Paystack" },
                             { id: "flutterwave", label: "Flutterwave" },
                             { id: "korapay", label: "Korapay" },
+                            { id: "bachs", label: "Bachs" },
                           ].map((gw) => {
                             const configured = providerStatus ? providerStatus[gw.id] : true;
                             return (

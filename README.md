@@ -35,7 +35,7 @@ The Vite dev server proxies `/api/*` to `http://localhost:4000` automatically.
 
 ## Payment gateways
 
-Each product picks its own payment provider (Paystack, Flutterwave, or Korapay) from its
+Each product picks its own payment provider (Paystack, Flutterwave, Korapay, or Bachs) from its
 Settings tab in the admin dashboard — switch a product to a different gateway instantly if
 one has an issue, without touching any other product. Only fill in the `.env` keys for the
 gateways you actually plan to use.
@@ -47,6 +47,7 @@ Each gateway has its own webhook URL, parameterized by provider:
 https://yourdomain.com/api/payments/webhook/paystack
 https://yourdomain.com/api/payments/webhook/flutterwave
 https://yourdomain.com/api/payments/webhook/korapay
+https://yourdomain.com/api/payments/webhook/bachs
 ```
 These are a backup path — the primary flow verifies payment right after checkout via
 `/api/payments/verify`, so the site works even if you skip the webhooks, but they catch edge
