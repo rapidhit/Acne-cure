@@ -20,17 +20,37 @@ export default function Success() {
       setMessage("Missing payment reference.");
       return;
     }
-    api
-      .verifyPayment(reference, providerRef)
-      .then((data) => {
-        setDownloadUrl(data.downloadUrl);
-        setDeliveryType(data.deliveryType || "pdf");
-        setStatus("celebrating");
-      })
-      .catch((e) => {
-        setStatus("error");
-        setMessage(e.message || "We could not confirm this payment.");
-      });
+    let cancelled = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 25; // ~75s: mobile money can take a moment to settle
+    const attempt = () => {
+      api
+        .verifyPayment(reference, providerRef)
+        .then((data) => {
+          if (cancelled) return;
+          if (data.status === "pending" && ++attempts < MAX_ATTEMPTS) {
+            setTimeout(attempt, 3000);
+            return;
+          }
+          if (data.status === "pending") {
+            setStatus("error");
+            setMessage("Your payment is still processing. Refresh this page in a minute, or contact support with your reference.");
+            return;
+          }
+          setDownloadUrl(data.downloadUrl);
+          setDeliveryType(data.deliveryType || "pdf");
+          setStatus("celebrating");
+        })
+        .catch((e) => {
+          if (cancelled) return;
+          setStatus("error");
+          setMessage(e.message || "We could not confirm this payment.");
+        });
+    };
+    attempt();
+    return () => {
+      cancelled = true;
+    };
   }, [reference, providerRef]);
 
   useEffect(() => {

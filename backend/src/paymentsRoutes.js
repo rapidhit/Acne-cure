@@ -146,6 +146,14 @@ router.post("/verify", async (req, res) => {
       });
     }
 
+    if (result.pending) {
+      // Mobile money etc. can still be settling; don't mark it failed.
+      return res.status(202).json({ status: "pending" });
+    }
+
+    console.error(
+      `${tx.provider} verify rejected: ref=${reference} success=${result.success} amountPaid=${result.amountPaid} expected=${tx.amount} currency=${result.currency} expectedCurrency=${tx.currency}`
+    );
     db.prepare(`UPDATE transactions SET status = 'failed', paystack_response = ? WHERE id = ?`).run(
       JSON.stringify(result.raw || {}),
       tx.id

@@ -58,14 +58,40 @@ export async function verifyTransaction({ reference, providerRef }) {
     headers: authHeaders(),
     timeout: 15000,
   });
+  const charge = data?.charge || null;
+  const lc = (v) => String(v || "").toLowerCase();
+  const PAID = ["succeeded", "success", "successful", "completed", "paid"];
+  const PENDING_STATUS = ["open"];
+  const PENDING_PAYMENT = ["processing", "requires_action", "requires_confirmation", "pending"];
   const paid =
-    data?.status === "COMPLETED" && (data?.payment_status == null || data.payment_status === "succeeded");
-  const referenceMatches = !data?.reference || data.reference === reference;
+    lc(data?.status) === "completed" ||
+    lc(data?.payment_status) === "succeeded" ||
+    PAID.includes(lc(charge?.status));
+  const failed = ["expired", "cancelled", "canceled"].includes(lc(data?.status)) || lc(data?.payment_status) === "failed";
+  const pending =
+    !paid &&
+    !failed &&
+    (PENDING_STATUS.includes(lc(data?.status)) ||
+      PENDING_PAYMENT.includes(lc(data?.payment_status)) ||
+      PENDING_PAYMENT.includes(lc(charge?.status)));
+
+  // Bachs reports decimal strings (e.g. "4.99"); we compare in smallest units.
+  const rawAmount = charge?.amount_paid ?? charge?.amount ?? data?.amount;
+  const amountPaid = rawAmount != null ? Math.round(parseFloat(rawAmount) * 100) : undefined;
+
+  if (!paid) {
+    console.error(
+      `bachs verify not paid: ref=${reference} checkout=${providerRef} status=${data?.status} payment_status=${data?.payment_status} charge_status=${charge?.status} reference_on_bachs=${data?.reference}`
+    );
+  } else if (lc(data?.reference) && data.reference !== reference) {
+    console.error(`bachs verify: reference differs (ours=${reference}, bachs=${data.reference}) — accepted, matched by checkout id`);
+  }
+
   return {
-    success: Boolean(paid && referenceMatches),
-    // Bachs reports a decimal string (e.g. "4.99"); we compare in smallest units.
-    amountPaid: data?.amount != null ? Math.round(parseFloat(data.amount) * 100) : undefined,
-    currency: data?.currency,
+    success: paid,
+    pending,
+    amountPaid,
+    currency: data?.currency ? String(data.currency).toUpperCase() : undefined,
     providerRef,
     raw: data,
   };
