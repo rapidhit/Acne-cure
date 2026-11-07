@@ -3,7 +3,9 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 
+import { lazy, Suspense } from "react";
 import ProductPage from "./pages/ProductPage.jsx";
+const LumaEdit = lazy(() => import("./pages/LumaEdit.jsx"));
 import Success from "./pages/Success.jsx";
 import TermsOfService from "./pages/TermsOfService.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
@@ -20,6 +22,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/lumaedit" element={<Suspense fallback={null}><LumaEdit /></Suspense>} />
         <Route path="/:slug" element={<ProductPage />} />
       </Routes>
     </BrowserRouter>
