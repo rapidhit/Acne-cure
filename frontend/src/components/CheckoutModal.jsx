@@ -155,46 +155,48 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ fontFamily: "'Manrope', system-ui, sans-serif" }}>
       <div
-        className="absolute inset-0 bg-[#0f3d1f]/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#17251d]/50 backdrop-blur-sm"
         onClick={() => !loading && handleClose()}
       />
-      <div className="relative bg-white rounded-[28px] p-7 sm:p-8 max-w-[440px] w-full shadow-[0_24px_64px_rgba(0,0,0,0.3)] animate-[in_0.25s_ease]">
+      <div className="relative w-full max-w-[440px] rounded-[32px] border border-[#2f7d5b]/10 bg-gradient-to-br from-[#eaf4ec] via-[#f4f9f5] to-white p-3 shadow-[0_30px_80px_rgba(23,37,29,0.25)] animate-[in_0.25s_ease]">
         <button
           onClick={() => !loading && handleClose()}
-          className="absolute top-4 right-4 text-[#0f3d1f]/40 hover:text-[#0f3d1f] text-[20px] leading-none"
+          className="absolute top-5 right-6 z-10 text-[#17251d]/40 hover:text-[#17251d] text-[22px] leading-none"
           aria-label="Close"
         >
           ×
         </button>
-        <div className="w-14 h-14 rounded-full bg-[#a3d65c] grid place-items-center">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M9 12l2 2 4-4" stroke="#0f3d1f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div className="rounded-[24px] bg-white border border-black/[0.05] p-7 sm:p-8">
+          <p className="text-[12px] font-bold uppercase tracking-[0.22em] text-[#2f7d5b]">Checkout</p>
+          <h3 className="mt-3 text-[28px] leading-[1.1] font-extrabold tracking-[-0.03em] text-[#17251d]">Almost there.</h3>
+          <p className="mt-3 text-[14.5px] leading-[1.6] text-[#17251d]/60">
+            Enter your email — your receipt and download link go straight there right after payment.
+          </p>
+          <input
+            type="email"
+            autoFocus
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleCheckout()}
+            placeholder="you@example.com"
+            className="mt-6 w-full rounded-2xl border border-[#17251d]/10 bg-white px-4 py-3.5 text-[15px] text-[#17251d] outline-none focus:border-[#2f7d5b] focus:ring-4 focus:ring-[#2f7d5b]/10"
+          />
+          {error && <p className="mt-2 text-[13px] text-[#dc2626]">{error}</p>}
+          <div className="mt-5 flex items-center justify-between rounded-2xl border border-black/[0.06] px-4 py-3.5">
+            <span className="text-[14px] font-semibold text-[#17251d]/60">Total</span>
+            <span className="text-[18px] font-extrabold text-[#17251d]">{priceDisplay}</span>
+          </div>
+          <button
+            onClick={handleCheckout}
+            disabled={loading}
+            className="mt-4 w-full rounded-full bg-[#2f7d5b] hover:bg-[#276b4c] text-white font-bold py-4 text-[15px] shadow-[0_10px_28px_rgba(47,125,91,0.28)] transition disabled:opacity-60"
+          >
+            {loading ? "Opening secure checkout…" : `Continue to Payment – ${priceDisplay}`}
+          </button>
+          <p className="mt-4 text-[12px] text-center text-[#17251d]/50">🔒 Secured checkout</p>
         </div>
-        <h3 className="mt-4 font-black text-[22px] tracking-[-0.02em] text-[#0f3d1f]">Almost there!</h3>
-        <p className="mt-2 text-[13.5px] leading-[1.5] text-[#0f3d1f]/70">
-          Enter your email — your receipt and download link go straight there right after payment.
-        </p>
-        <input
-          type="email"
-          autoFocus
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleCheckout()}
-          placeholder="you@example.com"
-          className="mt-5 w-full rounded-xl border border-black/10 px-4 py-3 text-[15px] outline-none focus:border-[#0f3d1f]"
-        />
-        {error && <p className="mt-2 text-[13px] text-[#dc2626]">{error}</p>}
-        <button
-          onClick={handleCheckout}
-          disabled={loading}
-          className="mt-5 w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black py-3.5 rounded-full text-[14px] disabled:opacity-60"
-        >
-          {loading ? "Opening secure checkout…" : `Continue to Payment – ${priceDisplay}`}
-        </button>
-        <p className="mt-3 text-[11px] text-center text-[#0f3d1f]/50">🔒 Secured checkout</p>
       </div>
     </div>
   );
