@@ -60,9 +60,20 @@ const DEFAULT_FAQS = [
 
 // Marketing "was" price is computed proportionally below, matching whatever currency is set.
 
+function useCountdown(initialSeconds) {
+  const [seconds, setSeconds] = useState(initialSeconds);
+  useEffect(() => {
+    const id = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : initialSeconds)), 1000);
+    return () => clearInterval(id);
+  }, [initialSeconds]);
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+  return `${mm}:${ss}`;
+}
+
 function Stars({ count }) {
   return (
-    <span className="text-[#2f7d5b] tracking-[0.1em] text-[13px]">
+    <span className="text-[#a3d65c]">
       {"★".repeat(count)}
       {"☆".repeat(5 - count)}
     </span>
@@ -80,6 +91,7 @@ export default function TemplateProduct({ product }) {
       return [];
     }
   });
+  const timer = useCountdown(15 * 60);
   const sessionId = useMemo(() => getOrCreateSessionId(), []);
   const [localizedPriceKobo, setLocalizedPriceKobo] = useState(null);
   const [localizedCurrency, setLocalizedCurrency] = useState(null);
@@ -136,184 +148,192 @@ export default function TemplateProduct({ product }) {
     setShowModal(true);
   }
 
-  const ink = "text-[#17251d]";
-  const muted = "text-[#17251d]/60";
-  const eyebrow = "text-[12px] font-bold uppercase tracking-[0.22em] text-[#2f7d5b]";
-  const primaryBtn =
-    "rounded-full bg-[#2f7d5b] hover:bg-[#276b4c] text-white font-bold text-[16px] px-8 py-4 shadow-[0_10px_28px_rgba(47,125,91,0.28)] transition active:scale-[0.99]";
-
   return (
-    <div
-      className={`min-h-screen bg-white ${ink} pb-28 sm:pb-0`}
-      style={{ fontFamily: "'Manrope', system-ui, sans-serif" }}
-    >
-      <div className="max-w-[680px] mx-auto px-6">
-        {/* Header */}
-        <header className="py-6 flex items-center justify-between">
-          <span className="text-[13px] font-extrabold tracking-[0.18em] uppercase">{product.name}</span>
-          <span className={`hidden sm:inline text-[12px] ${muted}`}>Instant download</span>
-        </header>
+    <div className="min-h-screen bg-[#fffef9] text-[#0f3d1f] pb-28">
+      {/* Top strip */}
+      <div className="bg-gradient-to-br from-[#0f3d1f] via-[#164a26] to-[#0f3d1f] text-[#e8f0d8] text-[11px] py-2 px-4 text-center flex flex-wrap items-center justify-center gap-2">
+        <span>Instant Digital Download</span>
+        <span className="opacity-60">|</span>
+        <span>Simple, Actionable System</span>
+        <span className="opacity-60">|</span>
+        <span className="font-semibold">Over 12,000+ Readers Worldwide</span>
+      </div>
 
-        {/* Hero */}
-        <section className="pt-8 pb-14">
-          <p className={eyebrow}>Natural acne system</p>
-          <h1 className="mt-5 text-[40px] sm:text-[52px] leading-[1.04] font-extrabold tracking-[-0.03em]">
-            {headline}
-          </h1>
-          <p className={`mt-5 text-[17px] leading-[1.65] ${muted}`}>{subheadline}</p>
-          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
-            <button onClick={openModal} className={primaryBtn}>
-              Get Access – {priceDisplay}
-            </button>
-            <span className={`text-[13px] ${muted}`}>PDF · 25–35 min read · Any device</span>
-          </div>
-        </section>
+      <div className="max-w-[640px] mx-auto px-5 pt-6">
+        <div className="inline-flex items-center gap-2 rounded-full bg-[#0f3d1f]/10 px-3 py-1.5 text-[11px] font-semibold">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#a3d65c]" />
+          {product.name?.toUpperCase()}
+        </div>
 
-        {/* Visual card */}
-        <section className="relative rounded-[36px] border border-[#2f7d5b]/10 bg-gradient-to-br from-[#eaf4ec] via-[#f4f9f5] to-white p-6 sm:p-10 shadow-[0_30px_80px_rgba(23,37,29,0.06)]">
-          <div className="mx-auto max-w-[460px] rounded-[28px] bg-white p-2.5 shadow-[0_10px_40px_rgba(23,37,29,0.08)] border border-black/[0.04]">
-            <img
-              src="/before-after.jpg"
-              alt={`${product.name} — real results`}
-              className="w-full h-auto rounded-[20px] object-cover"
-              onError={(e) => (e.currentTarget.parentElement.style.display = "none")}
-            />
+        <h1 className="mt-5 text-[36px] leading-[1.05] font-black tracking-[-0.02em]">
+          {headline}
+        </h1>
+
+        <p className="mt-4 rounded-2xl bg-[#0f3d1f]/[0.06] p-4 text-[15px] leading-[1.5]">
+          {subheadline}
+        </p>
+
+        {/* Before/after — real photo (only meaningful for the acne product; other
+            template-mode products should probably move to custom_code mode) */}
+        <div className="mt-6 rounded-[24px] overflow-hidden border border-black/10 bg-white p-2">
+          <img
+            src="/before-after.jpg"
+            alt={`${product.name} — real results`}
+            className="w-full h-auto rounded-[18px] object-cover"
+            onError={(e) => (e.currentTarget.parentElement.style.display = "none")}
+          />
+        </div>
+
+        <button
+          onClick={openModal}
+          className="mt-6 w-full rounded-full bg-[#dc2626] text-white font-bold text-[clamp(13px,3.8vw,17px)] py-4 px-3 flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 text-center leading-tight"
+        >
+          <span>Get Access – {priceDisplay} →</span>
+        </button>
+
+        {/* Pricing block */}
+        <div className="mt-8 rounded-[24px] bg-[#0f3d1f] text-[#e8f0d8] p-6">
+          <div className="text-[13px] uppercase tracking-widest text-[#a3d65c] mb-1">Today Only</div>
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
+            <span className="line-through opacity-50 text-[clamp(13px,3.5vw,20px)] whitespace-nowrap">
+              {originalPriceDisplay}
+            </span>
+            <span className="font-black text-[clamp(22px,7vw,42px)] leading-tight break-words">
+              {priceDisplay}
+            </span>
+            <span className="rounded-full bg-[#a3d65c] text-[#0f3d1f] text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
+              SAVE {savingsDisplay}
+            </span>
           </div>
-          <div className="mt-6 flex items-center justify-between gap-4 rounded-[22px] bg-white border border-black/[0.06] px-6 py-5">
-            <div className="min-w-0">
-              <div className="font-bold text-[17px] leading-tight">{product.name}</div>
-              <div className={`mt-1 text-[14px] ${muted}`}>8-step guide · Instant PDF</div>
-            </div>
-            <div className="text-right shrink-0">
-              <div className="font-extrabold text-[22px] leading-none">{priceDisplay}</div>
-              <div className={`mt-1 text-[12px] line-through ${muted}`}>{originalPriceDisplay}</div>
-            </div>
+          <div className="mt-4 flex items-center justify-between rounded-2xl bg-black/20 px-4 py-3">
+            <span className="text-[12px] uppercase tracking-wide">Price goes back up soon</span>
+            <span className="font-mono font-bold text-[18px]">{timer}</span>
           </div>
-        </section>
+        </div>
 
         {/* Steps */}
-        <section className="mt-20 pt-16 border-t border-[#17251d]/[0.08]">
-          <p className={eyebrow}>The system</p>
-          <h2 className="mt-4 text-[34px] sm:text-[40px] font-extrabold tracking-[-0.03em] leading-[1.08]">
-            Eight small steps.
-          </h2>
-          <p className={`mt-4 text-[17px] leading-[1.65] ${muted}`}>
-            No guessing, no 200-page theory. Read it once, start tonight.
-          </p>
-          <div className="mt-10 divide-y divide-[#17251d]/[0.08] border-y border-[#17251d]/[0.08]">
-            {DEFAULT_STEPS.map((s) => (
-              <div key={s.n} className="py-5 flex items-start gap-5">
-                <div className="w-8 shrink-0 pt-0.5 text-[13px] font-bold tracking-[0.1em] text-[#2f7d5b]">{s.n}</div>
-                <div className="min-w-0">
-                  <div className="font-bold text-[16px] leading-snug">{s.title}</div>
-                  <div className={`mt-1 text-[14px] leading-[1.55] ${muted}`}>{s.sub}</div>
-                </div>
+        <h2 className="mt-10 text-[26px] font-black">
+          Your Complete <span className="text-[#a3d65c]">System</span>
+        </h2>
+        <p className="mt-2 text-[15px] leading-[1.5] text-[#0f3d1f]/70">
+          No guessing, no 200-page theory. Read it once, start tonight.
+        </p>
+
+        <div className="mt-5 space-y-3">
+          {DEFAULT_STEPS.map((s) => (
+            <div key={s.n} className="rounded-2xl border border-[#0f3d1f]/[0.08] p-4 flex items-center gap-4">
+              <div className="w-9 h-9 shrink-0 rounded-full bg-[#a3d65c]/20 text-[#0f3d1f] font-bold text-[13px] flex items-center justify-center">
+                {s.n}
               </div>
-            ))}
-          </div>
-        </section>
+              <div className="min-w-0">
+                <div className="font-semibold text-[15px]">{s.title}</div>
+                <div className="text-[13px] text-[#0f3d1f]/60">{s.sub}</div>
+              </div>
+              {s.tag && <span className="ml-auto shrink-0 text-[11px] text-[#0f3d1f]/60">{s.tag}</span>}
+            </div>
+          ))}
+        </div>
 
-        {/* Reviews */}
-        <section className="mt-20 pt-16 border-t border-[#17251d]/[0.08]">
-          <p className={eyebrow}>Reader stories</p>
-          <h2 className="mt-4 text-[34px] sm:text-[40px] font-extrabold tracking-[-0.03em] leading-[1.08]">
-            Real people, real results.
-          </h2>
-          <p className={`mt-4 text-[17px] leading-[1.65] ${muted}`}>No filters — real reader reviews.</p>
-          <div className="mt-8 space-y-4">
-            {testimonials.map((t) => {
-              const isReal = usingRealReviews;
-              const key = isReal ? t.id : t.name;
-              const displayName = t.name;
-              const stars = isReal ? t.rating : t.stars || 5;
-              const bodyText = isReal ? t.body : t.text;
-              const alreadyLiked = isReal && likedIds.includes(t.id);
-              return (
-                <div key={key} className="rounded-[24px] border border-black/[0.07] bg-white p-6 shadow-[0_8px_30px_rgba(23,37,29,0.04)]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-[#eaf4ec] flex items-center justify-center text-[13px] font-bold text-[#2f7d5b]">
-                      {displayName?.[0]}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-bold text-[14.5px]">{displayName}</div>
-                      {!isReal && <div className={`text-[12px] ${muted}`}>{t.meta}</div>}
-                    </div>
-                    <div className="ml-auto"><Stars count={stars} /></div>
+        {/* Testimonials */}
+        <h2 className="mt-10 text-[26px] font-black">Real people, real results</h2>
+        <p className="mt-1 text-[13px] text-[#0f3d1f]/60">No filters — real reader reviews</p>
+
+        <div className="mt-5 space-y-3">
+          {testimonials.map((t) => {
+            const isReal = usingRealReviews;
+            const key = isReal ? t.id : t.name;
+            const displayName = isReal ? t.name : t.name;
+            const stars = isReal ? t.rating : t.stars || 5;
+            const bodyText = isReal ? t.body : t.text;
+            const alreadyLiked = isReal && likedIds.includes(t.id);
+            return (
+              <div key={key} className="rounded-2xl bg-[#f9fafb] border border-black/[0.06] p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-[#e0e7ff] flex items-center justify-center text-[12px] font-bold text-[#4338ca]">
+                    {displayName?.[0]}
                   </div>
-                  <p className="mt-4 text-[15px] leading-[1.65]">{bodyText}</p>
-                  {isReal && (
-                    <button
-                      onClick={() => handleLike(t.id)}
-                      disabled={alreadyLiked}
-                      className={`mt-4 inline-flex items-center gap-1.5 text-[13px] font-semibold ${
-                        alreadyLiked ? "text-[#2f7d5b]" : "text-[#17251d]/50 hover:text-[#2f7d5b]"
-                      }`}
-                    >
-                      <span>{alreadyLiked ? "♥" : "♡"}</span>
-                      {t.likes || 0}
-                    </button>
-                  )}
+                  <div>
+                    <div className="font-semibold text-[14px]">{displayName}</div>
+                    {!isReal && <div className="text-[11px] text-[#0f3d1f]/60">{t.meta}</div>}
+                  </div>
+                  <div className="ml-auto"><Stars count={stars} /></div>
                 </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="mt-20 pt-16 border-t border-[#17251d]/[0.08]">
-          <p className={eyebrow}>Questions</p>
-          <h2 className="mt-4 text-[34px] sm:text-[40px] font-extrabold tracking-[-0.03em] leading-[1.08]">
-            Good to know.
-          </h2>
-          <div className="mt-8 divide-y divide-[#17251d]/[0.08] border-y border-[#17251d]/[0.08]">
-            {faqs.map((f, i) => (
-              <div key={f.q}>
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between text-left py-5"
-                >
-                  <span className="font-bold text-[16px] pr-6">{f.q}</span>
-                  <span className="shrink-0 text-[20px] leading-none text-[#2f7d5b]">{openFaq === i ? "−" : "+"}</span>
-                </button>
-                {openFaq === i && (
-                  <div className={`pb-6 text-[15px] leading-[1.65] ${muted}`}>{f.a}</div>
+                <p className="mt-3 text-[14px] leading-[1.55]">{bodyText}</p>
+                {isReal && (
+                  <button
+                    onClick={() => handleLike(t.id)}
+                    disabled={alreadyLiked}
+                    className={`mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold ${
+                      alreadyLiked ? "text-[#dc2626]" : "text-[#0f3d1f]/60 hover:text-[#dc2626]"
+                    }`}
+                  >
+                    <span>{alreadyLiked ? "♥" : "♡"}</span>
+                    {t.likes || 0}
+                  </button>
                 )}
               </div>
-            ))}
-          </div>
-        </section>
+            );
+          })}
+        </div>
+
+        {/* FAQ */}
+        <h2 className="mt-12 text-[26px] font-black text-center">Frequently Asked Questions</h2>
+        <div className="mt-5 rounded-[20px] border border-[#0f3d1f]/[0.08] bg-white overflow-hidden divide-y divide-[#0f3d1f]/[0.06]">
+          {faqs.map((f, i) => (
+            <div key={f.q}>
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full flex items-center justify-between text-left px-6 py-5"
+              >
+                <span className="font-bold text-[15px] pr-6">{f.q}</span>
+                <span className="shrink-0 text-[#0f3d1f]/50">{openFaq === i ? "−" : "+"}</span>
+              </button>
+              {openFaq === i && (
+                <div className="px-6 pb-6 text-[13.5px] leading-[1.6] text-[#0f3d1f]/80">{f.a}</div>
+              )}
+            </div>
+          ))}
+        </div>
 
         {/* Final CTA */}
-        <section className="mt-20 rounded-[36px] border border-[#2f7d5b]/10 bg-gradient-to-br from-[#eaf4ec] via-[#f4f9f5] to-white p-8 sm:p-12 text-center">
-          <h2 className="text-[32px] sm:text-[38px] font-extrabold tracking-[-0.03em] leading-[1.08]">
-            Ready to get started?
-          </h2>
-          <p className={`mt-3 text-[16px] leading-[1.6] ${muted} max-w-[420px] mx-auto`}>
-            12,000+ readers already have it. Instant download, read on any device.
-          </p>
-          <button onClick={openModal} className={`mt-8 ${primaryBtn}`}>
-            Get Access – {priceDisplay}
-          </button>
-        </section>
+        <div className="mt-12 rounded-[32px] bg-[#0f3d1f] p-8 text-center relative overflow-hidden">
+          <div className="relative">
+            <h2 className="text-[#e8f0d8] text-[32px] font-black leading-[0.95] tracking-[-0.02em]">
+              Ready to get started?
+            </h2>
+            <p className="mt-3 text-[#e8f0d8]/70 text-[14px] max-w-[420px] mx-auto">
+              12,000+ readers already got results. Instant download, read on any device.
+            </p>
+            <button
+              onClick={openModal}
+              className="mt-7 max-w-full rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[clamp(13px,4vw,17px)] px-6 sm:px-10 py-[18px] shadow-[0_14px_32px_rgba(220,38,38,0.5)] leading-tight"
+            >
+              Get Access – {priceDisplay}
+            </button>
+          </div>
+        </div>
 
         {/* Footer */}
-        <footer className="mt-16 pb-10 text-center">
-          <div className="font-extrabold text-[13px] tracking-[0.18em] uppercase">{product.name}</div>
-          <p className={`mt-3 text-[12px] leading-[1.6] ${muted} max-w-[520px] mx-auto`}>
+        <div className="mt-10 border-t border-[#0f3d1f]/10 pt-6 pb-4 text-center">
+          <div className="font-black text-[14px] tracking-[-0.01em]">{product.name}</div>
+          <p className="mt-3 text-[11px] leading-[1.5] text-[#0f3d1f]/50 max-w-[520px] mx-auto">
             Disclaimer: This is a digital PDF guide. Individual results may vary. For informational
             purposes only.
           </p>
-        </footer>
+        </div>
       </div>
 
       {/* Sticky mobile buy bar */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/[0.08] p-3">
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/10 p-3">
         <button
           onClick={openModal}
-          className="w-full bg-[#2f7d5b] hover:bg-[#276b4c] text-white font-bold text-[15px] py-4 rounded-full shadow-[0_8px_22px_rgba(47,125,91,0.3)] active:scale-[0.99] transition"
+          className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[clamp(12px,3.8vw,15px)] py-4 px-2 rounded-full shadow-[0_8px_20px_rgba(220,38,38,0.5)] flex items-center justify-center gap-2 active:scale-[0.98] transition leading-tight"
         >
-          Get Access – {priceDisplay}
+          <span>Get Access – {priceDisplay}</span>
         </button>
+        <p className="mt-1.5 text-center text-[10px] font-semibold opacity-60">
+          Instant Download · Any Device
+        </p>
       </div>
 
       <CheckoutModal
