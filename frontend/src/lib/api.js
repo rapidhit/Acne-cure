@@ -28,7 +28,12 @@ export const api = {
 
   // --- Checkout ---
   initPayment: (email, productSlug) =>
-    request("/payments/init", { method: "POST", body: JSON.stringify({ email, productSlug }) }),
+    request("/payments/init", {
+      method: "POST",
+      body: JSON.stringify({ email, productSlug, visitorId: getVisitorId() }),
+    }),
+  getOffer: (slug) =>
+    request(`/public/products/${encodeURIComponent(slug)}/offer?visitorId=${encodeURIComponent(getVisitorId())}`),
   verifyPayment: (reference, providerRef) =>
     request("/payments/verify", { method: "POST", body: JSON.stringify({ reference, providerRef }) }),
 
@@ -91,6 +96,22 @@ export const api = {
   adminRejectReview: (id) => request(`/admin/reviews/${id}/reject`, { method: "POST" }),
   adminDeleteReview: (id) => request(`/admin/reviews/${id}`, { method: "DELETE" }),
 };
+
+// Long-lived anonymous id so a visitor's welcome-discount window survives
+// closing the tab (unlike the per-tab session id above).
+export function getVisitorId() {
+  const key = "flw_visitor_id";
+  try {
+    let id = localStorage.getItem(key);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(key, id);
+    }
+    return id;
+  } catch {
+    return getOrCreateSessionId();
+  }
+}
 
 export function getOrCreateSessionId() {
   const key = "flw_session_id";

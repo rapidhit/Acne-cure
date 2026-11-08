@@ -5,6 +5,7 @@ import fs from "node:fs";
 import db, { getProductBySlug, getProductById } from "./db.js";
 import { notifySale } from "./notify.js";
 import { getProvider, PROVIDER_NAMES } from "./providers/index.js";
+import { getOffer, discountedPrice } from "./offers.js";
 
 const router = express.Router();
 
@@ -52,7 +53,7 @@ function markSuccess(tx, verifyResult) {
  * provider that product is currently configured to use.
  */
 router.post("/init", async (req, res) => {
-  const { email, productSlug } = req.body || {};
+  const { email, productSlug, visitorId } = req.body || {};
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
     return res.status(400).json({ error: "Valid email is required" });
   }
@@ -68,12 +69,17 @@ router.post("/init", async (req, res) => {
     return res.status(500).json({ error: `${providerName} is not configured on this server yet.` });
   }
 
+  // Charge the visitor's welcome-discount price only if their window is
+  // genuinely still open right now; otherwise the normal price.
+  const offer = getOffer(product, visitorId, { create: false });
+  const chargeAmount = offer.active ? discountedPrice(product.price_kobo, offer.percent) : product.price_kobo;
+
   const reference = `fnr_${nanoid(20)}`;
 
   db.prepare(
     `INSERT INTO transactions (product_id, reference, email, amount, currency, status, provider, created_at)
      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
-  ).run(product.id, reference, email, product.price_kobo, product.currency, providerName, Date.now());
+  ).run(product.id, reference, email, chargeAmount, product.currency, providerName, Date.now());
 
   // Redirect-style gateways (hosted checkout page): create the session
   // server-side and hand the browser a URL instead of a public key.
@@ -83,7 +89,7 @@ router.post("/init", async (req, res) => {
       const { checkoutUrl, providerRef } = await provider.createCheckout({
         reference,
         email,
-        amount: product.price_kobo,
+        amount: chargeAmount,
         currency: product.currency,
         successUrl: `${origin}/success?reference=${reference}`,
         cancelUrl: `${origin}/${product.slug}`,
@@ -100,7 +106,7 @@ router.post("/init", async (req, res) => {
 
   res.json({
     reference,
-    amount: product.price_kobo,
+    amount: chargeAmount,
     currency: product.currency,
     publicKey: provider.getPublicKey(),
     provider: providerName,

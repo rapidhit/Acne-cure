@@ -136,6 +136,35 @@ export default function TemplateProduct({ product }) {
       .catch(() => {}); // any failure just leaves the real price showing — never breaks the page
   }, [product.slug, product.priceKobo, product.currency]);
 
+  // Welcome discount: the server owns the window; we just count down to it.
+  const [offer, setOffer] = useState(null);
+  const [secondsLeft, setSecondsLeft] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .getOffer(product.slug)
+      .then((o) => {
+        if (cancelled || !o?.active) return;
+        const offset = o.now ? o.now - Date.now() : 0; // server/client clock difference
+        setOffer({ ...o, offset });
+        setSecondsLeft(Math.max(0, Math.ceil((o.expiresAt - (Date.now() + offset)) / 1000)));
+      })
+      .catch(() => {}); // no offer, no problem — normal price shows
+    return () => {
+      cancelled = true;
+    };
+  }, [product.slug]);
+  useEffect(() => {
+    if (!offer) return;
+    const id = setInterval(() => {
+      const left = Math.max(0, Math.ceil((offer.expiresAt - (Date.now() + offer.offset)) / 1000));
+      setSecondsLeft(left);
+      if (left <= 0) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [offer]);
+  const countdown = `${String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:${String(secondsLeft % 60).padStart(2, "0")}`;
+
   useEffect(() => {
     api.getProductReviews(product.slug).then(setRealReviews).catch(() => setRealReviews([]));
   }, [product.slug]);
@@ -153,14 +182,16 @@ export default function TemplateProduct({ product }) {
     }
   }
 
-  const displayPriceKobo = localizedPriceKobo ?? product.priceKobo;
+  const regularPriceKobo = localizedPriceKobo ?? product.priceKobo;
+  const offerActive = Boolean(offer?.active) && secondsLeft > 0;
+  const displayPriceKobo = offerActive
+    ? Math.max(1, Math.round((regularPriceKobo * (100 - offer.percent)) / 100))
+    : regularPriceKobo;
   const displayCurrency = localizedCurrency ?? product.currency;
   const priceDisplay = formatPrice(displayPriceKobo, displayCurrency);
-  // "Was" price keeps the same ~5.4x markup illusion as the original design,
-  // but scales with whatever the real (or localized) price/currency actually is.
-  const originalPriceKobo = Math.round(displayPriceKobo * 5.41);
-  const originalPriceDisplay = formatPrice(originalPriceKobo, displayCurrency);
-  const savingsDisplay = formatPrice(originalPriceKobo - displayPriceKobo, displayCurrency);
+  // Only shown while a real welcome discount is active: the crossed-out figure is
+  // the genuine regular price the visitor goes back to paying when the timer ends.
+  const originalPriceDisplay = formatPrice(regularPriceKobo, displayCurrency);
   const headline = product.headline || "Are you Battling with Acne or Pimples?";
   const subheadline =
     product.subheadline ||
@@ -209,11 +240,28 @@ export default function TemplateProduct({ product }) {
             <p className="mt-5 text-[16.5px] sm:text-[18px] leading-[1.7] text-[#1c2b23]/75 max-w-[520px]">{subheadline}</p>
 
             <div className="mt-8">
+              {offerActive && (
+                <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-[#1f4d3a]/15 bg-[#f1f8f3] px-4 py-3">
+                  <div className="min-w-0">
+                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#2f7d5b]">
+                      Welcome offer · {offer.percent}% off
+                    </div>
+                    <div className="mt-0.5 flex items-baseline gap-2">
+                      <span className="text-[20px] font-extrabold text-[#0f2a1d]">{priceDisplay}</span>
+                      <span className={`text-[14px] line-through ${muted}`}>{originalPriceDisplay}</span>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <div className="text-[11px] font-semibold text-[#1c2b23]/60">Ends in</div>
+                    <div className="font-mono text-[20px] font-bold tabular-nums text-[#0f2a1d]">{countdown}</div>
+                  </div>
+                </div>
+              )}
               <button onClick={openModal} className={`${primaryBtn} w-full sm:w-auto`}>
                 Get Access – {priceDisplay} <span aria-hidden="true">→</span>
               </button>
               <p className={`mt-3 text-[13px] ${muted} text-center sm:text-left`}>
-                One-time payment · Instant access
+                {offerActive ? "Offer applies automatically at checkout" : "One-time payment · Instant access"}
               </p>
             </div>
 
@@ -407,6 +455,7 @@ export default function TemplateProduct({ product }) {
         onClose={() => setShowModal(false)}
         productSlug={product.slug}
         priceKobo={displayPriceKobo}
+        originalPriceKobo={offerActive ? regularPriceKobo : null}
         currency={displayCurrency}
       />
     </div>

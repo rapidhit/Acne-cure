@@ -135,6 +135,8 @@ export default function AdminDashboard() {
         deliveryType: p.delivery_type || "pdf",
         telegramLink: p.telegram_link || "",
         paymentProvider: p.payment_provider || "paystack",
+        discountPercent: String(p.discount_percent ?? 0),
+        discountWindowMinutes: String(p.discount_window_minutes ?? 30),
         floating: {
           enabled: !!p.floating_enabled,
           label: p.floating_label,
@@ -225,6 +227,8 @@ export default function AdminDashboard() {
         deliveryType: settingsForm.deliveryType,
         telegramLink: settingsForm.telegramLink,
         paymentProvider: settingsForm.paymentProvider,
+        discountPercent: Math.round(Number(settingsForm.discountPercent) || 0),
+        discountWindowMinutes: Math.round(Number(settingsForm.discountWindowMinutes) || 30),
         floatingEnabled: settingsForm.floating.enabled,
         floatingLabel: settingsForm.floating.label,
         floatingPosition: settingsForm.floating.position,
@@ -494,6 +498,40 @@ export default function AdminDashboard() {
                             </p>
                           </div>
                         )}
+                      </div>
+
+                      <div className="mt-5">
+                        <FieldLabel>Welcome discount</FieldLabel>
+                        <p className="mt-1 text-[12px] text-[#5B6472]">
+                          Each visitor gets this discount for a limited time after they first open the page, and
+                          they really are charged the lower price if they pay in time. Afterwards they pay the
+                          normal price, and a fresh window starts for them 24 hours after their first one.
+                          Set the percentage to 0 to turn it off.
+                        </p>
+                        <div className="mt-2 grid grid-cols-2 gap-3">
+                          <div>
+                            <FieldLabel>Discount %</FieldLabel>
+                            <input
+                              type="number"
+                              min="0"
+                              max="90"
+                              value={settingsForm.discountPercent}
+                              onChange={(e) => setSettingsForm((f) => ({ ...f, discountPercent: e.target.value }))}
+                              className={inputClass}
+                            />
+                          </div>
+                          <div>
+                            <FieldLabel>Window (minutes)</FieldLabel>
+                            <input
+                              type="number"
+                              min="1"
+                              max="1440"
+                              value={settingsForm.discountWindowMinutes}
+                              onChange={(e) => setSettingsForm((f) => ({ ...f, discountWindowMinutes: e.target.value }))}
+                              className={inputClass}
+                            />
+                          </div>
+                        </div>
                       </div>
 
                       <div className="mt-5">

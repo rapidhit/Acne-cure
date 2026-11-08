@@ -109,6 +109,20 @@ if (!columnExists("products", "usd_anchor_kobo")) {
 if (!columnExists("products", "payment_provider")) {
   db.exec(`ALTER TABLE products ADD COLUMN payment_provider TEXT NOT NULL DEFAULT 'paystack'`);
 }
+if (!columnExists("products", "discount_percent")) {
+  db.exec(`ALTER TABLE products ADD COLUMN discount_percent INTEGER NOT NULL DEFAULT 0`);
+}
+if (!columnExists("products", "discount_window_minutes")) {
+  db.exec(`ALTER TABLE products ADD COLUMN discount_window_minutes INTEGER NOT NULL DEFAULT 30`);
+}
+db.exec(`
+  CREATE TABLE IF NOT EXISTS visitor_offers (
+    visitor_id TEXT NOT NULL,
+    product_id INTEGER NOT NULL,
+    started_at INTEGER NOT NULL,
+    PRIMARY KEY (visitor_id, product_id)
+  )
+`);
 if (!columnExists("transactions", "provider")) {
   db.exec(`ALTER TABLE transactions ADD COLUMN provider TEXT NOT NULL DEFAULT 'paystack'`);
 }

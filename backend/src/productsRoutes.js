@@ -139,6 +139,20 @@ router.put("/:id", requireAdmin, (req, res) => {
     }
     updates.payment_provider = body.paymentProvider;
   }
+  if (body.discountPercent !== undefined) {
+    const pct = Number(body.discountPercent);
+    if (!Number.isInteger(pct) || pct < 0 || pct > 90) {
+      return res.status(400).json({ error: "discountPercent must be a whole number from 0 to 90" });
+    }
+    updates.discount_percent = pct;
+  }
+  if (body.discountWindowMinutes !== undefined) {
+    const mins = Number(body.discountWindowMinutes);
+    if (!Number.isInteger(mins) || mins < 1 || mins > 1440) {
+      return res.status(400).json({ error: "discountWindowMinutes must be a whole number from 1 to 1440" });
+    }
+    updates.discount_window_minutes = mins;
+  }
   if (body.usdAnchorKobo !== undefined) {
     const anchor = Number(body.usdAnchorKobo);
     if (anchor !== null && (!Number.isInteger(anchor) || anchor <= 0)) {

@@ -1,6 +1,7 @@
 import express from "express";
 import { getProductBySlug } from "./db.js";
 import db from "./db.js";
+import { getOffer } from "./offers.js";
 
 const router = express.Router();
 
@@ -46,6 +47,17 @@ router.get("/:slug/reviews", (req, res) => {
     .all(product.id);
 
   res.json(reviews);
+});
+
+/**
+ * GET /api/public/products/:slug/offer?visitorId=...
+ * The visitor's welcome-discount window (starts it if they're due one).
+ */
+router.get("/:slug/offer", (req, res) => {
+  const product = getProductBySlug(req.params.slug);
+  if (!product) return res.status(404).json({ error: "Product not found" });
+  res.set("Cache-Control", "no-store");
+  res.json(getOffer(product, req.query.visitorId, { create: true }));
 });
 
 /**

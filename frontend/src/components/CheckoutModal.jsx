@@ -36,7 +36,7 @@ function loadGatewayScript(provider) {
  * whichever payment gateway (Paystack, Flutterwave, or Korapay) that
  * product is currently configured to use.
  */
-export default function CheckoutModal({ open, onClose, productSlug, priceKobo, currency }) {
+export default function CheckoutModal({ open, onClose, productSlug, priceKobo, originalPriceKobo, currency }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -186,7 +186,14 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, c
           {error && <p className="mt-2 text-[13px] text-[#dc2626]">{error}</p>}
           <div className="mt-5 flex items-center justify-between rounded-2xl border border-black/[0.06] px-4 py-3.5">
             <span className="text-[14px] font-semibold text-[#17251d]/60">Total</span>
-            <span className="text-[18px] font-extrabold text-[#17251d]">{priceDisplay}</span>
+            <span className="text-[18px] font-extrabold text-[#17251d]">
+              {originalPriceKobo ? (
+                <span className="mr-2 text-[14px] font-semibold line-through text-[#17251d]/40">
+                  {formatPrice(originalPriceKobo, currency)}
+                </span>
+              ) : null}
+              {priceDisplay}
+            </span>
           </div>
           <button
             onClick={handleCheckout}
