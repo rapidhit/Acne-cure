@@ -283,7 +283,7 @@ export default function TemplateProduct({ product }) {
   const headline = product.headline || "Are you Battling with Acne or Pimples?";
   const subheadline =
     product.subheadline ||
-    `Discover the simple 8-step natural system to clear your skin and boost your confidence — just ${priceDisplay}`;
+    `Discover the simple 8-step natural system to clear your skin and boost your confidence`;
   const usingRealReviews = realReviews && realReviews.length > 0;
   // Sample reviews are no longer shown: the section appears only with approved real reviews
   // (or testimonials the owner entered for this product).
