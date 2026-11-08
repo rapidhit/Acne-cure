@@ -182,7 +182,7 @@ export default function TemplateProduct({ product }) {
 
   return (
     <div
-      className="min-h-screen bg-[#fbfaf5] text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
+      className="min-h-screen bg-white text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
       style={{ fontFamily: "'Manrope', system-ui, sans-serif" }}
     >
       <div className="max-w-[1040px] mx-auto px-6">
@@ -223,7 +223,7 @@ export default function TemplateProduct({ product }) {
           </Reveal>
 
           <Reveal delay={150} className="relative">
-            <div className="absolute -inset-4 rounded-[44px] bg-gradient-to-br from-[#dcebd9] via-[#eef5e6] to-transparent" />
+            <div className="absolute -inset-4 rounded-[44px] bg-gradient-to-br from-[#d9eede] via-[#eaf5ee] to-transparent" />
             <div className="relative rounded-[32px] bg-white p-3 shadow-[0_30px_70px_rgba(31,77,58,0.16)] border border-black/[0.04]">
               <img
                 src="/before-after.jpg"
@@ -245,7 +245,7 @@ export default function TemplateProduct({ product }) {
       </div>
 
       {/* Steps */}
-      <section className="bg-white border-y border-[#1c2b23]/[0.06]">
+      <section className="bg-[#f1f8f3] border-y border-[#1f4d3a]/[0.07]">
         <div className="max-w-[1040px] mx-auto px-6 py-20">
           <Reveal className="max-w-[560px]">
             <p className={eyebrow}>What's inside</p>
@@ -260,7 +260,7 @@ export default function TemplateProduct({ product }) {
             {DEFAULT_STEPS.map((s, i) => (
               <Reveal key={s.n} delay={(i % 2) * 120}>
               <div className="h-full rounded-[24px] border border-[#1f4d3a]/10 bg-white p-6 flex gap-5 shadow-[0_10px_30px_rgba(31,77,58,0.06)] hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(31,77,58,0.12)] transition">
-                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#eef3ee] text-[#1f4d3a] border border-[#1f4d3a]/10 text-[18px] font-semibold flex items-center justify-center" style={display}>
+                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#e4f2e8] text-[#1f4d3a] text-[18px] font-semibold flex items-center justify-center" style={display}>
                   {s.n}
                 </div>
                 <div className="min-w-0">
@@ -330,7 +330,7 @@ export default function TemplateProduct({ product }) {
       </section>
 
       {/* FAQ */}
-      <section className="bg-white border-y border-[#1c2b23]/[0.06]">
+      <section className="bg-[#f1f8f3] border-y border-[#1f4d3a]/[0.07]">
         <div className="max-w-[760px] mx-auto px-6 py-20">
           <Reveal className="text-center">
             <p className={eyebrow}>Questions</p>
@@ -338,7 +338,7 @@ export default function TemplateProduct({ product }) {
           </Reveal>
           <Reveal delay={100} className="mt-10 space-y-3">
             {faqs.map((f, i) => (
-              <div key={f.q} className="rounded-[22px] border border-[#1c2b23]/[0.08] bg-[#fbfaf5] overflow-hidden">
+              <div key={f.q} className="rounded-[22px] border border-[#1f4d3a]/10 bg-white overflow-hidden">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between text-left px-6 py-5"

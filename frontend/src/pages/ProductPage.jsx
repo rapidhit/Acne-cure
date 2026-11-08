@@ -56,7 +56,7 @@ export default function ProductPage() {
       ) : (
         <TemplateProduct product={product} />
       )}
-      <div className="bg-[#fffef9] text-center py-5 pb-24 sm:pb-5 border-t border-black/5">
+      <div className="bg-white text-center py-5 pb-24 sm:pb-5 border-t border-black/5">
         <a href="/terms-of-service" className="text-[11px] font-semibold text-[#0f3d1f]/50 underline">
           Terms of Service
         </a>
