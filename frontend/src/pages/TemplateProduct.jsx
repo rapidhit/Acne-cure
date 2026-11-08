@@ -285,7 +285,9 @@ export default function TemplateProduct({ product }) {
     product.subheadline ||
     `Discover the simple 8-step natural system to clear your skin and boost your confidence — just ${priceDisplay}`;
   const usingRealReviews = realReviews && realReviews.length > 0;
-  const testimonials = usingRealReviews ? realReviews : product.testimonials?.length ? product.testimonials : DEFAULT_TESTIMONIALS;
+  // Sample reviews are no longer shown: the section appears only with approved real reviews
+  // (or testimonials the owner entered for this product).
+  const testimonials = usingRealReviews ? realReviews : product.testimonials?.length ? product.testimonials : [];
   const faqs = product.faqs?.length ? product.faqs : DEFAULT_FAQS;
 
   function openModal() {
@@ -422,6 +424,7 @@ export default function TemplateProduct({ product }) {
       </section>
 
       {/* Reviews */}
+      {testimonials.length > 0 && (
       <section className="max-w-[1040px] mx-auto px-6 py-20">
         <Reveal className="max-w-[560px]">
           <p className={eyebrow} style={eyebrowFont}>Reader stories</p>
@@ -449,7 +452,7 @@ export default function TemplateProduct({ product }) {
                   </div>
                   <div className="min-w-0">
                     <div className="font-extrabold text-[14.5px]">{displayName}</div>
-                    {!isReal && <div className={`text-[12.5px] ${muted}`}>{t.meta}</div>}
+                    {isReal ? (t.country && <div className={`text-[12.5px] ${muted}`}>{t.country}</div>) : <div className={`text-[12.5px] ${muted}`}>{t.meta}</div>}
                   </div>
                   {isReal && (
                     <button
@@ -470,6 +473,7 @@ export default function TemplateProduct({ product }) {
         </Carousel>
         </Reveal>
       </section>
+      )}
 
       {/* FAQ */}
       <section className="bg-[#f1f8f3] border-y border-[#1f4d3a]/[0.07]">

@@ -109,6 +109,9 @@ if (!columnExists("products", "usd_anchor_kobo")) {
 if (!columnExists("products", "payment_provider")) {
   db.exec(`ALTER TABLE products ADD COLUMN payment_provider TEXT NOT NULL DEFAULT 'paystack'`);
 }
+if (!columnExists("reviews", "country")) {
+  db.exec(`ALTER TABLE reviews ADD COLUMN country TEXT`);
+}
 if (!columnExists("products", "discount_percent")) {
   db.exec(`ALTER TABLE products ADD COLUMN discount_percent INTEGER NOT NULL DEFAULT 0`);
 }

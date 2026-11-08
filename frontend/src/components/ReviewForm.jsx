@@ -5,6 +5,7 @@ export default function ReviewForm({ reference }) {
   const [name, setName] = useState("");
   const [rating, setRating] = useState(5);
   const [hoverRating, setHoverRating] = useState(0);
+  const [country, setCountry] = useState("");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -13,13 +14,13 @@ export default function ReviewForm({ reference }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
-    if (!name.trim() || !body.trim()) {
-      setError("Please fill in your name and a short review.");
+    if (!name.trim() || !country.trim() || !body.trim()) {
+      setError("Please fill in your name, country and a short review.");
       return;
     }
     setSubmitting(true);
     try {
-      await api.submitReview({ reference, name: name.trim(), rating, body: body.trim() });
+      await api.submitReview({ reference, name: name.trim(), country: country.trim(), rating, body: body.trim() });
       setSubmitted(true);
     } catch (err) {
       setError(err.message || "Could not submit your review.");
@@ -65,6 +66,12 @@ export default function ReviewForm({ reference }) {
         onChange={(e) => setName(e.target.value)}
         placeholder="Your name"
         className="mt-3 w-full rounded-xl border border-black/10 px-4 py-2.5 text-[14px] outline-none focus:border-[#0f3d1f]"
+      />
+      <input
+        value={country}
+        onChange={(e) => setCountry(e.target.value)}
+        placeholder="Your country (e.g. Nigeria)"
+        className="mt-2 w-full rounded-xl border border-black/10 px-4 py-2.5 text-[14px] outline-none focus:border-[#0f3d1f]"
       />
       <textarea
         value={body}

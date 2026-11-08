@@ -40,7 +40,7 @@ router.get("/:slug/reviews", (req, res) => {
 
   const reviews = db
     .prepare(
-      `SELECT id, name, rating, body, likes, created_at FROM reviews
+      `SELECT id, name, country, rating, body, likes, created_at FROM reviews
        WHERE product_id = ? AND status = 'approved'
        ORDER BY likes DESC, created_at DESC`
     )

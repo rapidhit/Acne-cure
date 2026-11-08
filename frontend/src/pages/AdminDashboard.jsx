@@ -694,7 +694,9 @@ export default function AdminDashboard() {
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-semibold text-[13.5px] text-[#12131A]">{r.name}</span>
+                                <span className="font-semibold text-[13.5px] text-[#12131A]">
+                                  {r.name}{r.country ? ` · ${r.country}` : ""}
+                                </span>
                                 <span className="text-[#a3d65c] text-[13px]">
                                   {"★".repeat(r.rating)}
                                   {"☆".repeat(5 - r.rating)}

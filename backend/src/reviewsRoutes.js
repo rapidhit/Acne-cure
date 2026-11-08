@@ -7,15 +7,16 @@ export const adminReviewsRouter = express.Router();
 
 const MAX_NAME_LEN = 60;
 const MAX_BODY_LEN = 1000;
+const MAX_COUNTRY_LEN = 60;
 
 /**
  * POST /api/reviews
- * Body: { reference, name, rating, body }
+ * Body: { reference, name, country, rating, body }
  * Only accepted for a transaction that actually completed successfully —
  * this ties every review to a real, verified purchase.
  */
 publicReviewsRouter.post("/", (req, res) => {
-  const { reference, name, rating, body } = req.body || {};
+  const { reference, name, country, rating, body } = req.body || {};
 
   if (!reference) return res.status(400).json({ error: "reference is required" });
   const tx = db.prepare(`SELECT * FROM transactions WHERE reference = ?`).get(reference);
@@ -28,6 +29,9 @@ publicReviewsRouter.post("/", (req, res) => {
 
   const cleanName = String(name || "").trim().slice(0, MAX_NAME_LEN);
   if (!cleanName) return res.status(400).json({ error: "Name is required" });
+
+  const cleanCountry = String(country || "").trim().slice(0, MAX_COUNTRY_LEN);
+  if (!cleanCountry) return res.status(400).json({ error: "Country is required" });
 
   const cleanRating = Number(rating);
   if (!Number.isInteger(cleanRating) || cleanRating < 1 || cleanRating > 5) {
@@ -44,9 +48,9 @@ publicReviewsRouter.post("/", (req, res) => {
   }
 
   db.prepare(
-    `INSERT INTO reviews (product_id, reference, name, rating, body, status, created_at)
-     VALUES (?, ?, ?, ?, ?, 'pending', ?)`
-  ).run(tx.product_id, reference, cleanName, cleanRating, cleanBody, Date.now());
+    `INSERT INTO reviews (product_id, reference, name, country, rating, body, status, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, 'pending', ?)`
+  ).run(tx.product_id, reference, cleanName, cleanCountry, cleanRating, cleanBody, Date.now());
 
   res.json({ ok: true, message: "Thanks! Your review will appear after it's approved." });
 });
