@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CheckoutModal, { formatPrice } from "../components/CheckoutModal.jsx";
 import { api, getOrCreateSessionId } from "../lib/api.js";
 
@@ -59,6 +59,43 @@ const DEFAULT_FAQS = [
 ];
 
 // Marketing "was" price is computed proportionally below, matching whatever currency is set.
+
+// Fades + slides content up the first time it scrolls into view.
+function Reveal({ children, delay = 0, className = "" }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (
+      !el ||
+      typeof IntersectionObserver === "undefined" ||
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setShown(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-7"} ${className}`}
+      style={{ transitionDelay: shown ? `${delay}ms` : "0ms" }}
+    >
+      {children}
+    </div>
+  );
+}
 
 function Stars({ count }) {
   return (
@@ -161,7 +198,7 @@ export default function TemplateProduct({ product }) {
 
         {/* Hero */}
         <section className="pt-6 pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
-          <div>
+          <Reveal>
             <p className={eyebrow}>The natural acne guide</p>
             <h1 className="mt-5 text-[42px] sm:text-[58px] leading-[1.02] tracking-[-0.03em] font-semibold" style={display}>
               {headline}
@@ -183,9 +220,9 @@ export default function TemplateProduct({ product }) {
                 </li>
               ))}
             </ul>
-          </div>
+          </Reveal>
 
-          <div className="relative">
+          <Reveal delay={150} className="relative">
             <div className="absolute -inset-4 rounded-[44px] bg-gradient-to-br from-[#dcebd9] via-[#eef5e6] to-transparent" />
             <div className="relative rounded-[32px] bg-white p-3 shadow-[0_30px_70px_rgba(31,77,58,0.16)] border border-black/[0.04]">
               <img
@@ -203,14 +240,14 @@ export default function TemplateProduct({ product }) {
               <div className="text-[12px] uppercase tracking-[0.16em] text-[#a3d65c] font-bold">Only</div>
               <div className="text-[22px] font-semibold leading-tight" style={display}>{priceDisplay}</div>
             </div>
-          </div>
+          </Reveal>
         </section>
       </div>
 
       {/* Steps */}
       <section className="bg-white border-y border-[#1c2b23]/[0.06]">
         <div className="max-w-[1040px] mx-auto px-6 py-20">
-          <div className="max-w-[560px]">
+          <Reveal className="max-w-[560px]">
             <p className={eyebrow}>What's inside</p>
             <h2 className={`mt-4 ${h2}`} style={display}>
               Your complete system, <em className="text-[#2f7d5b]">step by step.</em>
@@ -218,23 +255,25 @@ export default function TemplateProduct({ product }) {
             <p className={`mt-4 text-[17px] leading-[1.65] ${muted}`}>
               No guessing, no 200-page theory. Read it once, start tonight.
             </p>
-          </div>
+          </Reveal>
           <div className="mt-12 grid sm:grid-cols-2 gap-4">
-            {DEFAULT_STEPS.map((s) => (
-              <div key={s.n} className="group rounded-[24px] border border-[#1c2b23]/[0.08] bg-[#fbfaf5] p-6 flex gap-5 hover:border-[#2f7d5b]/40 hover:shadow-[0_16px_40px_rgba(31,77,58,0.08)] transition">
-                <div className="text-[40px] leading-none font-semibold text-[#2f7d5b]/35 group-hover:text-[#2f7d5b] transition" style={display}>
+            {DEFAULT_STEPS.map((s, i) => (
+              <Reveal key={s.n} delay={(i % 2) * 120}>
+              <div className="h-full rounded-[24px] border border-[#1f4d3a]/10 bg-white p-6 flex gap-5 shadow-[0_10px_30px_rgba(31,77,58,0.06)] hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(31,77,58,0.12)] transition">
+                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#a3d65c] text-[#17331f] text-[19px] font-semibold flex items-center justify-center" style={display}>
                   {s.n}
                 </div>
                 <div className="min-w-0">
                   <div className="font-extrabold text-[17px] leading-snug">{s.title}</div>
                   <div className={`mt-1.5 text-[14.5px] leading-[1.6] ${muted}`}>{s.sub}</div>
                   {s.tag && (
-                    <span className="mt-3 inline-block rounded-full bg-[#2f7d5b]/10 text-[#1f4d3a] text-[11.5px] font-bold px-3 py-1">
+                    <span className="mt-3 inline-block rounded-full bg-[#a3d65c]/25 text-[#1f4d3a] text-[11.5px] font-bold px-3 py-1">
                       {s.tag}
                     </span>
                   )}
                 </div>
               </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -242,14 +281,14 @@ export default function TemplateProduct({ product }) {
 
       {/* Reviews */}
       <section className="max-w-[1040px] mx-auto px-6 py-20">
-        <div className="max-w-[560px]">
+        <Reveal className="max-w-[560px]">
           <p className={eyebrow}>Reader stories</p>
           <h2 className={`mt-4 ${h2}`} style={display}>
             Real people, <em className="text-[#2f7d5b]">real skin.</em>
           </h2>
-        </div>
+        </Reveal>
         <div className="mt-12 grid md:grid-cols-2 gap-5">
-          {testimonials.map((t) => {
+          {testimonials.map((t, ti) => {
             const isReal = usingRealReviews;
             const key = isReal ? t.id : t.name;
             const displayName = t.name;
@@ -257,7 +296,8 @@ export default function TemplateProduct({ product }) {
             const bodyText = isReal ? t.body : t.text;
             const alreadyLiked = isReal && likedIds.includes(t.id);
             return (
-              <figure key={key} className="relative rounded-[28px] bg-white border border-black/[0.06] p-7 shadow-[0_12px_36px_rgba(31,77,58,0.06)]">
+              <Reveal key={key} delay={(ti % 2) * 120}>
+              <figure className="relative h-full rounded-[28px] bg-white border border-black/[0.06] p-7 shadow-[0_12px_36px_rgba(31,77,58,0.06)]">
                 <div className="absolute top-3 right-6 text-[72px] leading-none text-[#2f7d5b]/10 select-none" style={display}>”</div>
                 <Stars count={stars} />
                 <blockquote className="mt-4 text-[16px] leading-[1.7]">{bodyText}</blockquote>
@@ -283,6 +323,7 @@ export default function TemplateProduct({ product }) {
                   )}
                 </figcaption>
               </figure>
+              </Reveal>
             );
           })}
         </div>
@@ -291,11 +332,11 @@ export default function TemplateProduct({ product }) {
       {/* FAQ */}
       <section className="bg-white border-y border-[#1c2b23]/[0.06]">
         <div className="max-w-[760px] mx-auto px-6 py-20">
-          <div className="text-center">
+          <Reveal className="text-center">
             <p className={eyebrow}>Questions</p>
             <h2 className={`mt-4 ${h2}`} style={display}>Good to know.</h2>
-          </div>
-          <div className="mt-10 space-y-3">
+          </Reveal>
+          <Reveal delay={100} className="mt-10 space-y-3">
             {faqs.map((f, i) => (
               <div key={f.q} className="rounded-[22px] border border-[#1c2b23]/[0.08] bg-[#fbfaf5] overflow-hidden">
                 <button
@@ -312,12 +353,13 @@ export default function TemplateProduct({ product }) {
                 )}
               </div>
             ))}
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Final CTA */}
       <section className="max-w-[1040px] mx-auto px-6 py-20">
+        <Reveal>
         <div className="relative overflow-hidden rounded-[40px] bg-[#1f4d3a] px-8 py-14 sm:py-16 text-center">
           <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#a3d65c]/20 blur-2xl" />
           <div className="absolute -bottom-28 -left-20 w-72 h-72 rounded-full bg-[#2f7d5b]/40 blur-2xl" />
@@ -333,6 +375,7 @@ export default function TemplateProduct({ product }) {
             </button>
           </div>
         </div>
+        </Reveal>
       </section>
 
       {/* Footer */}
