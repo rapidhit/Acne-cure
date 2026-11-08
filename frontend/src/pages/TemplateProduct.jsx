@@ -237,7 +237,7 @@ export default function TemplateProduct({ product }) {
             <h1 className="mt-5 text-[36px] sm:text-[58px] leading-[1.08] sm:leading-[1.02] tracking-[-0.025em] font-semibold text-[#0f2a1d]" style={display}>
               {headline}
             </h1>
-            <p className="mt-5 text-[16.5px] sm:text-[18px] leading-[1.7] text-[#1c2b23]/75 max-w-[520px]">{subheadline}</p>
+            <p className="mt-5 text-[16.5px] sm:text-[18px] leading-[1.65] font-medium tracking-normal text-[#1c2b23]/85 max-w-[520px]">{subheadline}</p>
 
             <div className="mt-8">
               {offerActive && (
