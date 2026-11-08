@@ -332,19 +332,19 @@ export default function TemplateProduct({ product }) {
 
             <div className="mt-8">
               {offerActive && (
-                <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-[#1f4d3a]/15 bg-[#f1f8f3] px-4 py-3">
+                <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-[#dc2626]/30 bg-[#fef2f2] px-4 py-3">
                   <div className="min-w-0">
-                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#2f7d5b]">
+                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#dc2626]">
                       Welcome offer · {offer.percent}% off
                     </div>
                     <div className="mt-0.5 flex items-baseline gap-2">
-                      <span className="text-[20px] font-extrabold text-[#0f2a1d]">{priceDisplay}</span>
+                      <span className="text-[22px] font-extrabold text-[#dc2626]">{priceDisplay}</span>
                       <span className={`text-[14px] line-through ${muted}`}>{originalPriceDisplay}</span>
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <div className="text-[11px] font-semibold text-[#1c2b23]/60">Ends in</div>
-                    <div className="font-mono text-[20px] font-bold tabular-nums text-[#0f2a1d]">{countdown}</div>
+                    <div className="text-[11px] font-semibold text-[#dc2626]/80">Ends in</div>
+                    <div className="font-mono text-[22px] font-bold tabular-nums text-[#dc2626]">{countdown}</div>
                   </div>
                 </div>
               )}
