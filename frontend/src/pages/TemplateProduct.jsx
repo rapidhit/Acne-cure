@@ -259,15 +259,15 @@ export default function TemplateProduct({ product }) {
           <div className="mt-12 grid sm:grid-cols-2 gap-4">
             {DEFAULT_STEPS.map((s, i) => (
               <Reveal key={s.n} delay={(i % 2) * 120}>
-              <div className="h-full rounded-[24px] border border-[#1f4d3a]/10 bg-white p-6 flex gap-5 shadow-[0_10px_30px_rgba(31,77,58,0.06)] hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(31,77,58,0.12)] transition">
-                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#e4f2e8] text-[#1f4d3a] text-[18px] font-semibold flex items-center justify-center" style={display}>
+              <div className="h-full rounded-[24px] border-2 border-[#1f4d3a]/15 border-l-[6px] border-l-[#1f4d3a] bg-white p-6 flex gap-5 shadow-[0_18px_44px_rgba(31,77,58,0.14)] hover:-translate-y-1 hover:shadow-[0_24px_56px_rgba(31,77,58,0.22)] transition">
+                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#1f4d3a] text-white text-[19px] font-semibold flex items-center justify-center" style={display}>
                   {s.n}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-extrabold text-[17px] leading-snug">{s.title}</div>
+                  <div className="font-extrabold text-[18px] leading-snug text-[#0f2a1d]">{s.title}</div>
                   <div className={`mt-1.5 text-[14.5px] leading-[1.6] ${muted}`}>{s.sub}</div>
                   {s.tag && (
-                    <span className="mt-3 inline-block rounded-full bg-[#1f4d3a]/[0.06] text-[#1f4d3a]/80 text-[11.5px] font-semibold px-3 py-1">
+                    <span className="mt-3 inline-block rounded-full bg-[#1f4d3a]/10 text-[#1f4d3a] text-[11.5px] font-bold px-3 py-1">
                       {s.tag}
                     </span>
                   )}
@@ -297,10 +297,10 @@ export default function TemplateProduct({ product }) {
             const alreadyLiked = isReal && likedIds.includes(t.id);
             return (
               <Reveal key={key} delay={(ti % 2) * 120}>
-              <figure className="relative h-full rounded-[28px] bg-white border border-black/[0.06] p-7 shadow-[0_12px_36px_rgba(31,77,58,0.06)]">
+              <figure className="relative h-full rounded-[28px] bg-white border-2 border-[#1f4d3a]/15 border-t-[6px] border-t-[#1f4d3a] p-7 shadow-[0_18px_44px_rgba(31,77,58,0.14)]">
                 <div className="absolute top-3 right-6 text-[72px] leading-none text-[#2f7d5b]/10 select-none" style={display}>”</div>
                 <Stars count={stars} />
-                <blockquote className="mt-4 text-[16px] leading-[1.7]">{bodyText}</blockquote>
+                <blockquote className="mt-4 text-[16.5px] leading-[1.7] font-medium text-[#0f2a1d]">{bodyText}</blockquote>
                 <figcaption className="mt-6 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#1f4d3a] flex items-center justify-center text-[14px] font-bold text-white">
                     {displayName?.[0]}
@@ -338,13 +338,13 @@ export default function TemplateProduct({ product }) {
           </Reveal>
           <Reveal delay={100} className="mt-10 space-y-3">
             {faqs.map((f, i) => (
-              <div key={f.q} className="rounded-[22px] border border-[#1f4d3a]/10 bg-white overflow-hidden">
+              <div key={f.q} className="rounded-[22px] border-2 border-[#1f4d3a]/15 bg-white overflow-hidden shadow-[0_10px_30px_rgba(31,77,58,0.1)]">
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between text-left px-6 py-5"
                 >
-                  <span className="font-extrabold text-[16px] pr-6">{f.q}</span>
-                  <span className="shrink-0 w-7 h-7 rounded-full bg-[#2f7d5b]/10 text-[#1f4d3a] flex items-center justify-center text-[18px] leading-none">
+                  <span className="font-extrabold text-[17px] pr-6 text-[#0f2a1d]">{f.q}</span>
+                  <span className="shrink-0 w-8 h-8 rounded-full bg-[#1f4d3a] text-white flex items-center justify-center text-[18px] leading-none">
                     {openFaq === i ? "−" : "+"}
                   </span>
                 </button>
