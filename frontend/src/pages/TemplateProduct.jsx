@@ -429,7 +429,7 @@ export default function TemplateProduct({ product }) {
         <Reveal className="max-w-[560px]">
           <p className={eyebrow} style={eyebrowFont}>Reader stories</p>
           <h2 className={`mt-4 ${h2}`} style={display}>
-            Real people, <em className="not-italic text-[#2f7d5b]">real skin.</em>
+            What <em className="not-italic text-[#2f7d5b]">buyers say.</em>
           </h2>
         </Reveal>
         <Reveal className="mt-12">
@@ -442,7 +442,7 @@ export default function TemplateProduct({ product }) {
             const bodyText = isReal ? t.body : t.text;
             const alreadyLiked = isReal && likedIds.includes(t.id);
             return (
-              <figure key={key} className="relative h-full rounded-[28px] bg-white border-2 border-[#1f4d3a]/15 border-t-[6px] border-t-[#1f4d3a] p-7 shadow-[0_18px_44px_rgba(31,77,58,0.14)]">
+              <figure key={key} className="relative h-full rounded-[28px] bg-white border-[3px] border-[#f5b301] p-7 shadow-[0_18px_44px_rgba(245,179,1,0.22)]">
                 <div className="absolute top-3 right-6 text-[72px] leading-none text-[#2f7d5b]/10 select-none" style={display}>”</div>
                 <Stars count={stars} />
                 <blockquote className="mt-4 text-[16.5px] leading-[1.7] font-medium text-[#0f2a1d]">{bodyText}</blockquote>
