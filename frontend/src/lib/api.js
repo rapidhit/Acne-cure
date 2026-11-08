@@ -27,10 +27,10 @@ export const api = {
     request(`/reviews/${reviewId}/like`, { method: "POST", body: JSON.stringify({ sessionId }) }),
 
   // --- Checkout ---
-  initPayment: (email, productSlug) =>
+  initPayment: (email, productSlug, currency) =>
     request("/payments/init", {
       method: "POST",
-      body: JSON.stringify({ email, productSlug, visitorId: getVisitorId() }),
+      body: JSON.stringify({ email, productSlug, currency, visitorId: getVisitorId() }),
     }),
   getOffer: (slug) =>
     request(`/public/products/${encodeURIComponent(slug)}/offer?visitorId=${encodeURIComponent(getVisitorId())}`),

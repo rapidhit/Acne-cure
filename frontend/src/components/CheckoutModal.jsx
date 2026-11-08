@@ -135,7 +135,7 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
 
     setLoading(true);
     try {
-      const { reference, amount, currency: cur, publicKey, provider, checkoutUrl } = await api.initPayment(email, productSlug);
+      const { reference, amount, currency: cur, publicKey, provider, checkoutUrl } = await api.initPayment(email, productSlug, currency);
       attemptedPayment.current = true;
 
       // Hosted-checkout gateways (Bachs) hand back a URL to send the buyer to.

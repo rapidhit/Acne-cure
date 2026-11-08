@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Free, no-API-key exchange rate service, base USD, refreshed daily upstream.
-const FX_SOURCE = "https://open.er-api.com/v6/latest/USD";
+const FX_SOURCE = process.env.FX_SOURCE_URL || "https://open.er-api.com/v6/latest/USD";
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour — rates don't need per-request freshness
 
 let cache = { rates: null, fetchedAt: 0 };

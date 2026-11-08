@@ -6,6 +6,12 @@ import db, { getProductBySlug, getProductById } from "./db.js";
 import { notifySale } from "./notify.js";
 import { getProvider, PROVIDER_NAMES } from "./providers/index.js";
 import { getOffer, discountedPrice } from "./offers.js";
+import { getRateTo } from "./fxCache.js";
+
+// Hosted-checkout gateways (Bachs) decide which payment methods to show from the
+// currency of the session. Let buyers be charged in their own local currency, from
+// this list only, converted from the product price at the live rate.
+const LOCAL_CHARGE_CURRENCIES = new Set(["NGN", "GHS", "KES", "MWK"]);
 
 const router = express.Router();
 
@@ -58,7 +64,7 @@ export function markSuccess(tx, verifyResult) {
  * provider that product is currently configured to use.
  */
 router.post("/init", async (req, res) => {
-  const { email, productSlug, visitorId } = req.body || {};
+  const { email, productSlug, visitorId, currency: requestedCurrency } = req.body || {};
   if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
     return res.status(400).json({ error: "Valid email is required" });
   }
@@ -79,12 +85,27 @@ router.post("/init", async (req, res) => {
   const offer = getOffer(product, visitorId, { create: false });
   const chargeAmount = offer.active ? discountedPrice(product.price_kobo, offer.percent) : product.price_kobo;
 
+  let chargeCurrency = product.currency;
+  const wanted = String(requestedCurrency || "").toUpperCase();
+  let finalAmount = chargeAmount;
+  if (provider.createCheckout && wanted && wanted !== product.currency && LOCAL_CHARGE_CURRENCIES.has(wanted)) {
+    try {
+      const [to, from] = await Promise.all([getRateTo(wanted), getRateTo(product.currency)]);
+      if (to && from) {
+        finalAmount = Math.max(1, Math.round((chargeAmount * to.rate) / from.rate));
+        chargeCurrency = wanted;
+      }
+    } catch (err) {
+      console.error("Local-currency conversion failed, charging product currency:", err.message);
+    }
+  }
+
   const reference = `fnr_${nanoid(20)}`;
 
   db.prepare(
     `INSERT INTO transactions (product_id, reference, email, amount, currency, status, provider, created_at)
      VALUES (?, ?, ?, ?, ?, 'pending', ?, ?)`
-  ).run(product.id, reference, email, chargeAmount, product.currency, providerName, Date.now());
+  ).run(product.id, reference, email, finalAmount, chargeCurrency, providerName, Date.now());
 
   // Redirect-style gateways (hosted checkout page): create the session
   // server-side and hand the browser a URL instead of a public key.
@@ -94,8 +115,8 @@ router.post("/init", async (req, res) => {
       const { checkoutUrl, providerRef } = await provider.createCheckout({
         reference,
         email,
-        amount: chargeAmount,
-        currency: product.currency,
+        amount: finalAmount,
+        currency: chargeCurrency,
         successUrl: `${origin}/success?reference=${reference}`,
         cancelUrl: `${origin}/${product.slug}`,
         productName: product.name,
