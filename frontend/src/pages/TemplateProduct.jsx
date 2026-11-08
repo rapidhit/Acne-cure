@@ -60,20 +60,9 @@ const DEFAULT_FAQS = [
 
 // Marketing "was" price is computed proportionally below, matching whatever currency is set.
 
-function useCountdown(initialSeconds) {
-  const [seconds, setSeconds] = useState(initialSeconds);
-  useEffect(() => {
-    const id = setInterval(() => setSeconds((s) => (s > 0 ? s - 1 : initialSeconds)), 1000);
-    return () => clearInterval(id);
-  }, [initialSeconds]);
-  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
-  const ss = String(seconds % 60).padStart(2, "0");
-  return `${mm}:${ss}`;
-}
-
 function Stars({ count }) {
   return (
-    <span className="text-[#a3d65c]">
+    <span className="text-[#e0a526] tracking-[0.12em] text-[13px]">
       {"★".repeat(count)}
       {"☆".repeat(5 - count)}
     </span>
@@ -91,7 +80,6 @@ export default function TemplateProduct({ product }) {
       return [];
     }
   });
-  const timer = useCountdown(15 * 60);
   const sessionId = useMemo(() => getOrCreateSessionId(), []);
   const [localizedPriceKobo, setLocalizedPriceKobo] = useState(null);
   const [localizedCurrency, setLocalizedCurrency] = useState(null);
@@ -148,192 +136,222 @@ export default function TemplateProduct({ product }) {
     setShowModal(true);
   }
 
+  const muted = "text-[#1c2b23]/65";
+  const display = { fontFamily: "'Fraunces', Georgia, serif" };
+  const eyebrow = "text-[12px] font-bold uppercase tracking-[0.22em] text-[#2f7d5b]";
+  const h2 = "text-[34px] sm:text-[44px] leading-[1.06] tracking-[-0.02em] font-semibold";
+  const primaryBtn =
+    "inline-flex items-center justify-center gap-2 rounded-full bg-[#1f4d3a] hover:bg-[#173b2c] text-white font-bold text-[16px] px-8 py-4 shadow-[0_14px_32px_rgba(31,77,58,0.28)] transition active:scale-[0.99]";
+
   return (
-    <div className="min-h-screen bg-[#fffef9] text-[#0f3d1f] pb-28">
-      {/* Top strip */}
-      <div className="bg-gradient-to-br from-[#0f3d1f] via-[#164a26] to-[#0f3d1f] text-[#e8f0d8] text-[11px] py-2 px-4 text-center flex flex-wrap items-center justify-center gap-2">
-        <span>Instant Digital Download</span>
-        <span className="opacity-60">|</span>
-        <span>Simple, Actionable System</span>
-        <span className="opacity-60">|</span>
-        <span className="font-semibold">Over 12,000+ Readers Worldwide</span>
+    <div
+      className="min-h-screen bg-[#fbfaf5] text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
+      style={{ fontFamily: "'Manrope', system-ui, sans-serif" }}
+    >
+      <div className="max-w-[1040px] mx-auto px-6">
+        {/* Header */}
+        <header className="py-6 flex items-center justify-between">
+          <span className="text-[19px] font-semibold tracking-[-0.01em]" style={display}>
+            {product.name}
+          </span>
+          <button onClick={openModal} className="hidden sm:inline-flex rounded-full border border-[#1f4d3a]/20 px-5 py-2 text-[13px] font-bold hover:bg-[#1f4d3a] hover:text-white transition">
+            Get the guide
+          </button>
+        </header>
+
+        {/* Hero */}
+        <section className="pt-6 pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+          <div>
+            <p className={eyebrow}>The natural acne guide</p>
+            <h1 className="mt-5 text-[42px] sm:text-[58px] leading-[1.02] tracking-[-0.03em] font-semibold" style={display}>
+              {headline}
+            </h1>
+            <p className={`mt-6 text-[18px] leading-[1.65] ${muted} max-w-[520px]`}>{subheadline}</p>
+            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+              <button onClick={openModal} className={primaryBtn}>
+                Get Access – {priceDisplay} <span aria-hidden="true">→</span>
+              </button>
+              <span className={`text-[13px] ${muted}`}>
+                <span className="line-through mr-2">{originalPriceDisplay}</span>One-time payment
+              </span>
+            </div>
+            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px] font-semibold">
+              {["Instant PDF download", "Simple kitchen ingredients", "25–35 minute read"].map((t) => (
+                <li key={t} className="flex items-center gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#2f7d5b] text-white text-[11px] flex items-center justify-center">✓</span>
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-[44px] bg-gradient-to-br from-[#dcebd9] via-[#eef5e6] to-transparent" />
+            <div className="relative rounded-[32px] bg-white p-3 shadow-[0_30px_70px_rgba(31,77,58,0.16)] border border-black/[0.04]">
+              <img
+                src="/before-after.jpg"
+                alt={`${product.name} — real results`}
+                className="w-full h-auto rounded-[22px] object-cover"
+                onError={(e) => (e.currentTarget.parentElement.style.display = "none")}
+              />
+            </div>
+            <div className="absolute -bottom-6 -left-3 sm:-left-8 rounded-2xl bg-white px-5 py-4 shadow-[0_16px_40px_rgba(31,77,58,0.18)] border border-black/[0.04]">
+              <div className="text-[28px] leading-none font-semibold" style={display}>8 steps</div>
+              <div className={`mt-1 text-[12px] ${muted}`}>to clearer skin</div>
+            </div>
+            <div className="absolute -top-5 -right-2 sm:-right-6 rounded-2xl bg-[#1f4d3a] text-white px-5 py-3 shadow-[0_16px_40px_rgba(31,77,58,0.3)]">
+              <div className="text-[12px] uppercase tracking-[0.16em] text-[#a3d65c] font-bold">Only</div>
+              <div className="text-[22px] font-semibold leading-tight" style={display}>{priceDisplay}</div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <div className="max-w-[640px] mx-auto px-5 pt-6">
-        <div className="inline-flex items-center gap-2 rounded-full bg-[#0f3d1f]/10 px-3 py-1.5 text-[11px] font-semibold">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#a3d65c]" />
-          {product.name?.toUpperCase()}
-        </div>
-
-        <h1 className="mt-5 text-[36px] leading-[1.05] font-black tracking-[-0.02em]">
-          {headline}
-        </h1>
-
-        <p className="mt-4 rounded-2xl bg-[#0f3d1f]/[0.06] p-4 text-[15px] leading-[1.5]">
-          {subheadline}
-        </p>
-
-        {/* Before/after — real photo (only meaningful for the acne product; other
-            template-mode products should probably move to custom_code mode) */}
-        <div className="mt-6 rounded-[24px] overflow-hidden border border-black/10 bg-white p-2">
-          <img
-            src="/before-after.jpg"
-            alt={`${product.name} — real results`}
-            className="w-full h-auto rounded-[18px] object-cover"
-            onError={(e) => (e.currentTarget.parentElement.style.display = "none")}
-          />
-        </div>
-
-        <button
-          onClick={openModal}
-          className="mt-6 w-full rounded-full bg-[#dc2626] text-white font-bold text-[clamp(13px,3.8vw,17px)] py-4 px-3 flex items-center justify-center gap-2 shadow-lg shadow-red-900/20 text-center leading-tight"
-        >
-          <span>Get Access – {priceDisplay} →</span>
-        </button>
-
-        {/* Pricing block */}
-        <div className="mt-8 rounded-[24px] bg-[#0f3d1f] text-[#e8f0d8] p-6">
-          <div className="text-[13px] uppercase tracking-widest text-[#a3d65c] mb-1">Today Only</div>
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-2">
-            <span className="line-through opacity-50 text-[clamp(13px,3.5vw,20px)] whitespace-nowrap">
-              {originalPriceDisplay}
-            </span>
-            <span className="font-black text-[clamp(22px,7vw,42px)] leading-tight break-words">
-              {priceDisplay}
-            </span>
-            <span className="rounded-full bg-[#a3d65c] text-[#0f3d1f] text-[11px] font-bold px-2.5 py-1 whitespace-nowrap">
-              SAVE {savingsDisplay}
-            </span>
+      {/* Steps */}
+      <section className="bg-white border-y border-[#1c2b23]/[0.06]">
+        <div className="max-w-[1040px] mx-auto px-6 py-20">
+          <div className="max-w-[560px]">
+            <p className={eyebrow}>What's inside</p>
+            <h2 className={`mt-4 ${h2}`} style={display}>
+              Your complete system, <em className="text-[#2f7d5b]">step by step.</em>
+            </h2>
+            <p className={`mt-4 text-[17px] leading-[1.65] ${muted}`}>
+              No guessing, no 200-page theory. Read it once, start tonight.
+            </p>
           </div>
-          <div className="mt-4 flex items-center justify-between rounded-2xl bg-black/20 px-4 py-3">
-            <span className="text-[12px] uppercase tracking-wide">Price goes back up soon</span>
-            <span className="font-mono font-bold text-[18px]">{timer}</span>
+          <div className="mt-12 grid sm:grid-cols-2 gap-4">
+            {DEFAULT_STEPS.map((s) => (
+              <div key={s.n} className="group rounded-[24px] border border-[#1c2b23]/[0.08] bg-[#fbfaf5] p-6 flex gap-5 hover:border-[#2f7d5b]/40 hover:shadow-[0_16px_40px_rgba(31,77,58,0.08)] transition">
+                <div className="text-[40px] leading-none font-semibold text-[#2f7d5b]/35 group-hover:text-[#2f7d5b] transition" style={display}>
+                  {s.n}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-extrabold text-[17px] leading-snug">{s.title}</div>
+                  <div className={`mt-1.5 text-[14.5px] leading-[1.6] ${muted}`}>{s.sub}</div>
+                  {s.tag && (
+                    <span className="mt-3 inline-block rounded-full bg-[#2f7d5b]/10 text-[#1f4d3a] text-[11.5px] font-bold px-3 py-1">
+                      {s.tag}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
+      </section>
 
-        {/* Steps */}
-        <h2 className="mt-10 text-[26px] font-black">
-          Your Complete <span className="text-[#a3d65c]">System</span>
-        </h2>
-        <p className="mt-2 text-[15px] leading-[1.5] text-[#0f3d1f]/70">
-          No guessing, no 200-page theory. Read it once, start tonight.
-        </p>
-
-        <div className="mt-5 space-y-3">
-          {DEFAULT_STEPS.map((s) => (
-            <div key={s.n} className="rounded-2xl border border-[#0f3d1f]/[0.08] p-4 flex items-center gap-4">
-              <div className="w-9 h-9 shrink-0 rounded-full bg-[#a3d65c]/20 text-[#0f3d1f] font-bold text-[13px] flex items-center justify-center">
-                {s.n}
-              </div>
-              <div className="min-w-0">
-                <div className="font-semibold text-[15px]">{s.title}</div>
-                <div className="text-[13px] text-[#0f3d1f]/60">{s.sub}</div>
-              </div>
-              {s.tag && <span className="ml-auto shrink-0 text-[11px] text-[#0f3d1f]/60">{s.tag}</span>}
-            </div>
-          ))}
+      {/* Reviews */}
+      <section className="max-w-[1040px] mx-auto px-6 py-20">
+        <div className="max-w-[560px]">
+          <p className={eyebrow}>Reader stories</p>
+          <h2 className={`mt-4 ${h2}`} style={display}>
+            Real people, <em className="text-[#2f7d5b]">real skin.</em>
+          </h2>
         </div>
-
-        {/* Testimonials */}
-        <h2 className="mt-10 text-[26px] font-black">Real people, real results</h2>
-        <p className="mt-1 text-[13px] text-[#0f3d1f]/60">No filters — real reader reviews</p>
-
-        <div className="mt-5 space-y-3">
+        <div className="mt-12 grid md:grid-cols-2 gap-5">
           {testimonials.map((t) => {
             const isReal = usingRealReviews;
             const key = isReal ? t.id : t.name;
-            const displayName = isReal ? t.name : t.name;
+            const displayName = t.name;
             const stars = isReal ? t.rating : t.stars || 5;
             const bodyText = isReal ? t.body : t.text;
             const alreadyLiked = isReal && likedIds.includes(t.id);
             return (
-              <div key={key} className="rounded-2xl bg-[#f9fafb] border border-black/[0.06] p-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#e0e7ff] flex items-center justify-center text-[12px] font-bold text-[#4338ca]">
+              <figure key={key} className="relative rounded-[28px] bg-white border border-black/[0.06] p-7 shadow-[0_12px_36px_rgba(31,77,58,0.06)]">
+                <div className="absolute top-3 right-6 text-[72px] leading-none text-[#2f7d5b]/10 select-none" style={display}>”</div>
+                <Stars count={stars} />
+                <blockquote className="mt-4 text-[16px] leading-[1.7]">{bodyText}</blockquote>
+                <figcaption className="mt-6 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#1f4d3a] flex items-center justify-center text-[14px] font-bold text-white">
                     {displayName?.[0]}
                   </div>
-                  <div>
-                    <div className="font-semibold text-[14px]">{displayName}</div>
-                    {!isReal && <div className="text-[11px] text-[#0f3d1f]/60">{t.meta}</div>}
+                  <div className="min-w-0">
+                    <div className="font-extrabold text-[14.5px]">{displayName}</div>
+                    {!isReal && <div className={`text-[12.5px] ${muted}`}>{t.meta}</div>}
                   </div>
-                  <div className="ml-auto"><Stars count={stars} /></div>
-                </div>
-                <p className="mt-3 text-[14px] leading-[1.55]">{bodyText}</p>
-                {isReal && (
-                  <button
-                    onClick={() => handleLike(t.id)}
-                    disabled={alreadyLiked}
-                    className={`mt-3 inline-flex items-center gap-1.5 text-[12.5px] font-semibold ${
-                      alreadyLiked ? "text-[#dc2626]" : "text-[#0f3d1f]/60 hover:text-[#dc2626]"
-                    }`}
-                  >
-                    <span>{alreadyLiked ? "♥" : "♡"}</span>
-                    {t.likes || 0}
-                  </button>
-                )}
-              </div>
+                  {isReal && (
+                    <button
+                      onClick={() => handleLike(t.id)}
+                      disabled={alreadyLiked}
+                      className={`ml-auto inline-flex items-center gap-1.5 text-[13px] font-semibold ${
+                        alreadyLiked ? "text-[#2f7d5b]" : "text-[#1c2b23]/50 hover:text-[#2f7d5b]"
+                      }`}
+                    >
+                      <span>{alreadyLiked ? "♥" : "♡"}</span>
+                      {t.likes || 0}
+                    </button>
+                  )}
+                </figcaption>
+              </figure>
             );
           })}
         </div>
+      </section>
 
-        {/* FAQ */}
-        <h2 className="mt-12 text-[26px] font-black text-center">Frequently Asked Questions</h2>
-        <div className="mt-5 rounded-[20px] border border-[#0f3d1f]/[0.08] bg-white overflow-hidden divide-y divide-[#0f3d1f]/[0.06]">
-          {faqs.map((f, i) => (
-            <div key={f.q}>
-              <button
-                onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                className="w-full flex items-center justify-between text-left px-6 py-5"
-              >
-                <span className="font-bold text-[15px] pr-6">{f.q}</span>
-                <span className="shrink-0 text-[#0f3d1f]/50">{openFaq === i ? "−" : "+"}</span>
-              </button>
-              {openFaq === i && (
-                <div className="px-6 pb-6 text-[13.5px] leading-[1.6] text-[#0f3d1f]/80">{f.a}</div>
-              )}
-            </div>
-          ))}
+      {/* FAQ */}
+      <section className="bg-white border-y border-[#1c2b23]/[0.06]">
+        <div className="max-w-[760px] mx-auto px-6 py-20">
+          <div className="text-center">
+            <p className={eyebrow}>Questions</p>
+            <h2 className={`mt-4 ${h2}`} style={display}>Good to know.</h2>
+          </div>
+          <div className="mt-10 space-y-3">
+            {faqs.map((f, i) => (
+              <div key={f.q} className="rounded-[22px] border border-[#1c2b23]/[0.08] bg-[#fbfaf5] overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between text-left px-6 py-5"
+                >
+                  <span className="font-extrabold text-[16px] pr-6">{f.q}</span>
+                  <span className="shrink-0 w-7 h-7 rounded-full bg-[#2f7d5b]/10 text-[#1f4d3a] flex items-center justify-center text-[18px] leading-none">
+                    {openFaq === i ? "−" : "+"}
+                  </span>
+                </button>
+                {openFaq === i && (
+                  <div className={`px-6 pb-6 text-[15px] leading-[1.7] ${muted}`}>{f.a}</div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
+      </section>
 
-        {/* Final CTA */}
-        <div className="mt-12 rounded-[32px] bg-[#0f3d1f] p-8 text-center relative overflow-hidden">
+      {/* Final CTA */}
+      <section className="max-w-[1040px] mx-auto px-6 py-20">
+        <div className="relative overflow-hidden rounded-[40px] bg-[#1f4d3a] px-8 py-14 sm:py-16 text-center">
+          <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#a3d65c]/20 blur-2xl" />
+          <div className="absolute -bottom-28 -left-20 w-72 h-72 rounded-full bg-[#2f7d5b]/40 blur-2xl" />
           <div className="relative">
-            <h2 className="text-[#e8f0d8] text-[32px] font-black leading-[0.95] tracking-[-0.02em]">
-              Ready to get started?
+            <h2 className="text-[34px] sm:text-[46px] leading-[1.06] tracking-[-0.02em] font-semibold text-white" style={display}>
+              Ready for clearer skin?
             </h2>
-            <p className="mt-3 text-[#e8f0d8]/70 text-[14px] max-w-[420px] mx-auto">
-              12,000+ readers already got results. Instant download, read on any device.
+            <p className="mt-4 text-[16px] leading-[1.6] text-white/70 max-w-[440px] mx-auto">
+              Instant download. Read it tonight on any device and start tomorrow morning.
             </p>
-            <button
-              onClick={openModal}
-              className="mt-7 max-w-full rounded-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[clamp(13px,4vw,17px)] px-6 sm:px-10 py-[18px] shadow-[0_14px_32px_rgba(220,38,38,0.5)] leading-tight"
-            >
-              Get Access – {priceDisplay}
+            <button onClick={openModal} className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#a3d65c] hover:bg-[#b4e06f] text-[#17331f] font-extrabold text-[16px] px-9 py-4 shadow-[0_14px_32px_rgba(0,0,0,0.25)] transition active:scale-[0.99]">
+              Get Access – {priceDisplay} <span aria-hidden="true">→</span>
             </button>
           </div>
         </div>
+      </section>
 
-        {/* Footer */}
-        <div className="mt-10 border-t border-[#0f3d1f]/10 pt-6 pb-4 text-center">
-          <div className="font-black text-[14px] tracking-[-0.01em]">{product.name}</div>
-          <p className="mt-3 text-[11px] leading-[1.5] text-[#0f3d1f]/50 max-w-[520px] mx-auto">
-            Disclaimer: This is a digital PDF guide. Individual results may vary. For informational
-            purposes only.
-          </p>
-        </div>
-      </div>
+      {/* Footer */}
+      <footer className="max-w-[1040px] mx-auto px-6 pb-12 text-center">
+        <div className="text-[18px] font-semibold" style={display}>{product.name}</div>
+        <p className={`mt-3 text-[12px] leading-[1.6] ${muted} max-w-[520px] mx-auto`}>
+          Disclaimer: This is a digital PDF guide. Individual results may vary. For informational
+          purposes only.
+        </p>
+      </footer>
 
       {/* Sticky mobile buy bar */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/10 p-3">
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/[0.08] p-3">
         <button
           onClick={openModal}
-          className="w-full bg-[#dc2626] hover:bg-[#b91c1c] text-white font-black text-[clamp(12px,3.8vw,15px)] py-4 px-2 rounded-full shadow-[0_8px_20px_rgba(220,38,38,0.5)] flex items-center justify-center gap-2 active:scale-[0.98] transition leading-tight"
+          className="w-full bg-[#1f4d3a] text-white font-bold text-[15px] py-4 rounded-full shadow-[0_8px_22px_rgba(31,77,58,0.3)] active:scale-[0.99] transition"
         >
-          <span>Get Access – {priceDisplay}</span>
+          Get Access – {priceDisplay}
         </button>
-        <p className="mt-1.5 text-center text-[10px] font-semibold opacity-60">
-          Instant Download · Any Device
-        </p>
       </div>
 
       <CheckoutModal
