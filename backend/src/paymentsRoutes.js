@@ -11,30 +11,35 @@ const router = express.Router();
 
 const TOKEN_TTL_MS = (Number(process.env.DOWNLOAD_TOKEN_TTL_MINUTES) || 60) * 60 * 1000;
 
-function issueDownloadToken(txId) {
+// Claims the success transition atomically: if /verify and a gateway webhook (or a
+// webhook retry) race, only the one that actually flips the row from not-success to
+// success issues the token and sends the sale notification — everyone else just
+// gets the existing token back.
+export function markSuccess(tx, verifyResult) {
   const token = nanoid(32);
-  const expiresAt = Date.now() + TOKEN_TTL_MS;
-  db.prepare(
-    `UPDATE transactions SET download_token = ?, download_token_expires_at = ? WHERE id = ?`
-  ).run(token, expiresAt, txId);
-  return { token, expiresAt };
-}
-
-function markSuccess(tx, verifyResult) {
-  const { token } = issueDownloadToken(tx.id);
-  db.prepare(
-    `UPDATE transactions
-     SET status = 'success', paystack_response = ?, verified_at = ?, download_token = ?, provider_ref = ?
-     WHERE id = ?`
-  ).run(
-    JSON.stringify(verifyResult.raw || {}),
-    Date.now(),
-    token,
-    verifyResult.providerRef || tx.provider_ref || null,
-    tx.id
-  );
+  const claimed = db
+    .prepare(
+      `UPDATE transactions
+       SET status = 'success', paystack_response = ?, verified_at = ?, download_token = ?,
+           download_token_expires_at = ?, provider_ref = ?
+       WHERE id = ? AND status != 'success'`
+    )
+    .run(
+      JSON.stringify(verifyResult.raw || {}),
+      Date.now(),
+      token,
+      Date.now() + TOKEN_TTL_MS,
+      verifyResult.providerRef || tx.provider_ref || null,
+      tx.id
+    );
 
   const product = tx.product_id ? getProductById(tx.product_id) : null;
+
+  if (claimed.changes === 0) {
+    const current = db.prepare(`SELECT download_token FROM transactions WHERE id = ?`).get(tx.id);
+    return { token: current?.download_token, product, duplicate: true };
+  }
+
   notifySale({
     email: tx.email,
     amount: tx.amount,
@@ -43,7 +48,7 @@ function markSuccess(tx, verifyResult) {
     productName: product?.name,
   });
 
-  return { token, product };
+  return { token, product, duplicate: false };
 }
 
 /**

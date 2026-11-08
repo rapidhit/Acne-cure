@@ -70,7 +70,7 @@ export default function ReviewForm({ reference }) {
       <input
         value={country}
         onChange={(e) => setCountry(e.target.value)}
-        placeholder="Your country (e.g. Nigeria)"
+        placeholder="Your country (e.g. USA)"
         className="mt-2 w-full rounded-xl border border-black/10 px-4 py-2.5 text-[14px] outline-none focus:border-[#0f3d1f]"
       />
       <textarea
