@@ -39,6 +39,7 @@ export default function Success() {
           }
           setDownloadUrl(data.downloadUrl);
           setDeliveryType(data.deliveryType || "pdf");
+          try { localStorage.removeItem("flw_pending_order"); } catch {}
           setStatus("celebrating");
         })
         .catch((e) => {

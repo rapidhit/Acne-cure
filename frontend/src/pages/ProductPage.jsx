@@ -4,6 +4,7 @@ import { api, getOrCreateSessionId } from "../lib/api.js";
 import TemplateProduct from "./TemplateProduct.jsx";
 import CustomCodeProduct from "./CustomCodeProduct.jsx";
 import SupportFloatingButton from "../components/SupportFloatingButton.jsx";
+import RecoverOrder from "../components/RecoverOrder.jsx";
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -51,6 +52,7 @@ export default function ProductPage() {
   return (
     <>
       <SupportFloatingButton />
+      <RecoverOrder />
       {product.mode === "custom_code" ? (
         <CustomCodeProduct product={product} />
       ) : (

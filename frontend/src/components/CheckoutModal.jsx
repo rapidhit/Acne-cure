@@ -140,6 +140,10 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
 
       // Hosted-checkout gateways (Bachs) hand back a URL to send the buyer to.
       if (checkoutUrl) {
+        try {
+          // Remember the order so we can recover it if the buyer isn't sent back.
+          localStorage.setItem("flw_pending_order", JSON.stringify({ reference, at: Date.now() }));
+        } catch {}
         window.location.href = checkoutUrl;
         return;
       }
