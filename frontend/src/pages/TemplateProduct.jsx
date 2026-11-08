@@ -187,39 +187,48 @@ export default function TemplateProduct({ product }) {
     >
       <div className="max-w-[1040px] mx-auto px-6">
         {/* Header */}
-        <header className="py-6 flex items-center justify-between">
-          <span className="text-[19px] font-semibold tracking-[-0.01em]" style={display}>
-            {product.name}
+        <header className="py-5 sm:py-6 flex items-center justify-between gap-4 border-b border-[#1f4d3a]/[0.08] sm:border-0">
+          <span className="text-[18px] sm:text-[19px] font-semibold tracking-[-0.01em] truncate" style={display}>
+            {String(product.name || "").split(" - ")[0]}
           </span>
-          <button onClick={openModal} className="hidden sm:inline-flex rounded-full border border-[#1f4d3a]/20 px-5 py-2 text-[13px] font-bold hover:bg-[#1f4d3a] hover:text-white transition">
+          <button onClick={openModal} className="hidden sm:inline-flex shrink-0 rounded-full border border-[#1f4d3a]/20 px-5 py-2 text-[13px] font-bold hover:bg-[#1f4d3a] hover:text-white transition">
             Get the guide
           </button>
         </header>
 
         {/* Hero */}
-        <section className="pt-6 pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+        <section className="pt-8 sm:pt-6 pb-16 sm:pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
           <Reveal>
-            <p className={eyebrow}>The natural acne guide</p>
-            <h1 className="mt-5 text-[42px] sm:text-[58px] leading-[1.02] tracking-[-0.03em] font-semibold" style={display}>
+            <div className="flex items-center gap-3">
+              <span className="h-[2px] w-8 bg-[#2f7d5b]" />
+              <p className={eyebrow}>The natural acne guide</p>
+            </div>
+            <h1 className="mt-5 text-[36px] sm:text-[58px] leading-[1.08] sm:leading-[1.02] tracking-[-0.025em] font-semibold text-[#0f2a1d]" style={display}>
               {headline}
             </h1>
-            <p className={`mt-6 text-[18px] leading-[1.65] ${muted} max-w-[520px]`}>{subheadline}</p>
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
-              <button onClick={openModal} className={primaryBtn}>
+            <p className="mt-5 text-[16.5px] sm:text-[18px] leading-[1.7] text-[#1c2b23]/75 max-w-[520px]">{subheadline}</p>
+
+            <div className="mt-8">
+              <button onClick={openModal} className={`${primaryBtn} w-full sm:w-auto`}>
                 Get Access – {priceDisplay} <span aria-hidden="true">→</span>
               </button>
-              <span className={`text-[13px] ${muted}`}>
-                <span className="line-through mr-2">{originalPriceDisplay}</span>One-time payment
-              </span>
+              <p className={`mt-3 text-[13px] ${muted} text-center sm:text-left`}>
+                One-time payment · Instant access
+              </p>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-[14px] font-semibold">
-              {["Instant PDF download", "Simple kitchen ingredients", "25–35 minute read"].map((t) => (
-                <li key={t} className="flex items-center gap-2">
-                  <span className="w-5 h-5 rounded-full bg-[#2f7d5b] text-white text-[11px] flex items-center justify-center">✓</span>
-                  {t}
-                </li>
+
+            <dl className="mt-10 grid grid-cols-3 border-t border-[#1f4d3a]/[0.12] pt-6">
+              {[
+                ["Instant", "PDF download"],
+                ["Simple", "kitchen ingredients"],
+                ["25–35 min", "to read"],
+              ].map(([k, v], i) => (
+                <div key={k} className={`pr-3 ${i > 0 ? "pl-4 border-l border-[#1f4d3a]/[0.12]" : ""}`}>
+                  <dt className="text-[15px] sm:text-[16px] font-extrabold text-[#0f2a1d] leading-tight">{k}</dt>
+                  <dd className={`mt-1 text-[12.5px] sm:text-[13px] leading-snug ${muted}`}>{v}</dd>
+                </div>
               ))}
-            </ul>
+            </dl>
           </Reveal>
 
           <Reveal delay={150} className="relative">
@@ -232,13 +241,9 @@ export default function TemplateProduct({ product }) {
                 onError={(e) => (e.currentTarget.parentElement.style.display = "none")}
               />
             </div>
-            <div className="absolute -bottom-6 -left-3 sm:-left-8 rounded-2xl bg-white px-5 py-4 shadow-[0_16px_40px_rgba(31,77,58,0.18)] border border-black/[0.04]">
+            <div className="hidden md:block absolute -bottom-6 -left-8 rounded-2xl bg-white px-5 py-4 shadow-[0_16px_40px_rgba(31,77,58,0.18)] border border-black/[0.04]">
               <div className="text-[28px] leading-none font-semibold" style={display}>8 steps</div>
               <div className={`mt-1 text-[12px] ${muted}`}>to clearer skin</div>
-            </div>
-            <div className="absolute -top-5 -right-2 sm:-right-6 rounded-2xl bg-[#1f4d3a] text-white px-5 py-3 shadow-[0_16px_40px_rgba(31,77,58,0.3)]">
-              <div className="text-[12px] uppercase tracking-[0.16em] text-[#a3d65c] font-bold">Only</div>
-              <div className="text-[22px] font-semibold leading-tight" style={display}>{priceDisplay}</div>
             </div>
           </Reveal>
         </section>
