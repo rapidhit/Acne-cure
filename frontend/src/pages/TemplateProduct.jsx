@@ -54,7 +54,7 @@ const DEFAULT_FAQS = [
   },
   {
     q: "How quick is it to read?",
-    a: "It's designed to be read in one sitting – about 25-35 minutes.",
+    a: "It's designed to be read in one sitting – about 10 minutes.",
   },
 ];
 
@@ -174,7 +174,7 @@ export default function TemplateProduct({ product }) {
   }
 
   const muted = "text-[#1c2b23]/65";
-  const display = { fontFamily: "'Fraunces', Georgia, serif" };
+  const display = { fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 800 };
   const eyebrow = "text-[12px] font-bold uppercase tracking-[0.22em] text-[#2f7d5b]";
   const h2 = "text-[34px] sm:text-[44px] leading-[1.06] tracking-[-0.02em] font-semibold";
   const primaryBtn =
@@ -183,7 +183,7 @@ export default function TemplateProduct({ product }) {
   return (
     <div
       className="min-h-screen bg-white text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
-      style={{ fontFamily: "'Manrope', system-ui, sans-serif" }}
+      style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
       <div className="max-w-[1040px] mx-auto px-6">
         {/* Header */}
@@ -220,8 +220,8 @@ export default function TemplateProduct({ product }) {
             <dl className="mt-10 grid grid-cols-3 border-t border-[#1f4d3a]/[0.12] pt-6">
               {[
                 ["Instant", "PDF download"],
-                ["Simple", "kitchen ingredients"],
-                ["25–35 min", "to read"],
+                ["Natural", "plant-based ingredients"],
+                ["10 min", "to read"],
               ].map(([k, v], i) => (
                 <div key={k} className={`pr-3 ${i > 0 ? "pl-4 border-l border-[#1f4d3a]/[0.12]" : ""}`}>
                   <dt className="text-[15px] sm:text-[16px] font-extrabold text-[#0f2a1d] leading-tight">{k}</dt>
@@ -255,7 +255,7 @@ export default function TemplateProduct({ product }) {
           <Reveal className="max-w-[560px]">
             <p className={eyebrow}>What's inside</p>
             <h2 className={`mt-4 ${h2}`} style={display}>
-              Your complete system, <em className="text-[#2f7d5b]">step by step.</em>
+              Your complete system, <em className="not-italic text-[#2f7d5b]">step by step.</em>
             </h2>
             <p className={`mt-4 text-[17px] leading-[1.65] ${muted}`}>
               No guessing, no 200-page theory. Read it once, start tonight.
@@ -289,7 +289,7 @@ export default function TemplateProduct({ product }) {
         <Reveal className="max-w-[560px]">
           <p className={eyebrow}>Reader stories</p>
           <h2 className={`mt-4 ${h2}`} style={display}>
-            Real people, <em className="text-[#2f7d5b]">real skin.</em>
+            Real people, <em className="not-italic text-[#2f7d5b]">real skin.</em>
           </h2>
         </Reveal>
         <div className="mt-12 grid md:grid-cols-2 gap-5">
