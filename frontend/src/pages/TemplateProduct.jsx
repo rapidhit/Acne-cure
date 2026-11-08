@@ -97,6 +97,94 @@ function Reveal({ children, delay = 0, className = "" }) {
   );
 }
 
+// Horizontal swipe carousel that advances by itself every 5s and pauses while touched.
+function Carousel({ children, intervalMs = 5000 }) {
+  const ref = useRef(null);
+  const paused = useRef(false);
+  const resumeTimer = useRef(null);
+  const [active, setActive] = useState(0);
+  const items = Array.isArray(children) ? children : [children];
+  const count = items.length;
+
+  function slideLeft(i) {
+    const el = ref.current;
+    const first = el.children[0];
+    return el.children[i].offsetLeft - first.offsetLeft;
+  }
+
+  useEffect(() => {
+    if (count < 2 || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => {
+      const el = ref.current;
+      if (!el || paused.current) return;
+      const atEnd = el.scrollLeft >= el.scrollWidth - el.clientWidth - 4;
+      let idx = 0;
+      let best = Infinity;
+      for (let i = 0; i < count; i++) {
+        const d = Math.abs(slideLeft(i) - el.scrollLeft);
+        if (d < best) { best = d; idx = i; }
+      }
+      const next = atEnd ? 0 : (idx + 1) % count;
+      el.scrollTo({ left: slideLeft(next), behavior: "smooth" });
+    }, intervalMs);
+    return () => clearInterval(id);
+  }, [count, intervalMs]);
+
+  function onScroll() {
+    const el = ref.current;
+    let idx = 0;
+    let best = Infinity;
+    for (let i = 0; i < count; i++) {
+      const d = Math.abs(slideLeft(i) - el.scrollLeft);
+      if (d < best) { best = d; idx = i; }
+    }
+    setActive(idx);
+  }
+
+  function pause() {
+    paused.current = true;
+    clearTimeout(resumeTimer.current);
+  }
+  function resume() {
+    clearTimeout(resumeTimer.current);
+    resumeTimer.current = setTimeout(() => (paused.current = false), 4000);
+  }
+
+  return (
+    <div>
+      <div
+        ref={ref}
+        onScroll={onScroll}
+        onTouchStart={pause}
+        onTouchEnd={resume}
+        onMouseEnter={pause}
+        onMouseLeave={resume}
+        className="flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-pl-6 pb-6 -mx-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {items.map((child, i) => (
+          <div key={i} className="snap-start shrink-0 w-[86%] sm:w-[calc(50%-10px)]">
+            {child}
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-center gap-2">
+        {items.map((_, i) => (
+          <button
+            key={i}
+            aria-label={`Go to review ${i + 1}`}
+            onClick={() => {
+              pause();
+              ref.current.scrollTo({ left: slideLeft(i), behavior: "smooth" });
+              resume();
+            }}
+            className={`h-2 rounded-full transition-all ${i === active ? "w-6 bg-[#1f4d3a]" : "w-2 bg-[#1f4d3a]/25"}`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Stars({ count }) {
   return (
     <span className="text-[#e0a526] tracking-[0.12em] text-[13px]">
@@ -206,6 +294,7 @@ export default function TemplateProduct({ product }) {
 
   const muted = "text-[#1c2b23]/65";
   const display = { fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 800 };
+  const eyebrowFont = { fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700 };
   const eyebrow = "text-[12px] font-bold uppercase tracking-[0.22em] text-[#2f7d5b]";
   const h2 = "text-[34px] sm:text-[44px] leading-[1.06] tracking-[-0.02em] font-semibold";
   const primaryBtn =
@@ -232,7 +321,7 @@ export default function TemplateProduct({ product }) {
           <Reveal>
             <div className="flex items-center gap-3">
               <span className="h-[2px] w-8 bg-[#2f7d5b]" />
-              <p className={eyebrow}>The natural acne guide</p>
+              <p className={eyebrow} style={eyebrowFont}>The natural acne guide</p>
             </div>
             <h1 className="mt-5 text-[36px] sm:text-[58px] leading-[1.08] sm:leading-[1.02] tracking-[-0.025em] font-semibold text-[#0f2a1d]" style={display}>
               {headline}
@@ -301,7 +390,7 @@ export default function TemplateProduct({ product }) {
       <section className="bg-[#f1f8f3] border-y border-[#1f4d3a]/[0.07]">
         <div className="max-w-[1040px] mx-auto px-6 py-20">
           <Reveal className="max-w-[560px]">
-            <p className={eyebrow}>What's inside</p>
+            <p className={eyebrow} style={eyebrowFont}>What's inside</p>
             <h2 className={`mt-4 ${h2}`} style={display}>
               Your complete system, <em className="not-italic text-[#2f7d5b]">step by step.</em>
             </h2>
@@ -335,13 +424,14 @@ export default function TemplateProduct({ product }) {
       {/* Reviews */}
       <section className="max-w-[1040px] mx-auto px-6 py-20">
         <Reveal className="max-w-[560px]">
-          <p className={eyebrow}>Reader stories</p>
+          <p className={eyebrow} style={eyebrowFont}>Reader stories</p>
           <h2 className={`mt-4 ${h2}`} style={display}>
             Real people, <em className="not-italic text-[#2f7d5b]">real skin.</em>
           </h2>
         </Reveal>
-        <div className="mt-12 grid md:grid-cols-2 gap-5">
-          {testimonials.map((t, ti) => {
+        <Reveal className="mt-12">
+        <Carousel>
+          {testimonials.map((t) => {
             const isReal = usingRealReviews;
             const key = isReal ? t.id : t.name;
             const displayName = t.name;
@@ -349,8 +439,7 @@ export default function TemplateProduct({ product }) {
             const bodyText = isReal ? t.body : t.text;
             const alreadyLiked = isReal && likedIds.includes(t.id);
             return (
-              <Reveal key={key} delay={(ti % 2) * 120}>
-              <figure className="relative h-full rounded-[28px] bg-white border-2 border-[#1f4d3a]/15 border-t-[6px] border-t-[#1f4d3a] p-7 shadow-[0_18px_44px_rgba(31,77,58,0.14)]">
+              <figure key={key} className="relative h-full rounded-[28px] bg-white border-2 border-[#1f4d3a]/15 border-t-[6px] border-t-[#1f4d3a] p-7 shadow-[0_18px_44px_rgba(31,77,58,0.14)]">
                 <div className="absolute top-3 right-6 text-[72px] leading-none text-[#2f7d5b]/10 select-none" style={display}>”</div>
                 <Stars count={stars} />
                 <blockquote className="mt-4 text-[16.5px] leading-[1.7] font-medium text-[#0f2a1d]">{bodyText}</blockquote>
@@ -376,17 +465,17 @@ export default function TemplateProduct({ product }) {
                   )}
                 </figcaption>
               </figure>
-              </Reveal>
             );
           })}
-        </div>
+        </Carousel>
+        </Reveal>
       </section>
 
       {/* FAQ */}
       <section className="bg-[#f1f8f3] border-y border-[#1f4d3a]/[0.07]">
         <div className="max-w-[760px] mx-auto px-6 py-20">
           <Reveal className="text-center">
-            <p className={eyebrow}>Questions</p>
+            <p className={eyebrow} style={eyebrowFont}>Questions</p>
             <h2 className={`mt-4 ${h2}`} style={display}>Good to know.</h2>
           </Reveal>
           <Reveal delay={100} className="mt-10 space-y-3">
