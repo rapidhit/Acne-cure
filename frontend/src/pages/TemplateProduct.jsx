@@ -260,14 +260,14 @@ export default function TemplateProduct({ product }) {
             {DEFAULT_STEPS.map((s, i) => (
               <Reveal key={s.n} delay={(i % 2) * 120}>
               <div className="h-full rounded-[24px] border border-[#1f4d3a]/10 bg-white p-6 flex gap-5 shadow-[0_10px_30px_rgba(31,77,58,0.06)] hover:-translate-y-1 hover:shadow-[0_18px_44px_rgba(31,77,58,0.12)] transition">
-                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#a3d65c] text-[#17331f] text-[19px] font-semibold flex items-center justify-center" style={display}>
+                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#eef3ee] text-[#1f4d3a] border border-[#1f4d3a]/10 text-[18px] font-semibold flex items-center justify-center" style={display}>
                   {s.n}
                 </div>
                 <div className="min-w-0">
                   <div className="font-extrabold text-[17px] leading-snug">{s.title}</div>
                   <div className={`mt-1.5 text-[14.5px] leading-[1.6] ${muted}`}>{s.sub}</div>
                   {s.tag && (
-                    <span className="mt-3 inline-block rounded-full bg-[#a3d65c]/25 text-[#1f4d3a] text-[11.5px] font-bold px-3 py-1">
+                    <span className="mt-3 inline-block rounded-full bg-[#1f4d3a]/[0.06] text-[#1f4d3a]/80 text-[11.5px] font-semibold px-3 py-1">
                       {s.tag}
                     </span>
                   )}
