@@ -159,7 +159,7 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
       <div
         className="absolute inset-0 bg-[#17251d]/50 backdrop-blur-sm"
         onClick={() => !loading && handleClose()}

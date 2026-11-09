@@ -316,7 +316,7 @@ export default function TemplateProduct({ product }) {
   }
 
   const muted = "text-[#1c2b23]/65";
-  const display = { fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", fontWeight: 800 };
+  const display = { fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700 };
   const eyebrowFont = { fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700 };
   const eyebrow = "text-[12px] font-bold uppercase tracking-[0.22em] text-[#2f7d5b]";
   const h2 = "text-[34px] sm:text-[44px] leading-[1.06] tracking-[-0.02em] font-semibold";
@@ -326,7 +326,7 @@ export default function TemplateProduct({ product }) {
   return (
     <div
       className="min-h-screen bg-white text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
-      style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
     >
       <div className="max-w-[1040px] mx-auto px-6">
         {/* Header */}
@@ -348,10 +348,10 @@ export default function TemplateProduct({ product }) {
               <span className="h-[2px] w-8 bg-[#2f7d5b]" />
               <p className={eyebrow} style={eyebrowFont}>The natural acne guide</p>
             </div>
-            <h1 className="mt-5 text-[36px] sm:text-[58px] leading-[1.08] sm:leading-[1.02] tracking-[-0.025em] font-semibold text-[#0f2a1d]" style={display}>
+            <h1 className="mt-5 text-[33px] sm:text-[52px] leading-[1.2] sm:leading-[1.1] tracking-[-0.015em] text-[#0f2a1d] [text-wrap:balance]" style={display}>
               {headline}
             </h1>
-            <p className="mt-5 text-[16.5px] sm:text-[18px] leading-[1.65] font-medium tracking-normal text-[#1c2b23]/85 max-w-[520px]">{subheadline}</p>
+            <p className="mt-5 text-[17px] sm:text-[18px] leading-[1.75] font-normal tracking-normal text-[#1c2b23]/70 max-w-[520px] [text-wrap:pretty]">{subheadline}</p>
 
             <div className="mt-8">
               {offerActive && (
