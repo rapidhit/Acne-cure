@@ -112,6 +112,9 @@ if (!columnExists("products", "payment_provider")) {
 if (!columnExists("reviews", "country")) {
   db.exec(`ALTER TABLE reviews ADD COLUMN country TEXT`);
 }
+if (!columnExists("products", "loader_seconds")) {
+  db.exec(`ALTER TABLE products ADD COLUMN loader_seconds REAL NOT NULL DEFAULT 1`);
+}
 if (!columnExists("products", "discount_percent")) {
   db.exec(`ALTER TABLE products ADD COLUMN discount_percent INTEGER NOT NULL DEFAULT 0`);
 }

@@ -214,10 +214,17 @@ export default function TemplateProduct({ product }) {
   const [geoReady, setGeoReady] = useState(false);
   const [offerReady, setOfferReady] = useState(false);
   const [loaderTimedOut, setLoaderTimedOut] = useState(false);
+  const [minTimeDone, setMinTimeDone] = useState(false);
+  // Owner-set minimum time the loader stays up (dashboard → Settings).
+  const minLoaderMs = Math.max(0, Number(product.loaderSeconds ?? 1)) * 1000;
   useEffect(() => {
-    const t = setTimeout(() => setLoaderTimedOut(true), 5000);
-    return () => clearTimeout(t);
-  }, []);
+    const t1 = setTimeout(() => setMinTimeDone(true), minLoaderMs);
+    const t2 = setTimeout(() => setLoaderTimedOut(true), Math.max(5000, minLoaderMs + 3000));
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [minLoaderMs]);
 
   useEffect(() => {
     api
@@ -302,7 +309,7 @@ export default function TemplateProduct({ product }) {
   const testimonials = usingRealReviews ? realReviews : product.testimonials?.length ? product.testimonials : [];
   const faqs = product.faqs?.length ? product.faqs : DEFAULT_FAQS;
 
-  if (!((geoReady && offerReady) || loaderTimedOut)) return <PageLoader />;
+  if (!(minTimeDone && ((geoReady && offerReady) || loaderTimedOut))) return <PageLoader />;
 
   function openModal() {
     setShowModal(true);

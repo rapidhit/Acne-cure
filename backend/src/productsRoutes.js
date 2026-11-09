@@ -139,6 +139,13 @@ router.put("/:id", requireAdmin, (req, res) => {
     }
     updates.payment_provider = body.paymentProvider;
   }
+  if (body.loaderSeconds !== undefined) {
+    const secs = Number(body.loaderSeconds);
+    if (!Number.isFinite(secs) || secs < 0 || secs > 10) {
+      return res.status(400).json({ error: "loaderSeconds must be a number from 0 to 10" });
+    }
+    updates.loader_seconds = Math.round(secs * 10) / 10;
+  }
   if (body.discountPercent !== undefined) {
     const pct = Number(body.discountPercent);
     if (!Number.isInteger(pct) || pct < 0 || pct > 90) {
