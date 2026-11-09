@@ -524,10 +524,10 @@ export default function AdminDashboard() {
                       </div>
 
                       <div className="mt-5">
-                        <FieldLabel>Processing fee (%)</FieldLabel>
+                        <FieldLabel>Payment tax (%)</FieldLabel>
                         <p className="mt-1 text-[12px] text-[#5B6472]">
-                          Shown to the buyer at checkout as part of the price (price + processing fee = the same total as
-                          on your page), so the price never changes between the two. 0 hides it. Max 30.
+                          Shown at checkout as a separate "Tax" line under the price (your product price and landing page
+                          price stay untouched). Update it whenever your payment gateway changes its fee. 0 hides it. Max 30.
                         </p>
                         <input
                           type="number"

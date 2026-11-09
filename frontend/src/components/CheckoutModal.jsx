@@ -56,11 +56,9 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
 
   if (!open) return null;
 
-  // The fee is part of the displayed price, not extra: the total always
-  // equals the price on the landing page. We just show how it splits.
-  const totalKobo = priceKobo;
-  const feeKobo = Math.round(priceKobo - priceKobo / (1 + (Number(feePercent) || 0) / 100));
-  const baseKobo = totalKobo - feeKobo;
+  // Product price stays as-is; the payment-system tax is its own line.
+  const feeKobo = Math.round((priceKobo * (Number(feePercent) || 0)) / 100);
+  const totalKobo = priceKobo + feeKobo;
   const priceDisplay = formatPrice(totalKobo, currency);
 
   function handleClose() {
@@ -196,14 +194,14 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
           <div className="mt-5 rounded-2xl border border-black/[0.06] px-4 py-3.5">
           {feeKobo > 0 && (
             <div className="mb-2 pb-2 border-b border-black/[0.06] space-y-1 text-[13px] text-[#17251d]/60">
-              <div className="flex justify-between"><span>Price</span><span>{formatPrice(baseKobo, currency)}</span></div>
-              <div className="flex justify-between"><span>Processing fee ({Number(feePercent)}%)</span><span>{formatPrice(feeKobo, currency)}</span></div>
+              <div className="flex justify-between"><span>Price</span><span>{originalPriceKobo ? <s className="mr-2 text-[#17251d]/40">{formatPrice(originalPriceKobo, currency)}</s> : null}{formatPrice(priceKobo, currency)}</span></div>
+              <div className="flex justify-between"><span>Tax ({Number(feePercent)}%, charged by payment system)</span><span>{formatPrice(feeKobo, currency)}</span></div>
             </div>
           )}
           <div className="flex items-center justify-between">
             <span className="text-[14px] font-semibold text-[#17251d]/60">Total</span>
             <span className="text-[18px] font-extrabold text-[#17251d]">
-              {originalPriceKobo ? (
+              {originalPriceKobo && feeKobo === 0 ? (
                 <span className="mr-2 text-[14px] font-semibold line-through text-[#17251d]/40">
                   {formatPrice(originalPriceKobo, currency)}
                 </span>
