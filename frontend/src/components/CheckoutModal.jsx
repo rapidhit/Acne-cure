@@ -195,7 +195,7 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
           {feeKobo > 0 && (
             <div className="mb-2 pb-2 border-b border-black/[0.06] space-y-1 text-[13px] text-[#17251d]/60">
               <div className="flex justify-between"><span>Price</span><span>{originalPriceKobo ? <s className="mr-2 text-[#17251d]/40">{formatPrice(originalPriceKobo, currency)}</s> : null}{formatPrice(priceKobo, currency)}</span></div>
-              <div className="flex justify-between"><span>Tax ({Number(feePercent)}%, charged by payment system)</span><span>{formatPrice(feeKobo, currency)}</span></div>
+              <div className="flex justify-between"><span>Tax ({Number(feePercent)}%)</span><span>{formatPrice(feeKobo, currency)}</span></div>
             </div>
           )}
           <div className="flex items-center justify-between">
