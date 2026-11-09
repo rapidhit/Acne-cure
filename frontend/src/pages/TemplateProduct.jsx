@@ -321,14 +321,21 @@ export default function TemplateProduct({ product }) {
       className="min-h-screen bg-white text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
-      {/* Brand bar */}
-      <header className="bg-black flex items-center justify-center py-3">
-        <img src="/logo.png" alt={String(product.name || "").split(" - ")[0]} className="h-[104px] sm:h-[120px] w-auto" />
-      </header>
-
       <div className="max-w-[1040px] mx-auto px-6">
+        {/* Header */}
+        <header className="py-4 sm:py-5 flex items-center justify-between gap-4 border-b border-[#1f4d3a]/[0.08] sm:border-0">
+          <span className="text-[18px] sm:text-[19px] font-semibold tracking-[-0.01em] truncate" style={display}>
+            {String(product.name || "").split(" - ")[0]}
+          </span>
+          <img
+            src="/logo.png"
+            alt=""
+            className="shrink-0 h-[52px] w-auto rounded-xl bg-black p-1.5"
+          />
+        </header>
+
         {/* Hero */}
-        <section className="pt-10 sm:pt-12 pb-16 sm:pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+        <section className="pt-8 sm:pt-6 pb-16 sm:pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
           <Reveal>
             <div className="flex items-center gap-3">
               <span className="h-[2px] w-8 bg-[#2f7d5b]" />
