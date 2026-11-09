@@ -16,6 +16,7 @@ function toPublicShape(product) {
     mode: product.mode,
     headline: product.headline,
     subheadline: product.subheadline,
+    processingFeePercent: product.processing_fee_percent ?? 0,
     loaderSeconds: product.loader_seconds ?? 1,
     testimonials: product.testimonials_json ? JSON.parse(product.testimonials_json) : [],
     faqs: product.faqs_json ? JSON.parse(product.faqs_json) : [],

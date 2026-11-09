@@ -61,6 +61,7 @@ export default function CustomCodeProduct({ product }) {
         productSlug={product.slug}
         priceKobo={product.priceKobo}
         currency={product.currency}
+        feePercent={product.processingFeePercent}
       />
     </div>
   );

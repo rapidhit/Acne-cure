@@ -573,6 +573,7 @@ export default function TemplateProduct({ product }) {
         priceKobo={displayPriceKobo}
         originalPriceKobo={offerActive ? regularPriceKobo : null}
         currency={displayCurrency}
+        feePercent={product.processingFeePercent}
       />
     </div>
   );

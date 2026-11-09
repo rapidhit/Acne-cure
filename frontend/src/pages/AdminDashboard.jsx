@@ -137,6 +137,7 @@ export default function AdminDashboard() {
         telegramLink: p.telegram_link || "",
         paymentProvider: p.payment_provider || "paystack",
         discountPercent: String(p.discount_percent ?? 0),
+        processingFeePercent: String(p.processing_fee_percent ?? 0),
         loaderSeconds: String(p.loader_seconds ?? 1),
         discountWindowMinutes: String(p.discount_window_minutes ?? 30),
         floating: {
@@ -230,6 +231,7 @@ export default function AdminDashboard() {
         telegramLink: settingsForm.telegramLink,
         paymentProvider: settingsForm.paymentProvider,
         discountPercent: Math.round(Number(settingsForm.discountPercent) || 0),
+        processingFeePercent: Math.min(30, Math.max(0, Number(settingsForm.processingFeePercent) || 0)),
         loaderSeconds: Math.min(10, Math.max(0, Number(settingsForm.loaderSeconds) || 0)),
         discountWindowMinutes: Math.round(Number(settingsForm.discountWindowMinutes) || 30),
         floatingEnabled: settingsForm.floating.enabled,
@@ -517,6 +519,23 @@ export default function AdminDashboard() {
                           step="0.5"
                           value={settingsForm.loaderSeconds}
                           onChange={(e) => setSettingsForm((f) => ({ ...f, loaderSeconds: e.target.value }))}
+                          className={`${inputClass} mt-2`}
+                        />
+                      </div>
+
+                      <div className="mt-5">
+                        <FieldLabel>Processing fee (%)</FieldLabel>
+                        <p className="mt-1 text-[12px] text-[#5B6472]">
+                          Added on top of the price at checkout and shown to the buyer as "Processing fee" with the
+                          total, so you can pass on what your payment gateway charges. 0 hides it. Max 30.
+                        </p>
+                        <input
+                          type="number"
+                          min="0"
+                          max="30"
+                          step="0.1"
+                          value={settingsForm.processingFeePercent}
+                          onChange={(e) => setSettingsForm((f) => ({ ...f, processingFeePercent: e.target.value }))}
                           className={`${inputClass} mt-2`}
                         />
                       </div>

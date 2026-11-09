@@ -36,7 +36,7 @@ function loadGatewayScript(provider) {
  * whichever payment gateway (Paystack, Flutterwave, or Korapay) that
  * product is currently configured to use.
  */
-export default function CheckoutModal({ open, onClose, productSlug, priceKobo, originalPriceKobo, currency }) {
+export default function CheckoutModal({ open, onClose, productSlug, priceKobo, originalPriceKobo, currency, feePercent = 0 }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -56,7 +56,9 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
 
   if (!open) return null;
 
-  const priceDisplay = formatPrice(priceKobo, currency);
+  const feeKobo = Math.round((priceKobo * (Number(feePercent) || 0)) / 100);
+  const totalKobo = priceKobo + feeKobo;
+  const priceDisplay = formatPrice(totalKobo, currency);
 
   function handleClose() {
     // If they typed a real-looking email but never actually attempted payment,
@@ -188,16 +190,24 @@ export default function CheckoutModal({ open, onClose, productSlug, priceKobo, o
             className="mt-6 w-full rounded-2xl border border-[#17251d]/10 bg-white px-4 py-3.5 text-[15px] text-[#17251d] outline-none focus:border-[#2f7d5b] focus:ring-4 focus:ring-[#2f7d5b]/10"
           />
           {error && <p className="mt-2 text-[13px] text-[#dc2626]">{error}</p>}
-          <div className="mt-5 flex items-center justify-between rounded-2xl border border-black/[0.06] px-4 py-3.5">
+          <div className="mt-5 rounded-2xl border border-black/[0.06] px-4 py-3.5">
+          {feeKobo > 0 && (
+            <div className="mb-2 pb-2 border-b border-black/[0.06] space-y-1 text-[13px] text-[#17251d]/60">
+              <div className="flex justify-between"><span>Price</span><span>{originalPriceKobo ? <s className="mr-2 text-[#17251d]/40">{formatPrice(originalPriceKobo, currency)}</s> : null}{formatPrice(priceKobo, currency)}</span></div>
+              <div className="flex justify-between"><span>Processing fee ({Number(feePercent)}%)</span><span>{formatPrice(feeKobo, currency)}</span></div>
+            </div>
+          )}
+          <div className="flex items-center justify-between">
             <span className="text-[14px] font-semibold text-[#17251d]/60">Total</span>
             <span className="text-[18px] font-extrabold text-[#17251d]">
-              {originalPriceKobo ? (
+              {originalPriceKobo && feeKobo === 0 ? (
                 <span className="mr-2 text-[14px] font-semibold line-through text-[#17251d]/40">
                   {formatPrice(originalPriceKobo, currency)}
                 </span>
               ) : null}
               {priceDisplay}
             </span>
+          </div>
           </div>
           <button
             onClick={handleCheckout}
