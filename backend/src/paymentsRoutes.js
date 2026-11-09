@@ -100,12 +100,6 @@ router.post("/init", async (req, res) => {
     }
   }
 
-  // Payment-gateway tax (set in dashboard) is shown to the buyer as its own
-  // line; the product price itself is untouched. Same rounding as the popup.
-  const taxPercent = Number(product.processing_fee_percent) || 0;
-  const taxAmount = Math.round((finalAmount * taxPercent) / 100);
-  finalAmount += taxAmount;
-
   const reference = `fnr_${nanoid(20)}`;
 
   db.prepare(
@@ -138,8 +132,8 @@ router.post("/init", async (req, res) => {
 
   res.json({
     reference,
-    amount: finalAmount,
-    currency: chargeCurrency,
+    amount: chargeAmount,
+    currency: product.currency,
     publicKey: provider.getPublicKey(),
     provider: providerName,
   });
