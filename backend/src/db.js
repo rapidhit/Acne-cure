@@ -109,9 +109,6 @@ if (!columnExists("products", "usd_anchor_kobo")) {
 if (!columnExists("products", "payment_provider")) {
   db.exec(`ALTER TABLE products ADD COLUMN payment_provider TEXT NOT NULL DEFAULT 'paystack'`);
 }
-if (!columnExists("reviews", "country")) {
-  db.exec(`ALTER TABLE reviews ADD COLUMN country TEXT`);
-}
 if (!columnExists("products", "loader_seconds")) {
   db.exec(`ALTER TABLE products ADD COLUMN loader_seconds REAL NOT NULL DEFAULT 1`);
 }
@@ -121,6 +118,14 @@ if (!columnExists("products", "discount_percent")) {
 if (!columnExists("products", "discount_window_minutes")) {
   db.exec(`ALTER TABLE products ADD COLUMN discount_window_minutes INTEGER NOT NULL DEFAULT 30`);
 }
+db.exec(`
+  CREATE TABLE IF NOT EXISTS admin_security (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    totp_secret TEXT NOT NULL,
+    last_step INTEGER NOT NULL DEFAULT 0,
+    enabled_at INTEGER NOT NULL
+  )
+`);
 db.exec(`
   CREATE TABLE IF NOT EXISTS visitor_offers (
     visitor_id TEXT NOT NULL,
@@ -187,6 +192,11 @@ CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);
 CREATE INDEX IF NOT EXISTS idx_email_captures_product ON email_captures(product_id);
 `);
+
+// Must run after the reviews table exists (fresh databases create it above).
+if (!columnExists("reviews", "country")) {
+  db.exec(`ALTER TABLE reviews ADD COLUMN country TEXT`);
+}
 
 export default db;
 

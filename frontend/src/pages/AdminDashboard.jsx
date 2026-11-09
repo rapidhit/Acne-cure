@@ -1,3 +1,4 @@
+import AdminSecurity from "../components/AdminSecurity.jsx";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -342,6 +343,7 @@ export default function AdminDashboard() {
             { id: "stats", label: "Insights" },
             { id: "reviews", label: "Reviews" },
             { id: "settings", label: "Settings" },
+            { id: "security", label: "Security" },
           ].map((item) => (
             <button
               key={item.id}
@@ -695,6 +697,8 @@ export default function AdminDashboard() {
                     </section>
                   )}
                 </div>
+              ) : activeView === "security" ? (
+                <AdminSecurity />
               ) : activeView === "reviews" ? (
                 <div className="rounded-lg border border-hairline bg-white p-5">
                   <h2 className="font-display font-semibold text-[15px] text-[#12131A] mb-1">Reviews</h2>

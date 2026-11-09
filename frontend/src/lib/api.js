@@ -50,8 +50,12 @@ export const api = {
     }).catch(() => {}),
 
   // --- Admin auth ---
-  adminLogin: (password) =>
-    request("/admin/login", { method: "POST", body: JSON.stringify({ password }) }),
+  adminLogin: (password, code) =>
+    request("/admin/login", { method: "POST", body: JSON.stringify({ password, code }) }),
+  adminTwoFaStatus: () => request("/admin/2fa/status"),
+  adminTwoFaSetup: () => request("/admin/2fa/setup", { method: "POST" }),
+  adminTwoFaEnable: (code) => request("/admin/2fa/enable", { method: "POST", body: JSON.stringify({ code }) }),
+  adminTwoFaDisable: (code) => request("/admin/2fa/disable", { method: "POST", body: JSON.stringify({ code }) }),
   adminLogout: () => request("/admin/logout", { method: "POST" }),
   adminSession: () => request("/admin/session"),
 
