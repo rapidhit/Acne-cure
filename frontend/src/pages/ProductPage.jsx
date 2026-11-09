@@ -5,6 +5,7 @@ import TemplateProduct from "./TemplateProduct.jsx";
 import CustomCodeProduct from "./CustomCodeProduct.jsx";
 import SupportFloatingButton from "../components/SupportFloatingButton.jsx";
 import RecoverOrder from "../components/RecoverOrder.jsx";
+import PageLoader from "../components/PageLoader.jsx";
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -42,11 +43,7 @@ export default function ProductPage() {
   }
 
   if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fffef9]">
-        <div className="w-10 h-10 rounded-full border-4 border-[#a3d65c] border-t-transparent animate-spin" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import CheckoutModal, { formatPrice } from "../components/CheckoutModal.jsx";
+import PageLoader from "../components/PageLoader.jsx";
 import { api, getOrCreateSessionId } from "../lib/api.js";
 
 // Kept as sensible defaults for the legacy "8 Steps" design — a product using
@@ -208,6 +209,15 @@ export default function TemplateProduct({ product }) {
   const sessionId = useMemo(() => getOrCreateSessionId(), []);
   const [localizedPriceKobo, setLocalizedPriceKobo] = useState(null);
   const [localizedCurrency, setLocalizedCurrency] = useState(null);
+  // The page stays behind a loader until the visitor's currency conversion and
+  // welcome offer are resolved (or 5s passes), so prices never visibly change.
+  const [geoReady, setGeoReady] = useState(false);
+  const [offerReady, setOfferReady] = useState(false);
+  const [loaderTimedOut, setLoaderTimedOut] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setLoaderTimedOut(true), 5000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     api
@@ -221,7 +231,8 @@ export default function TemplateProduct({ product }) {
         setLocalizedPriceKobo(Math.round(product.priceKobo * rate));
         setLocalizedCurrency(currency);
       })
-      .catch(() => {}); // any failure just leaves the real price showing — never breaks the page
+      .catch(() => {}) // any failure just leaves the real price showing — never breaks the page
+      .finally(() => setGeoReady(true));
   }, [product.slug, product.priceKobo, product.currency]);
 
   // Welcome discount: the server owns the window; we just count down to it.
@@ -237,7 +248,8 @@ export default function TemplateProduct({ product }) {
         setOffer({ ...o, offset });
         setSecondsLeft(Math.max(0, Math.ceil((o.expiresAt - (Date.now() + offset)) / 1000)));
       })
-      .catch(() => {}); // no offer, no problem — normal price shows
+      .catch(() => {}) // no offer, no problem — normal price shows
+      .finally(() => setOfferReady(true));
     return () => {
       cancelled = true;
     };
@@ -290,6 +302,8 @@ export default function TemplateProduct({ product }) {
   const testimonials = usingRealReviews ? realReviews : product.testimonials?.length ? product.testimonials : [];
   const faqs = product.faqs?.length ? product.faqs : DEFAULT_FAQS;
 
+  if (!((geoReady && offerReady) || loaderTimedOut)) return <PageLoader />;
+
   function openModal() {
     setShowModal(true);
   }
@@ -307,19 +321,14 @@ export default function TemplateProduct({ product }) {
       className="min-h-screen bg-white text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
     >
-      <div className="max-w-[1040px] mx-auto px-6">
-        {/* Header */}
-        <header className="py-5 sm:py-6 flex items-center justify-between gap-4 border-b border-[#1f4d3a]/[0.08] sm:border-0">
-          <span className="text-[18px] sm:text-[19px] font-semibold tracking-[-0.01em] truncate" style={display}>
-            {String(product.name || "").split(" - ")[0]}
-          </span>
-          <button onClick={openModal} className="hidden sm:inline-flex shrink-0 rounded-full border border-[#1f4d3a]/20 px-5 py-2 text-[13px] font-bold hover:bg-[#1f4d3a] hover:text-white transition">
-            Get the guide
-          </button>
-        </header>
+      {/* Brand bar */}
+      <header className="bg-black flex items-center justify-center py-3">
+        <img src="/logo.png" alt={String(product.name || "").split(" - ")[0]} className="h-[104px] sm:h-[120px] w-auto" />
+      </header>
 
+      <div className="max-w-[1040px] mx-auto px-6">
         {/* Hero */}
-        <section className="pt-8 sm:pt-6 pb-16 sm:pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+        <section className="pt-10 sm:pt-12 pb-16 sm:pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
           <Reveal>
             <div className="flex items-center gap-3">
               <span className="h-[2px] w-8 bg-[#2f7d5b]" />
