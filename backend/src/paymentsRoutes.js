@@ -100,10 +100,6 @@ router.post("/init", async (req, res) => {
     }
   }
 
-  // Processing fee (set in dashboard) is added on top, in the charge currency.
-  const feePercent = Number(product.processing_fee_percent) || 0;
-  finalAmount += Math.round((finalAmount * feePercent) / 100);
-
   const reference = `fnr_${nanoid(20)}`;
 
   db.prepare(
@@ -136,8 +132,8 @@ router.post("/init", async (req, res) => {
 
   res.json({
     reference,
-    amount: finalAmount,
-    currency: chargeCurrency,
+    amount: chargeAmount,
+    currency: product.currency,
     publicKey: provider.getPublicKey(),
     provider: providerName,
   });
