@@ -160,7 +160,7 @@ function Carousel({ children, intervalMs = 5000 }) {
         onTouchEnd={resume}
         onMouseEnter={pause}
         onMouseLeave={resume}
-        className="flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-pl-6 pb-6 -mx-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-pl-6 pb-6 -mx-6 px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((child, i) => (
           <div key={i} className="snap-start shrink-0 w-[86%] sm:w-[calc(50%-10px)]">
@@ -178,7 +178,7 @@ function Carousel({ children, intervalMs = 5000 }) {
               ref.current.scrollTo({ left: slideLeft(i), behavior: "smooth" });
               resume();
             }}
-            className={`h-2 rounded-full transition-all ${i === active ? "w-6 bg-[#1f4d3a]" : "w-2 bg-[#1f4d3a]/25"}`}
+            className={`h-2 rounded-full transition-all ${i === active ? "w-6 bg-[#0b2a3a]" : "w-2 bg-[#0b2a3a]/20"}`}
           />
         ))}
       </div>
@@ -315,53 +315,51 @@ export default function TemplateProduct({ product }) {
     setShowModal(true);
   }
 
-  const muted = "text-[#1c2b23]/65";
-  const display = { fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700 };
-  const eyebrowFont = { fontFamily: "'Poppins', system-ui, sans-serif", fontWeight: 700 };
-  const eyebrow = "text-[12px] font-bold uppercase tracking-[0.22em] text-[#2f7d5b]";
-  const h2 = "text-[34px] sm:text-[44px] leading-[1.06] tracking-[-0.02em] font-semibold";
-  const primaryBtn =
-    "inline-flex items-center justify-center gap-2 rounded-full bg-[#1f4d3a] hover:bg-[#173b2c] text-white font-bold text-[16px] px-8 py-4 shadow-[0_14px_32px_rgba(31,77,58,0.28)] transition active:scale-[0.99]";
+  const ink = "text-[#0b2a3a]"; // deep navy-teal for headings
+  const muted = "text-[#4a5b66]";
+  const font = { fontFamily: "'Figtree', system-ui, sans-serif" };
+  const h2 = `text-[28px] sm:text-[36px] leading-[1.2] tracking-[-0.015em] font-bold ${ink}`;
+  const card = "rounded-[24px] border border-[#e4e9ee] bg-white shadow-[0_2px_10px_rgba(11,42,58,0.05)]";
+  const limeBtn =
+    "inline-flex items-center justify-center gap-2.5 rounded-2xl bg-[#d9ee62] hover:bg-[#cde54a] text-[#0b2a3a] font-bold text-[16px] px-8 py-4 shadow-[0_8px_20px_rgba(150,180,20,0.25)] transition active:scale-[0.99]";
+  const arrow = (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M7 17 17 7M8 7h9v9" />
+    </svg>
+  );
 
   return (
-    <div
-      className="min-h-screen bg-white text-[#1c2b23] pb-28 sm:pb-0 overflow-x-hidden"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-    >
-      <div className="max-w-[1040px] mx-auto px-6">
-        {/* Header */}
-        <header className="py-4 sm:py-5 flex items-center justify-between gap-4 border-b border-[#1f4d3a]/[0.08] sm:border-0">
-          <span className="text-[18px] sm:text-[19px] font-semibold tracking-[-0.01em] truncate" style={display}>
+    <div className="min-h-screen bg-white text-[#0b2a3a] pb-28 sm:pb-0 overflow-x-hidden" style={font}>
+      {/* Header */}
+      <header className="bg-white border-b border-[#e4e9ee]">
+        <div className="max-w-[1040px] mx-auto px-6 h-[68px] flex items-center justify-between gap-4">
+          <span className={`text-[19px] font-bold tracking-[-0.01em] truncate ${ink}`}>
             {String(product.name || "").split(" - ")[0]}
           </span>
-          <img
-            src="/logo.png"
-            alt=""
-            className="shrink-0 h-[52px] w-auto rounded-xl bg-black p-1.5"
-          />
-        </header>
+          <img src="/logo.png" alt="" className="shrink-0 h-10 w-auto rounded-lg bg-black p-1" />
+        </div>
+      </header>
 
-        {/* Hero */}
-        <section className="pt-8 sm:pt-6 pb-16 sm:pb-20 grid md:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
+      {/* Hero */}
+      <section className="bg-[linear-gradient(180deg,#e3effa_0%,#e9f3e4_45%,#ffffff_100%)]">
+        <div className="max-w-[760px] mx-auto px-6 pt-14 sm:pt-20 pb-14 sm:pb-20 text-center">
           <Reveal>
-            <div className="flex items-center gap-3">
-              <span className="h-[2px] w-8 bg-[#2f7d5b]" />
-              <p className={eyebrow} style={eyebrowFont}>The natural acne guide</p>
-            </div>
-            <h1 className="mt-5 text-[33px] sm:text-[52px] leading-[1.2] sm:leading-[1.1] tracking-[-0.015em] text-[#0f2a1d] [text-wrap:balance]" style={display}>
+            <h1 className={`text-[34px] sm:text-[52px] leading-[1.15] tracking-[-0.02em] font-bold ${ink} [text-wrap:balance]`}>
               {headline}
             </h1>
-            <p className="mt-5 text-[17px] sm:text-[18px] leading-[1.75] font-normal tracking-normal text-[#1c2b23]/70 max-w-[520px] [text-wrap:pretty]">{subheadline}</p>
+            <p className={`mt-5 text-[17px] sm:text-[19px] leading-[1.65] ${muted} max-w-[560px] mx-auto [text-wrap:pretty]`}>
+              {subheadline}
+            </p>
 
-            <div className="mt-8">
+            <div className="mt-9 flex flex-col items-center">
               {offerActive && (
-                <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border-2 border-[#dc2626]/30 bg-[#fef2f2] px-4 py-3">
+                <div className="mb-5 w-full max-w-[420px] flex items-center justify-between gap-3 rounded-2xl border border-[#dc2626]/25 bg-white px-4 py-3 text-left">
                   <div className="min-w-0">
-                    <div className="text-[12px] font-bold uppercase tracking-[0.14em] text-[#dc2626]">
+                    <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-[#dc2626]">
                       Welcome offer · {offer.percent}% off
                     </div>
                     <div className="mt-0.5 flex items-baseline gap-2">
-                      <span className="text-[22px] font-extrabold text-[#dc2626]">{priceDisplay}</span>
+                      <span className="text-[22px] font-bold text-[#dc2626]">{priceDisplay}</span>
                       <span className={`text-[14px] line-through ${muted}`}>{originalPriceDisplay}</span>
                     </div>
                   </div>
@@ -371,75 +369,70 @@ export default function TemplateProduct({ product }) {
                   </div>
                 </div>
               )}
-              <button onClick={openModal} className={`${primaryBtn} w-full sm:w-auto`}>
-                Get Access – {priceDisplay} <span aria-hidden="true">→</span>
-              </button>
-              <p className={`mt-3 text-[13px] ${muted} text-center sm:text-left`}>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                <button onClick={openModal} className={limeBtn}>
+                  Get Access – {priceDisplay} {arrow}
+                </button>
+                <a
+                  href="#inside"
+                  className="inline-flex items-center justify-center rounded-2xl border border-[#d5dde4] bg-white/80 hover:bg-white text-[#0b2a3a] font-semibold text-[16px] px-8 py-4 transition"
+                >
+                  See what's inside
+                </a>
+              </div>
+              <p className={`mt-4 text-[14px] ${muted}`}>
                 {offerActive ? "Offer applies automatically at checkout" : "One-time payment · Instant access"}
               </p>
             </div>
-
-            <dl className="mt-10 grid grid-cols-3 border-t border-[#1f4d3a]/[0.12] pt-6">
-              {[
-                ["Instant", "PDF download"],
-                ["Natural", "plant-based ingredients"],
-                ["10 min", "to read"],
-              ].map(([k, v], i) => (
-                <div key={k} className={`pr-3 ${i > 0 ? "pl-4 border-l border-[#1f4d3a]/[0.12]" : ""}`}>
-                  <dt className="text-[15px] sm:text-[16px] font-extrabold text-[#0f2a1d] leading-tight">{k}</dt>
-                  <dd className={`mt-1 text-[12.5px] sm:text-[13px] leading-snug ${muted}`}>{v}</dd>
-                </div>
-              ))}
-            </dl>
           </Reveal>
 
-          <Reveal delay={150} className="relative">
-            <div className="absolute -inset-4 rounded-[44px] bg-gradient-to-br from-[#d9eede] via-[#eaf5ee] to-transparent" />
-            <div className="relative rounded-[32px] bg-white p-3 shadow-[0_30px_70px_rgba(31,77,58,0.16)] border border-black/[0.04]">
+          <Reveal delay={150} className="mt-12">
+            <div className="mx-auto max-w-[460px] rounded-[28px] bg-white p-2.5 border border-[#e4e9ee] shadow-[0_12px_40px_rgba(11,42,58,0.10)]">
               <img
                 src="/before-after.jpg"
                 alt={`${product.name} — real results`}
-                className="w-full h-auto rounded-[22px] object-cover"
+                className="w-full h-auto rounded-[20px] object-cover"
                 onError={(e) => (e.currentTarget.parentElement.style.display = "none")}
               />
             </div>
-            <div className="hidden md:block absolute -bottom-6 -left-8 rounded-2xl bg-white px-5 py-4 shadow-[0_16px_40px_rgba(31,77,58,0.18)] border border-black/[0.04]">
-              <div className="text-[28px] leading-none font-semibold" style={display}>8 steps</div>
-              <div className={`mt-1 text-[12px] ${muted}`}>to clearer skin</div>
-            </div>
           </Reveal>
-        </section>
-      </div>
+
+          <dl className="mt-12 grid grid-cols-3 gap-3 max-w-[560px] mx-auto">
+            {[
+              ["Instant", "PDF download"],
+              ["Natural", "plant-based ingredients"],
+              ["10 min", "to read"],
+            ].map(([k, v]) => (
+              <div key={k}>
+                <dt className={`text-[17px] font-bold ${ink}`}>{k}</dt>
+                <dd className={`mt-0.5 text-[13px] leading-snug ${muted}`}>{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
 
       {/* Steps */}
-      <section className="bg-[#f1f8f3] border-y border-[#1f4d3a]/[0.07]">
-        <div className="max-w-[1040px] mx-auto px-6 py-20">
-          <Reveal className="max-w-[560px]">
-            <p className={eyebrow} style={eyebrowFont}>What's inside</p>
-            <h2 className={`mt-4 ${h2}`} style={display}>
-              Your complete system, <em className="not-italic text-[#2f7d5b]">step by step.</em>
-            </h2>
-            <p className={`mt-4 text-[17px] leading-[1.65] ${muted}`}>
+      <section id="inside" className="bg-white">
+        <div className="max-w-[1040px] mx-auto px-6 py-16 sm:py-24">
+          <Reveal className="text-center max-w-[560px] mx-auto">
+            <h2 className={h2}>Your complete system, step by step</h2>
+            <p className={`mt-3 text-[17px] leading-[1.65] ${muted}`}>
               No guessing, no 200-page theory. Read it once, start tonight.
             </p>
           </Reveal>
           <div className="mt-12 grid sm:grid-cols-2 gap-4">
             {DEFAULT_STEPS.map((s, i) => (
-              <Reveal key={s.n} delay={(i % 2) * 120}>
-              <div className="h-full rounded-[24px] border-2 border-[#1f4d3a]/15 border-l-[6px] border-l-[#1f4d3a] bg-white p-6 flex gap-5 shadow-[0_18px_44px_rgba(31,77,58,0.14)] hover:-translate-y-1 hover:shadow-[0_24px_56px_rgba(31,77,58,0.22)] transition">
-                <div className="shrink-0 w-12 h-12 rounded-2xl bg-[#1f4d3a] text-white text-[19px] font-semibold flex items-center justify-center" style={display}>
-                  {s.n}
+              <Reveal key={s.n} delay={(i % 2) * 100}>
+                <div className={`h-full ${card} p-6 flex gap-5`}>
+                  <div className="shrink-0 w-11 h-11 rounded-full bg-[#e6f1e0] text-[#2c6a3a] text-[16px] font-bold flex items-center justify-center">
+                    {Number(s.n)}
+                  </div>
+                  <div className="min-w-0">
+                    <div className={`font-bold text-[18px] leading-snug ${ink}`}>{s.title}</div>
+                    <div className={`mt-1.5 text-[15px] leading-[1.6] ${muted}`}>{s.sub}</div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <div className="font-extrabold text-[18px] leading-snug text-[#0f2a1d]">{s.title}</div>
-                  <div className={`mt-1.5 text-[14.5px] leading-[1.6] ${muted}`}>{s.sub}</div>
-                  {s.tag && (
-                    <span className="mt-3 inline-block rounded-full bg-[#1f4d3a]/10 text-[#1f4d3a] text-[11.5px] font-bold px-3 py-1">
-                      {s.tag}
-                    </span>
-                  )}
-                </div>
-              </div>
               </Reveal>
             ))}
           </div>
@@ -448,77 +441,74 @@ export default function TemplateProduct({ product }) {
 
       {/* Reviews */}
       {testimonials.length > 0 && (
-      <section className="max-w-[1040px] mx-auto px-6 py-20">
-        <Reveal className="max-w-[560px]">
-          <p className={eyebrow} style={eyebrowFont}>Reader stories</p>
-          <h2 className={`mt-4 ${h2}`} style={display}>
-            What <em className="not-italic text-[#2f7d5b]">buyers say.</em>
-          </h2>
-        </Reveal>
-        <Reveal className="mt-12">
-        <Carousel>
-          {testimonials.map((t) => {
-            const isReal = usingRealReviews;
-            const key = isReal ? t.id : t.name;
-            const displayName = t.name;
-            const stars = isReal ? t.rating : t.stars || 5;
-            const bodyText = isReal ? t.body : t.text;
-            const alreadyLiked = isReal && likedIds.includes(t.id);
-            return (
-              <figure key={key} className="relative h-full rounded-[28px] bg-white border-[3px] border-[#f5b301] p-7 shadow-[0_18px_44px_rgba(245,179,1,0.22)]">
-                <div className="absolute top-3 right-6 text-[72px] leading-none text-[#2f7d5b]/10 select-none" style={display}>”</div>
-                <Stars count={stars} />
-                <blockquote className="mt-4 text-[16.5px] leading-[1.7] font-medium text-[#0f2a1d]">{bodyText}</blockquote>
-                <figcaption className="mt-6 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#1f4d3a] flex items-center justify-center text-[14px] font-bold text-white">
-                    {displayName?.[0]}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-extrabold text-[14.5px]">{displayName}</div>
-                    {isReal ? (t.country && <div className={`text-[12.5px] ${muted}`}>{t.country}</div>) : <div className={`text-[12.5px] ${muted}`}>{t.meta}</div>}
-                  </div>
-                  {isReal && (
-                    <button
-                      onClick={() => handleLike(t.id)}
-                      disabled={alreadyLiked}
-                      className={`ml-auto inline-flex items-center gap-1.5 text-[13px] font-semibold ${
-                        alreadyLiked ? "text-[#2f7d5b]" : "text-[#1c2b23]/50 hover:text-[#2f7d5b]"
-                      }`}
-                    >
-                      <span>{alreadyLiked ? "♥" : "♡"}</span>
-                      {t.likes || 0}
-                    </button>
-                  )}
-                </figcaption>
-              </figure>
-            );
-          })}
-        </Carousel>
-        </Reveal>
-      </section>
+        <section className="bg-[#f6f8fa]">
+          <div className="max-w-[1040px] mx-auto px-6 py-16 sm:py-24">
+            <Reveal className="text-center">
+              <h2 className={h2}>What buyers say</h2>
+            </Reveal>
+            <Reveal className="mt-12">
+              <Carousel>
+                {testimonials.map((t) => {
+                  const isReal = usingRealReviews;
+                  const key = isReal ? t.id : t.name;
+                  const displayName = t.name;
+                  const stars = isReal ? t.rating : t.stars || 5;
+                  const bodyText = isReal ? t.body : t.text;
+                  const alreadyLiked = isReal && likedIds.includes(t.id);
+                  return (
+                    <figure key={key} className="h-full rounded-[24px] bg-white border-2 border-[#f5b301] p-7">
+                      <Stars count={stars} />
+                      <blockquote className={`mt-4 text-[16.5px] leading-[1.7] ${ink}`}>{bodyText}</blockquote>
+                      <figcaption className="mt-6 flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-[#e6f1e0] flex items-center justify-center text-[15px] font-bold text-[#2c6a3a]">
+                          {displayName?.[0]}
+                        </div>
+                        <div className="min-w-0">
+                          <div className={`font-bold text-[15px] ${ink}`}>{displayName}</div>
+                          {isReal ? (t.country && <div className={`text-[13px] ${muted}`}>{t.country}</div>) : <div className={`text-[13px] ${muted}`}>{t.meta}</div>}
+                        </div>
+                        {isReal && (
+                          <button
+                            onClick={() => handleLike(t.id)}
+                            disabled={alreadyLiked}
+                            className={`ml-auto inline-flex items-center gap-1.5 text-[13px] font-semibold ${
+                              alreadyLiked ? "text-[#2c6a3a]" : "text-[#4a5b66]/70 hover:text-[#2c6a3a]"
+                            }`}
+                          >
+                            <span>{alreadyLiked ? "♥" : "♡"}</span>
+                            {t.likes || 0}
+                          </button>
+                        )}
+                      </figcaption>
+                    </figure>
+                  );
+                })}
+              </Carousel>
+            </Reveal>
+          </div>
+        </section>
       )}
 
       {/* FAQ */}
-      <section className="bg-[#f1f8f3] border-y border-[#1f4d3a]/[0.07]">
-        <div className="max-w-[760px] mx-auto px-6 py-20">
+      <section className="bg-white">
+        <div className="max-w-[760px] mx-auto px-6 py-16 sm:py-24">
           <Reveal className="text-center">
-            <p className={eyebrow} style={eyebrowFont}>Questions</p>
-            <h2 className={`mt-4 ${h2}`} style={display}>Good to know.</h2>
+            <h2 className={h2}>Good to know</h2>
           </Reveal>
           <Reveal delay={100} className="mt-10 space-y-3">
             {faqs.map((f, i) => (
-              <div key={f.q} className="rounded-[22px] border-2 border-[#1f4d3a]/15 bg-white overflow-hidden shadow-[0_10px_30px_rgba(31,77,58,0.1)]">
+              <div key={f.q} className={`${card} overflow-hidden`}>
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full flex items-center justify-between text-left px-6 py-5"
                 >
-                  <span className="font-extrabold text-[17px] pr-6 text-[#0f2a1d]">{f.q}</span>
-                  <span className="shrink-0 w-8 h-8 rounded-full bg-[#1f4d3a] text-white flex items-center justify-center text-[18px] leading-none">
+                  <span className={`font-semibold text-[17px] pr-6 ${ink}`}>{f.q}</span>
+                  <span className="shrink-0 w-8 h-8 rounded-full bg-[#eef2f5] text-[#0b2a3a] flex items-center justify-center text-[18px] leading-none">
                     {openFaq === i ? "−" : "+"}
                   </span>
                 </button>
                 {openFaq === i && (
-                  <div className={`px-6 pb-6 text-[15px] leading-[1.7] ${muted}`}>{f.a}</div>
+                  <div className={`px-6 pb-6 text-[15.5px] leading-[1.7] ${muted}`}>{f.a}</div>
                 )}
               </div>
             ))}
@@ -527,40 +517,36 @@ export default function TemplateProduct({ product }) {
       </section>
 
       {/* Final CTA */}
-      <section className="max-w-[1040px] mx-auto px-6 py-20">
-        <Reveal>
-        <div className="relative overflow-hidden rounded-[40px] bg-[#1f4d3a] px-8 py-14 sm:py-16 text-center">
-          <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#a3d65c]/20 blur-2xl" />
-          <div className="absolute -bottom-28 -left-20 w-72 h-72 rounded-full bg-[#2f7d5b]/40 blur-2xl" />
-          <div className="relative">
-            <h2 className="text-[34px] sm:text-[46px] leading-[1.06] tracking-[-0.02em] font-semibold text-white" style={display}>
-              Ready for clearer skin?
-            </h2>
-            <p className="mt-4 text-[16px] leading-[1.6] text-white/70 max-w-[440px] mx-auto">
+      <section className="bg-[linear-gradient(180deg,#ffffff_0%,#e9f3e4_60%,#e3effa_100%)]">
+        <div className="max-w-[680px] mx-auto px-6 py-16 sm:py-24 text-center">
+          <Reveal>
+            <h2 className={h2}>Ready for clearer skin?</h2>
+            <p className={`mt-3 text-[17px] leading-[1.65] ${muted}`}>
               Instant download. Read it tonight on any device and start tomorrow morning.
             </p>
-            <button onClick={openModal} className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-[#a3d65c] hover:bg-[#b4e06f] text-[#17331f] font-extrabold text-[16px] px-9 py-4 shadow-[0_14px_32px_rgba(0,0,0,0.25)] transition active:scale-[0.99]">
-              Get Access – {priceDisplay} <span aria-hidden="true">→</span>
+            <button onClick={openModal} className={`mt-8 ${limeBtn}`}>
+              Get Access – {priceDisplay} {arrow}
             </button>
-          </div>
+          </Reveal>
         </div>
-        </Reveal>
       </section>
 
       {/* Footer */}
-      <footer className="max-w-[1040px] mx-auto px-6 pb-12 text-center">
-        <div className="text-[18px] font-semibold" style={display}>{product.name}</div>
-        <p className={`mt-3 text-[12px] leading-[1.6] ${muted} max-w-[520px] mx-auto`}>
-          Disclaimer: This is a digital PDF guide. Individual results may vary. For informational
-          purposes only.
-        </p>
+      <footer className="border-t border-[#e4e9ee] bg-white">
+        <div className="max-w-[1040px] mx-auto px-6 py-10 text-center">
+          <div className={`text-[17px] font-bold ${ink}`}>{product.name}</div>
+          <p className={`mt-3 text-[13px] leading-[1.6] ${muted} max-w-[520px] mx-auto`}>
+            Disclaimer: This is a digital PDF guide. Individual results may vary. For informational
+            purposes only.
+          </p>
+        </div>
       </footer>
 
       {/* Sticky mobile buy bar */}
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-black/[0.08] p-3">
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-t border-[#e4e9ee] p-3">
         <button
           onClick={openModal}
-          className="w-full bg-[#1f4d3a] text-white font-bold text-[15px] py-4 rounded-full shadow-[0_8px_22px_rgba(31,77,58,0.3)] active:scale-[0.99] transition"
+          className="w-full bg-[#d9ee62] text-[#0b2a3a] font-bold text-[16px] py-4 rounded-2xl active:scale-[0.99] transition"
         >
           Get Access – {priceDisplay}
         </button>
