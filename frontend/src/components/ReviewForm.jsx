@@ -31,9 +31,9 @@ export default function ReviewForm({ reference }) {
 
   if (submitted) {
     return (
-      <div className="mt-6 rounded-2xl border border-black/10 p-5 text-center">
-        <p className="text-[14px] font-semibold text-[#0f3d1f]">Thanks for your review!</p>
-        <p className="mt-1 text-[13px] text-[#0f3d1f]/60">
+      <div className="mt-6 rounded-[24px] border border-[#e4e9ee] bg-white p-5 text-center">
+        <p className="text-[14px] font-semibold text-[#0b2a3a]">Thanks for your review!</p>
+        <p className="mt-1 text-[13px] text-[#4a5b66]">
           It'll appear on the page once it's been reviewed.
         </p>
       </div>
@@ -41,9 +41,9 @@ export default function ReviewForm({ reference }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 rounded-2xl border border-black/10 p-5">
-      <h3 className="text-[15px] font-bold text-[#0f3d1f]">Leave a review</h3>
-      <p className="mt-1 text-[12.5px] text-[#0f3d1f]/60">Help others considering this guide.</p>
+    <form onSubmit={handleSubmit} className="mt-6 rounded-[24px] border border-[#e4e9ee] bg-white p-5">
+      <h3 className="text-[15px] font-bold text-[#0b2a3a]">Leave a review</h3>
+      <p className="mt-1 text-[12.5px] text-[#4a5b66]">Help others considering this guide.</p>
 
       <div className="mt-4 flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
@@ -56,7 +56,7 @@ export default function ReviewForm({ reference }) {
             className="text-[26px] leading-none"
             aria-label={`${n} star${n > 1 ? "s" : ""}`}
           >
-            <span className={(hoverRating || rating) >= n ? "text-[#a3d65c]" : "text-black/15"}>★</span>
+            <span className={(hoverRating || rating) >= n ? "text-[#f5b301]" : "text-black/15"}>★</span>
           </button>
         ))}
       </div>
@@ -65,20 +65,20 @@ export default function ReviewForm({ reference }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Your name"
-        className="mt-3 w-full rounded-xl border border-black/10 px-4 py-2.5 text-[14px] outline-none focus:border-[#0f3d1f]"
+        className="mt-3 w-full rounded-xl border border-[#d5dde4] px-4 py-2.5 text-[14px] outline-none focus:border-[#1f4d3a]"
       />
       <input
         value={country}
         onChange={(e) => setCountry(e.target.value)}
         placeholder="Your country (e.g. USA)"
-        className="mt-2 w-full rounded-xl border border-black/10 px-4 py-2.5 text-[14px] outline-none focus:border-[#0f3d1f]"
+        className="mt-2 w-full rounded-xl border border-[#d5dde4] px-4 py-2.5 text-[14px] outline-none focus:border-[#1f4d3a]"
       />
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="What did you think?"
         rows={3}
-        className="mt-2 w-full rounded-xl border border-black/10 px-4 py-2.5 text-[14px] outline-none focus:border-[#0f3d1f]"
+        className="mt-2 w-full rounded-xl border border-[#d5dde4] px-4 py-2.5 text-[14px] outline-none focus:border-[#1f4d3a]"
       />
 
       {error && <p className="mt-2 text-[13px] text-[#dc2626]">{error}</p>}
@@ -86,7 +86,7 @@ export default function ReviewForm({ reference }) {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-3 w-full rounded-full bg-[#0f3d1f] text-white font-semibold text-[14px] py-2.5 disabled:opacity-60"
+        className="mt-3 w-full rounded-2xl bg-[#1f4d3a] text-white font-semibold text-[14px] py-2.5 disabled:opacity-60"
       >
         {submitting ? "Submitting…" : "Submit review"}
       </button>

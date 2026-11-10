@@ -51,7 +51,7 @@ export default function RecoverOrder() {
       <span className="text-[13.5px] font-semibold leading-snug">Your payment went through.</span>
       <a
         href={`/success?reference=${encodeURIComponent(reference)}`}
-        className="shrink-0 rounded-full bg-white text-[#1f4d3a] text-[13px] font-extrabold px-4 py-2"
+        className="shrink-0 rounded-full bg-white text-[#1f4d3a] text-[13px] font-bold px-4 py-2"
       >
         Get my download →
       </a>

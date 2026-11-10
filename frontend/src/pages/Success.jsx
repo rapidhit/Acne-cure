@@ -61,13 +61,13 @@ export default function Success() {
   }, [status]);
 
   return (
-    <div className="min-h-screen bg-[#fffef9] text-[#0f3d1f] flex items-center justify-center px-5 py-10">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#e3effa_0%,#e9f3e4_45%,#ffffff_100%)] text-[#0b2a3a] flex items-center justify-center px-5 py-10" style={{ fontFamily: "'Figtree', system-ui, sans-serif" }}>
       <SupportFloatingButton />
       <div className="max-w-[440px] w-full">
-        <div className="relative rounded-[24px] border border-black/10 p-8 text-center overflow-hidden">
+        <div className="relative rounded-[24px] border border-[#e4e9ee] bg-white shadow-[0_2px_10px_rgba(11,42,58,0.05)] p-8 text-center overflow-hidden">
           {status === "verifying" && (
             <>
-              <div className="w-10 h-10 mx-auto rounded-full border-4 border-[#a3d65c] border-t-transparent animate-spin" />
+              <div className="w-10 h-10 mx-auto rounded-full border-4 border-[#1f4d3a] border-t-transparent animate-spin" />
               <p className="mt-4 text-[15px]">Confirming your payment…</p>
             </>
           )}
@@ -76,11 +76,11 @@ export default function Success() {
             <>
               <ConfettiBurst />
               <div
-                className="w-16 h-16 mx-auto rounded-full bg-[#a3d65c] flex items-center justify-center"
+                className="w-16 h-16 mx-auto rounded-full bg-[#e6f1e0] flex items-center justify-center"
                 style={{ animation: "checkmark-pop 0.5s ease-out forwards" }}
               >
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 13l4 4L19 7" stroke="#0f3d1f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5 13l4 4L19 7" stroke="#1f4d3a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <p className="mt-4 text-[16px] font-bold">Payment confirmed!</p>
@@ -89,13 +89,13 @@ export default function Success() {
 
           {status === "success" && (
             <>
-              <div className="w-14 h-14 mx-auto rounded-full bg-[#a3d65c] flex items-center justify-center">
+              <div className="w-14 h-14 mx-auto rounded-full bg-[#e6f1e0] flex items-center justify-center">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 13l4 4L19 7" stroke="#0f3d1f" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5 13l4 4L19 7" stroke="#1f4d3a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <h1 className="mt-3 text-[22px] font-black">You're all set!</h1>
-              <p className="mt-2 text-[14px] text-[#0f3d1f]/70">
+              <h1 className="mt-3 text-[26px] font-bold">You're all set!</h1>
+              <p className="mt-2 text-[15.5px] leading-[1.6] text-[#4a5b66]">
                 {deliveryType === "telegram"
                   ? "Tap below to join the Telegram group — your access link expires after a while for security."
                   : "Your download link is ready below and expires after a while for security — grab it now."}
@@ -104,8 +104,8 @@ export default function Success() {
                 href={downloadUrl}
                 target={deliveryType === "telegram" ? "_blank" : undefined}
                 rel={deliveryType === "telegram" ? "noopener noreferrer" : undefined}
-                className={`mt-6 inline-flex items-center justify-center gap-2 w-full rounded-full text-white font-bold text-[16px] py-4 ${
-                  deliveryType === "telegram" ? "bg-[#229ED9]" : "bg-[#dc2626]"
+                className={`mt-6 inline-flex items-center justify-center gap-2 w-full rounded-2xl text-white font-bold text-[16px] py-4 ${
+                  deliveryType === "telegram" ? "bg-[#229ED9]" : "bg-[#1f4d3a] hover:bg-[#173b2c]"
                 }`}
               >
                 {deliveryType === "telegram" ? (
@@ -119,16 +119,15 @@ export default function Success() {
                   "Download Now"
                 )}
               </a>
-              <p className="mt-3 text-[11px] text-[#0f3d1f]/50">Reference: {reference}</p>
+              <p className="mt-3 text-[12px] text-[#4a5b66]/80">Reference: {reference}</p>
             </>
           )}
 
           {status === "error" && (
             <>
-              <div className="text-[48px]">⚠️</div>
-              <h1 className="mt-2 text-[20px] font-black">We couldn't confirm this payment</h1>
-              <p className="mt-2 text-[14px] text-[#0f3d1f]/70">{message}</p>
-              <Link to="/" className="mt-6 inline-block text-[14px] font-semibold underline">
+              <h1 className=" text-[22px] font-bold">We couldn't confirm this payment</h1>
+              <p className="mt-2 text-[15.5px] leading-[1.6] text-[#4a5b66]">{message}</p>
+              <Link to="/" className="mt-6 inline-block text-[15px] font-semibold text-[#1f4d3a]">
                 Back
               </Link>
             </>
