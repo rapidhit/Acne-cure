@@ -516,7 +516,18 @@ export default function TemplateProduct({ product }) {
 
       {/* Final CTA */}
       <section className="bg-[linear-gradient(180deg,#ffffff_0%,#e9f3e4_60%,#e3effa_100%)]">
-        <div className="max-w-[680px] mx-auto px-6 py-16 sm:py-24 text-center">
+        <div className="max-w-[680px] mx-auto px-6 pt-4 pb-16 sm:pb-24 text-center">
+          <Reveal className="mb-14">
+            <div className="mx-auto max-w-[460px] rounded-[28px] bg-white p-2.5 border border-[#e4e9ee] shadow-[0_12px_40px_rgba(11,42,58,0.10)]">
+              <img
+                src="/results.jpg"
+                alt="Before and after"
+                loading="lazy"
+                className="w-full h-auto rounded-[20px] object-cover"
+                onError={(e) => (e.currentTarget.parentElement.style.display = "none")}
+              />
+            </div>
+          </Reveal>
           <Reveal>
             <h2 className={h2}>Ready for clearer skin?</h2>
             <p className={`mt-3 text-[17px] leading-[1.65] ${muted}`}>
