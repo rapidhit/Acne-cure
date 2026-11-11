@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import multer from "multer";
 import { requireAdmin } from "./adminRoutes.js";
+import { cleanFileName } from "./fileName.js";
 import db, { getProductById, listProducts } from "./db.js";
 
 const router = express.Router();
@@ -145,6 +146,10 @@ router.put("/:id", requireAdmin, (req, res) => {
       return res.status(400).json({ error: "loaderSeconds must be a number from 0 to 10" });
     }
     updates.loader_seconds = Math.round(secs * 10) / 10;
+  }
+  if (body.pdfDownloadName !== undefined) {
+    const n = cleanFileName(body.pdfDownloadName);
+    updates.pdf_download_name = n || null;
   }
   if (body.processingFeePercent !== undefined) {
     const fee = Number(body.processingFeePercent);

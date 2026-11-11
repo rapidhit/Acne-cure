@@ -109,6 +109,9 @@ if (!columnExists("products", "usd_anchor_kobo")) {
 if (!columnExists("products", "payment_provider")) {
   db.exec(`ALTER TABLE products ADD COLUMN payment_provider TEXT NOT NULL DEFAULT 'paystack'`);
 }
+if (!columnExists("products", "pdf_download_name")) {
+  db.exec(`ALTER TABLE products ADD COLUMN pdf_download_name TEXT`);
+}
 if (!columnExists("products", "processing_fee_percent")) {
   db.exec(`ALTER TABLE products ADD COLUMN processing_fee_percent REAL NOT NULL DEFAULT 0`);
 }

@@ -138,6 +138,7 @@ export default function AdminDashboard() {
         paymentProvider: p.payment_provider || "paystack",
         discountPercent: String(p.discount_percent ?? 0),
         processingFeePercent: String(p.processing_fee_percent ?? 0),
+        pdfDownloadName: p.pdf_download_name || "",
         loaderSeconds: String(p.loader_seconds ?? 1),
         discountWindowMinutes: String(p.discount_window_minutes ?? 30),
         floating: {
@@ -231,6 +232,7 @@ export default function AdminDashboard() {
         telegramLink: settingsForm.telegramLink,
         paymentProvider: settingsForm.paymentProvider,
         discountPercent: Math.round(Number(settingsForm.discountPercent) || 0),
+        pdfDownloadName: settingsForm.pdfDownloadName || "",
         processingFeePercent: Math.min(30, Math.max(0, Number(settingsForm.processingFeePercent) || 0)),
         loaderSeconds: Math.min(10, Math.max(0, Number(settingsForm.loaderSeconds) || 0)),
         discountWindowMinutes: Math.round(Number(settingsForm.discountWindowMinutes) || 30),
@@ -711,6 +713,20 @@ export default function AdminDashboard() {
                           {uploadingPdf ? "Uploading…" : pdfStatus?.exists ? "Replace file" : "Upload PDF"}
                           <input type="file" accept="application/pdf" onChange={handleUploadPdf} disabled={uploadingPdf} className="hidden" />
                         </label>
+                      </div>
+                      <div className="mt-5">
+                        <FieldLabel>File name customers see when they download</FieldLabel>
+                        <p className="mt-1 text-[12px] text-[#5B6472]">
+                          Type the name without ".pdf". Leave empty to use the product name. Press Save settings to apply.
+                        </p>
+                        <input
+                          type="text"
+                          maxLength={100}
+                          value={settingsForm.pdfDownloadName}
+                          onChange={(e) => setSettingsForm((f) => ({ ...f, pdfDownloadName: e.target.value }))}
+                          placeholder="e.g. Flawless Natural Remedies Guide"
+                          className={`${inputClass} mt-2`}
+                        />
                       </div>
                       {pdfMessage && <p className="mt-3 text-[13px] text-[#5B6472]">{pdfMessage}</p>}
                     </section>

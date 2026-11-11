@@ -7,6 +7,7 @@ import { notifySale } from "./notify.js";
 import { getProvider, PROVIDER_NAMES } from "./providers/index.js";
 import { getOffer, discountedPrice } from "./offers.js";
 import { getRateTo } from "./fxCache.js";
+import { cleanFileName } from "./fileName.js";
 
 // Hosted-checkout gateways (Bachs) decide which payment methods to show from the
 // currency of the session. Let buyers be charged in their own local currency, from
@@ -236,7 +237,8 @@ router.get("/download/:token", (req, res) => {
   }
 
   db.prepare(`UPDATE transactions SET download_count = download_count + 1 WHERE id = ?`).run(tx.id);
-  res.download(filePath, `${product.slug}.pdf`);
+  const downloadName = cleanFileName(product.pdf_download_name || product.name) || product.slug;
+  res.download(filePath, `${downloadName}.pdf`);
 });
 
 /**
