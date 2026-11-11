@@ -334,7 +334,7 @@ export default function TemplateProduct({ product }) {
           <span className={`text-[19px] font-bold tracking-[-0.01em] truncate ${ink}`}>
             {String(product.name || "").split(" - ")[0]}
           </span>
-          <img src="/logo.png" alt="" className="shrink-0 h-10 w-auto rounded-lg bg-black p-1" />
+          <img src="/logo-leaf.png" alt="Flawless Natural Remedies" className="shrink-0 h-11 w-auto" />
         </div>
       </header>
 

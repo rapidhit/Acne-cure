@@ -3,7 +3,7 @@
 export default function PageLoader() {
   return (
     <div className="fixed inset-0 z-[200] bg-white flex flex-col items-center justify-center">
-      <img src="/logo.png" alt="Flawless Natural Remedies" className="w-[150px] max-w-[50vw] h-auto rounded-3xl bg-black p-3" />
+      <img src="/logo-mark.png" alt="Flawless Natural Remedies" className="w-[170px] max-w-[55vw] h-auto" />
       <div className="mt-8 flex items-center gap-2" aria-label="Loading">
         <span className="loader-dot" style={{ animationDelay: "0s" }} />
         <span className="loader-dot" style={{ animationDelay: "0.18s" }} />
