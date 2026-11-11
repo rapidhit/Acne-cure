@@ -7,14 +7,12 @@ import { api, getOrCreateSessionId } from "../lib/api.js";
 // template mode can override headline/subheadline/testimonials/faqs from the
 // dashboard; anything else falls back to these.
 const DEFAULT_STEPS = [
-  { n: "01", title: "Understanding Your Acne Type", sub: "Identify what's really causing your breakouts", tag: "Know your trigger" },
-  { n: "02", title: "The Natural Cleanse Protocol", sub: "Gentle cleanse that clears pores without harsh chemicals", tag: "Clear pores gently" },
-  { n: "03", title: "The Main Recipe", sub: "The exact mix, dosage & how to apply", tag: "Core formula" },
-  { n: "04", title: "Reducing Redness & Inflammation", sub: "Calm redness and swelling in days, naturally", tag: "Calm skin fast" },
-  { n: "05", title: "Detox & Diet Tweaks", sub: "Foods that trigger acne and simple swaps that help", tag: "Food swaps" },
-  { n: "06", title: "Daily Skincare Routine", sub: "Morning & night routine for lasting clear skin", tag: "" },
-  { n: "07", title: "Mistakes That Make Acne Worse", sub: "Common habits that keep pimples coming back", tag: "Avoid setbacks" },
-  { n: "08", title: "Maintaining Clear, Healthy Skin", sub: "How to stay clear long-term without products", tag: "Stay clear" },
+  { n: "01", title: "Why Acne and Pimples Appear", sub: "Learn the common causes, so you know what is behind your breakouts" },
+  { n: "02", title: "Know Your Neem Leaf", sub: "Clear photos so you can be sure you are using the real neem leaf" },
+  { n: "03", title: "The Neem Treatment", sub: "Simple steps: boil, cool, strain and apply, for 2 weeks" },
+  { n: "04", title: "Illustrated Picture Guide", sub: "The whole remedy in pictures, easy to follow for everyone" },
+  { n: "05", title: "Best Habits to Stay Clear", sub: "Everyday habits that help keep pimples away" },
+  { n: "06", title: "Your 2-Week Challenge", sub: "Take before and after photos, compare, and send them to our support team" },
 ];
 
 const DEFAULT_TESTIMONIALS = [
@@ -416,9 +414,9 @@ export default function TemplateProduct({ product }) {
       <section id="inside" className="bg-white">
         <div className="max-w-[1040px] mx-auto px-6 py-16 sm:py-24">
           <Reveal className="text-center max-w-[560px] mx-auto">
-            <h2 className={h2}>Your complete system, step by step</h2>
+            <h2 className={h2}>What is inside the guide</h2>
             <p className={`mt-3 text-[17px] leading-[1.65] ${muted}`}>
-              No guessing, no 200-page theory. Read it once, start tonight.
+              A short, simple guide you can read once and start tonight.
             </p>
           </Reveal>
           <div className="mt-12 grid sm:grid-cols-2 gap-4">
