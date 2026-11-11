@@ -22,8 +22,8 @@ export default function Terms() {
         <p className="mt-2 text-[16px] leading-[1.75] text-[#4a5b66]">
           Flawless Natural Remedies is a small, Ghana-based digital shop. We create and sell
           simple, practical guides on things like skincare and natural wellness. Our main product
-          right now is "Flawless Natural Remedies – 8 Steps PDF," a guide covering an 8-step
-          natural approach to clearer skin. We also sell other digital products and course access
+          right now is "Flawless Natural Remedies," a short guide covering a simple natural
+          approach to clearer skin. We also sell other digital products and course access
           from time to time — all of them work the same way described below.
         </p>
 

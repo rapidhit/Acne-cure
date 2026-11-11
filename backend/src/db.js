@@ -210,7 +210,7 @@ if (productCount === 0) {
   const oldSettings = db.prepare(`SELECT * FROM settings WHERE id = 1`).get();
   const now = Date.now();
 
-  const name = oldSettings?.product_name || process.env.PRODUCT_NAME || "Flawless Natural Remedies - 8 Steps PDF";
+  const name = oldSettings?.product_name || process.env.PRODUCT_NAME || "Flawless Natural Remedies";
   const priceKobo = oldSettings?.price_kobo || Number(process.env.PRODUCT_PRICE_KOBO) || 499;
   const currency = oldSettings?.currency || process.env.PRODUCT_CURRENCY || "USD";
   const oldPdfPath = process.env.PDF_FILE_PATH || "./data/flawless-natural-remedies.pdf";
@@ -228,6 +228,13 @@ if (productCount === 0) {
   db.prepare(`UPDATE transactions SET product_id = ? WHERE product_id IS NULL`).run(newProductId);
   db.prepare(`UPDATE visits SET product_id = ? WHERE product_id IS NULL`).run(newProductId);
 }
+
+// --- Copy cleanup: the guide is no longer "8 steps". Idempotent. ---
+db.exec(`
+  UPDATE products SET name = replace(replace(name, ' - 8 Steps PDF', ''), ' – 8 Steps PDF', '') WHERE name LIKE '%8 Steps PDF%';
+  UPDATE products SET subheadline = replace(subheadline, '8-step ', '') WHERE subheadline LIKE '%8-step %';
+  UPDATE products SET headline = replace(headline, '8-step ', '') WHERE headline LIKE '%8-step %';
+`);
 
 export function getDefaultProduct() {
   return db.prepare(`SELECT * FROM products WHERE is_default = 1 LIMIT 1`).get();

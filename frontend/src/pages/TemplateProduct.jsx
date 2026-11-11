@@ -3,7 +3,7 @@ import CheckoutModal, { formatPrice } from "../components/CheckoutModal.jsx";
 import PageLoader from "../components/PageLoader.jsx";
 import { api, getOrCreateSessionId } from "../lib/api.js";
 
-// Kept as sensible defaults for the legacy "8 Steps" design — a product using
+// Kept as sensible defaults for the guide outline — a product using
 // template mode can override headline/subheadline/testimonials/faqs from the
 // dashboard; anything else falls back to these.
 const DEFAULT_STEPS = [
@@ -300,7 +300,7 @@ export default function TemplateProduct({ product }) {
   const headline = product.headline || "Are you Battling with Acne or Pimples?";
   const subheadline =
     product.subheadline ||
-    `Discover the simple 8-step natural system to clear your skin and boost your confidence`;
+    `Discover the simple natural system to clear your skin and boost your confidence`;
   const usingRealReviews = realReviews && realReviews.length > 0;
   // Sample reviews are no longer shown: the section appears only with approved real reviews
   // (or testimonials the owner entered for this product).
