@@ -532,6 +532,7 @@ export default function TemplateProduct({ product }) {
       {/* Footer */}
       <footer className="border-t border-[#e4e9ee] bg-white">
         <div className="max-w-[1040px] mx-auto px-6 py-10 text-center">
+          <img src="/logo-mark.png" alt="Flawless Natural Remedies" className="mx-auto h-24 w-auto mb-3" />
           <div className={`text-[17px] font-bold ${ink}`}>{product.name}</div>
           <p className={`mt-3 text-[13px] leading-[1.6] ${muted} max-w-[520px] mx-auto`}>
             Disclaimer: This is a digital PDF guide. Individual results may vary. For informational
