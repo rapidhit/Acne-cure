@@ -8,8 +8,8 @@ import { api, getOrCreateSessionId } from "../lib/api.js";
 // dashboard; anything else falls back to these.
 const DEFAULT_STEPS = [
   { n: "01", title: "Why Acne and Pimples Appear", sub: "Learn the common causes, so you know what is behind your breakouts" },
-  { n: "02", title: "Know Your Neem Leaf", sub: "Clear photos so you can be sure you are using the real neem leaf" },
-  { n: "03", title: "The Neem Treatment", sub: "Simple steps: boil, cool, strain and apply, for 2 weeks" },
+  { n: "02", title: "Know Your Key Ingredient", sub: "Clear photos so you can be sure you are using the right one" },
+  { n: "03", title: "The Natural Treatment", sub: "A simple step-by-step remedy you follow for 2 weeks" },
   { n: "04", title: "Illustrated Picture Guide", sub: "The whole remedy in pictures, easy to follow for everyone" },
   { n: "05", title: "Best Habits to Stay Clear", sub: "Everyday habits that help keep pimples away" },
   { n: "06", title: "Your 2-Week Challenge", sub: "Take before and after photos, compare, and send them to our support team" },
