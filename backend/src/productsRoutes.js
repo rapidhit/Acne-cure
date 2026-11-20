@@ -147,6 +147,20 @@ router.put("/:id", requireAdmin, (req, res) => {
     }
     updates.loader_seconds = Math.round(secs * 10) / 10;
   }
+  if (body.videoUrl !== undefined) {
+    const v = String(body.videoUrl || "").trim();
+    if (v) {
+      let ok = v.length <= 800;
+      try {
+        const u = new URL(v);
+        ok = ok && (u.protocol === "https:" || u.protocol === "http:");
+      } catch {
+        ok = false;
+      }
+      if (!ok) return res.status(400).json({ error: "Video link must be a full web address starting with https://" });
+    }
+    updates.video_url = v || null;
+  }
   if (body.pdfDownloadName !== undefined) {
     const n = cleanFileName(body.pdfDownloadName);
     updates.pdf_download_name = n || null;

@@ -6,6 +6,43 @@ import { api, getOrCreateSessionId } from "../lib/api.js";
 // Kept as sensible defaults for the guide outline — a product using
 // template mode can override headline/subheadline/testimonials/faqs from the
 // dashboard; anything else falls back to these.
+// Plays when at least half of it is on screen, pauses when scrolled away.
+// Browsers only allow autoplay when muted, so it starts muted; the visitor can
+// turn the sound on with the built-in controls.
+function AutoVideo({ src }) {
+  const ref = useRef(null);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) el.play().catch(() => {});
+        else el.pause();
+      },
+      { threshold: 0.5 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [src]);
+  if (failed) return null;
+  return (
+    <div className="mx-auto max-w-[460px] rounded-[28px] bg-white p-2.5 border border-[#e4e9ee] shadow-[0_12px_40px_rgba(11,42,58,0.10)]">
+      <video
+        ref={ref}
+        src={src}
+        muted
+        loop
+        playsInline
+        controls
+        preload="metadata"
+        onError={() => setFailed(true)}
+        className="w-full h-auto rounded-[20px] bg-[#0b2a3a]"
+      />
+    </div>
+  );
+}
+
 const DEFAULT_STEPS = [
   { n: "01", title: "Why Acne and Pimples Appear", sub: "Learn the common causes, so you know what is behind your breakouts" },
   { n: "02", title: "Know Your Key Ingredient", sub: "Clear photos so you can be sure you are using the right one" },
@@ -383,6 +420,12 @@ export default function TemplateProduct({ product }) {
               </p>
             </div>
           </Reveal>
+
+          {product.videoUrl && (
+            <Reveal delay={100} className="mt-12">
+              <AutoVideo src={product.videoUrl} />
+            </Reveal>
+          )}
 
           <Reveal delay={150} className="mt-12">
             <div className="mx-auto max-w-[460px] rounded-[28px] bg-white p-2.5 border border-[#e4e9ee] shadow-[0_12px_40px_rgba(11,42,58,0.10)]">
