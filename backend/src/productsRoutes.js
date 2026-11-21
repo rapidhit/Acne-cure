@@ -4,6 +4,7 @@ import path from "node:path";
 import multer from "multer";
 import { requireAdmin } from "./adminRoutes.js";
 import { cleanFileName } from "./fileName.js";
+import { VIDEO_DIR } from "./mediaRoutes.js";
 import db, { getProductById, listProducts } from "./db.js";
 
 const router = express.Router();
@@ -21,6 +22,22 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype !== "application/pdf") return cb(new Error("Only PDF files are allowed"));
+    cb(null, true);
+  },
+});
+
+const VIDEO_TYPES = { "video/mp4": "mp4", "video/webm": "webm", "video/quicktime": "mov" };
+const videoUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      fs.mkdirSync(VIDEO_DIR, { recursive: true });
+      cb(null, VIDEO_DIR);
+    },
+    filename: (req, file, cb) => cb(null, `video-${Date.now()}.${VIDEO_TYPES[file.mimetype]}`),
+  }),
+  limits: { fileSize: 80 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!VIDEO_TYPES[file.mimetype]) return cb(new Error("Only MP4, WebM or MOV videos are allowed"));
     cb(null, true);
   },
 });
@@ -151,7 +168,10 @@ router.put("/:id", requireAdmin, (req, res) => {
     const v = String(body.videoUrl || "").trim();
     if (v) {
       let ok = v.length <= 800;
-      try {
+      if (v.startsWith("/api/media/video/")) {
+        updates.video_url = v;
+        ok = true;
+      } else try {
         const u = new URL(v);
         ok = ok && (u.protocol === "https:" || u.protocol === "http:");
       } catch {
@@ -294,6 +314,23 @@ router.get("/:id/pdf-status", requireAdmin, (req, res) => {
 
   const stat = fs.statSync(filePath);
   res.json({ exists: true, sizeBytes: stat.size, updatedAt: stat.mtimeMs, fileName: path.basename(filePath) });
+});
+
+router.post("/:id/upload-video", requireAdmin, videoUpload.single("file"), (req, res) => {
+  const product = getProductById(Number(req.params.id));
+  if (!product) {
+    if (req.file) fs.rmSync(req.file.path, { force: true });
+    return res.status(404).json({ error: "Product not found" });
+  }
+  if (!req.file) return res.status(400).json({ error: "No video received" });
+  // Remove the previously uploaded video so old files don't pile up.
+  const prev = product.video_url || "";
+  if (prev.startsWith("/api/media/video/")) {
+    fs.rmSync(path.join(VIDEO_DIR, path.basename(prev)), { force: true });
+  }
+  const url = `/api/media/video/${req.file.filename}`;
+  db.prepare(`UPDATE products SET video_url = ? WHERE id = ?`).run(url, product.id);
+  res.json({ ok: true, url, sizeBytes: req.file.size });
 });
 
 router.post("/:id/upload-pdf", requireAdmin, upload.single("file"), (req, res) => {

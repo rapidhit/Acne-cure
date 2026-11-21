@@ -66,6 +66,8 @@ export default function AdminDashboard() {
 
   const [pdfStatus, setPdfStatus] = useState(null);
   const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [videoMessage, setVideoMessage] = useState("");
   const [pdfMessage, setPdfMessage] = useState("");
 
   const [stats, setStats] = useState(null);
@@ -268,6 +270,23 @@ export default function AdminDashboard() {
       setPdfMessage(err.message || "Upload failed.");
     } finally {
       setUploadingPdf(false);
+      e.target.value = "";
+    }
+  }
+
+  async function handleUploadVideo(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    setVideoMessage("");
+    try {
+      const result = await api.adminUploadVideo(selectedId, file);
+      setSettingsForm((f) => ({ ...f, videoUrl: result.url }));
+      setVideoMessage(`Uploaded (${(result.sizeBytes / 1048576).toFixed(1)} MB). It is live on the page now.`);
+    } catch (err) {
+      setVideoMessage(err.message || "Upload failed.");
+    } finally {
+      setUploadingVideo(false);
       e.target.value = "";
     }
   }
@@ -530,12 +549,17 @@ export default function AdminDashboard() {
                       <div className="mt-5">
                         <FieldLabel>Video link (optional)</FieldLabel>
                         <p className="mt-1 text-[12px] text-[#5B6472]">
-                          Paste a direct video file link (ends in .mp4 or .webm). It appears above the before and after
-                          photo and plays automatically, without sound, when the visitor scrolls to it. Leave empty to
-                          hide it. Press Save settings to apply.
+                          Upload your video (MP4, up to 80 MB; under 10 MB loads fastest), or paste a direct video file
+                          link. It appears above the before and after photo and plays automatically, without sound, when
+                          the visitor scrolls to it. To remove it, empty the box and press Save settings.
                         </p>
+                        <label className="mt-2 inline-block cursor-pointer rounded-md bg-[#12131A] text-white font-semibold text-[13px] px-4 py-2 hover:bg-black transition-colors">
+                          {uploadingVideo ? "Uploading…" : "Upload video"}
+                          <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={handleUploadVideo} disabled={uploadingVideo} className="hidden" />
+                        </label>
+                        {videoMessage && <p className="mt-2 text-[13px] text-[#5B6472]">{videoMessage}</p>}
                         <input
-                          type="url"
+                          type="text"
                           value={settingsForm.videoUrl}
                           onChange={(e) => setSettingsForm((f) => ({ ...f, videoUrl: e.target.value }))}
                           placeholder="https://example.com/video.mp4"

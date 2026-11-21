@@ -9,6 +9,7 @@ import trackRoutes from "./trackRoutes.js";
 import adminRoutes from "./adminRoutes.js";
 import telegramRoutes from "./telegramRoutes.js";
 import productsRoutes from "./productsRoutes.js";
+import mediaRoutes from "./mediaRoutes.js";
 import publicRoutes from "./publicRoutes.js";
 import { publicReviewsRouter, adminReviewsRouter } from "./reviewsRoutes.js";
 import fxRoutes from "./fxRoutes.js";
@@ -58,6 +59,7 @@ app.use("/api/payments/verify", paymentLimiter);
 app.use("/api/admin/login", loginLimiter);
 
 app.use("/api/payments", paymentsRoutes);
+app.use("/api/media", mediaRoutes);
 app.use("/api/track", trackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/telegram", telegramRoutes);

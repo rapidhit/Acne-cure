@@ -84,6 +84,19 @@ export const api = {
     return data;
   },
 
+  adminUploadVideo: async (id, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch(`/api/admin/products/${id}/upload-video`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(data?.error || "Upload failed");
+    return data;
+  },
+
   // --- Admin: per-product stats ---
   adminGetStats: (id) => request(`/admin/products/${id}/stats`),
   adminClearPending: (id) =>
