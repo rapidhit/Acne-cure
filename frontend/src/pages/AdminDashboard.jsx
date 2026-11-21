@@ -558,6 +558,26 @@ export default function AdminDashboard() {
                           <input type="file" accept="video/mp4,video/webm,video/quicktime" onChange={handleUploadVideo} disabled={uploadingVideo} className="hidden" />
                         </label>
                         {videoMessage && <p className="mt-2 text-[13px] text-[#5B6472]">{videoMessage}</p>}
+                        {settingsForm.videoUrl && (
+                          <div className="mt-3">
+                            <video
+                              key={settingsForm.videoUrl}
+                              src={settingsForm.videoUrl}
+                              controls
+                              muted
+                              playsInline
+                              preload="metadata"
+                              onError={(e) => {
+                                const c = e.currentTarget.error?.code;
+                                setVideoMessage(
+                                  `This video can't be played from that address (error ${c || "?"}). If it is a GitHub link, it will not work: use the Upload video button instead.`
+                                );
+                              }}
+                              onLoadedMetadata={() => setVideoMessage("Preview works. This video will play on your page.")}
+                              className="w-full max-w-[220px] rounded-lg bg-black"
+                            />
+                          </div>
+                        )}
                         <input
                           type="text"
                           value={settingsForm.videoUrl}
